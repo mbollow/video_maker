@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>{{TITLE}}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: #000; overflow: hidden; }
+
+  #main {
+    position: relative;
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+    background: {{INK_950}};
+  }
+
+  #bg-video {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 1;
+  }
+
+  /* ===== B-Roll cutaway layer — full-frame clips that cover the speaker
+     during their window while the speaker AUDIO (track 0) keeps playing.
+     z-index 5: above speaker (1), below subtitles (~10) and graphics (12-15). */
+  .broll {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 5;
+    opacity: 0;
+  }
+
+  /* ===== Visual Hook (top centered, max 1.5s) ===== */
+  #hook {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    width: 920px;
+    text-align: center;
+    z-index: 15;
+    opacity: 0;
+    pointer-events: none;
+  }
+  #hook .hook-eyebrow {
+    font-family: Inter, sans-serif;
+    font-weight: 700;
+    font-size: 30px;
+    letter-spacing: 0.15em;
+    color: {{BRAND_500}};
+    text-transform: uppercase;
+    margin-bottom: 18px;
+    text-shadow: 0 4px 24px rgba(7,9,16,0.95);
+  }
+  #hook .hook-main {
+    font-family: "Bricolage Grotesque", Inter, sans-serif;
+    font-weight: 800;
+    font-size: 132px;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    color: {{INK_50}};
+    text-shadow: 0 8px 36px rgba(7,9,16,0.9), 0 2px 12px rgba(0,0,0,0.85);
+  }
+
+  /* ===== Big-Center Anchor Words ===== */
+  .big-anchor {
+    position: absolute;
+    top: 46%;
+    left: 50%;
+    width: 980px;
+    text-align: center;
+    font-family: "Bricolage Grotesque", Inter, sans-serif;
+    font-weight: 800;
+    color: {{BRAND_500}};
+    letter-spacing: -0.03em;
+    line-height: 1.0;
+    opacity: 0;
+    z-index: 14;
+    pointer-events: none;
+    text-shadow: 0 8px 36px rgba(7,9,16,0.92), 0 2px 12px rgba(0,0,0,0.85);
+    font-size: 156px;
+  }
+  .big-anchor.size-md { font-size: 120px; }
+  .big-anchor.size-sm { font-size: 92px; }
+  .big-anchor.color-white { color: {{INK_50}}; }
+
+  .anchor-underline {
+    position: absolute;
+    height: 10px;
+    background: {{BRAND_500}};
+    border-radius: 5px;
+    transform-origin: left center;
+    transform: scaleX(0);
+    z-index: 14;
+    box-shadow: 0 4px 24px rgba(219,170,103,0.55);
+  }
+
+  /* ===== Top pill (e.g. "3 PUNKTE") ===== */
+  .top-pill {
+    position: absolute;
+    top: 120px;
+    left: 50%;
+    background: {{BRAND_500}};
+    color: {{INK_950}};
+    font-family: Inter, sans-serif;
+    font-weight: 800;
+    font-size: 36px;
+    padding: 22px 56px;
+    border-radius: 9999px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    opacity: 0;
+    z-index: 12;
+    box-shadow: 0 10px 36px rgba(7,9,16,0.55);
+  }
+
+  /* ===== Number Cards "1." "2." "3." ===== */
+  .num-card {
+    position: absolute;
+    top: 240px;
+    left: 80px;
+    width: 320px;
+    height: 320px;
+    background: {{INK_950}};
+    border: 4px solid {{BRAND_500}};
+    border-radius: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Bricolage Grotesque", Inter, sans-serif;
+    font-weight: 800;
+    font-size: 220px;
+    color: {{BRAND_500}};
+    line-height: 1;
+    opacity: 0;
+    z-index: 12;
+    box-shadow: 0 16px 48px rgba(7,9,16,0.6);
+  }
+  .punkt-anchor {
+    position: absolute;
+    top: 320px;
+    left: 440px;
+    right: 80px;
+    font-family: "Bricolage Grotesque", Inter, sans-serif;
+    font-weight: 800;
+    color: {{INK_50}};
+    letter-spacing: -0.01em;
+    line-height: 1.0;
+    opacity: 0;
+    z-index: 12;
+    text-shadow: 0 4px 20px rgba(7,9,16,0.95);
+    font-size: 72px;
+  }
+
+  /* ===== List Card (e.g. for 3-5 question lists) ===== */
+  .list-card {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 940px;
+    transform: translate(-50%, -50%);
+    background: rgba(7,9,16,0.92);
+    border-left: 6px solid {{BRAND_500}};
+    border-radius: 24px;
+    padding: 40px 56px;
+    z-index: 13;
+    opacity: 0;
+    box-shadow: 0 16px 56px rgba(7,9,16,0.7);
+  }
+  .list-card .list-header {
+    font-family: Inter, sans-serif;
+    font-weight: 700;
+    font-size: 26px;
+    letter-spacing: 0.18em;
+    color: {{BRAND_500}};
+    text-transform: uppercase;
+    margin-bottom: 26px;
+  }
+  .list-item {
+    font-family: "Bricolage Grotesque", Inter, sans-serif;
+    font-weight: 700;
+    font-size: 48px;
+    line-height: 1.18;
+    color: {{INK_50}};
+    margin: 14px 0;
+    opacity: 0;
+    letter-spacing: -0.01em;
+  }
+
+  /* ===== Subtitles ===== */
+  #subtitle-layer {
+    position: absolute;
+    bottom: 220px;
+    left: 60px;
+    right: 60px;
+    height: 180px;
+    z-index: 8;
+    pointer-events: none;
+  }
+  .subtitle {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-family: Inter, system-ui, sans-serif;
+    font-weight: 800;
+    font-size: 58px;
+    line-height: 1.1;
+    color: {{INK_50}};
+    letter-spacing: 0.005em;
+    text-shadow: 0 6px 28px rgba(7,9,16,0.96), 0 2px 8px rgba(0,0,0,0.85);
+    opacity: 0;
+  }
+
+  /* ===== Logo ===== */
+  #logo {
+    position: absolute;
+    bottom: 80px;
+    left: 50%;
+    width: 200px;
+    opacity: 0;
+    z-index: 10;
+    filter: drop-shadow(0 4px 18px rgba(7,9,16,0.7));
+  }
+</style>
+</head>
+<body>
+
+<div id="main" data-composition-id="main" data-start="0" data-duration="{{DURATION}}" data-width="1080" data-height="1920">
+
+  <video id="bg-video"
+         data-start="0"
+         data-duration="{{DURATION}}"
+         data-track-index="0"
+         src="assets/speaker.mp4"
+         muted
+         playsinline></video>
+
+  <!-- BROLL_BLOCK — sub-agent inserts one <video class="broll"> per cutaway,
+       each keyframe-converted into assets/. data-track-index 1+, data-start =
+       output time the cutaway begins, data-duration = clip length. Speaker
+       audio (track 0) keeps playing underneath. Removed entirely if no b-roll. -->
+  {{BROLL_BLOCK}}
+
+  <!-- HOOK_BLOCK_START — sub-agent removes entire block if no hook -->
+  {{HOOK_BLOCK}}
+  <!-- HOOK_BLOCK_END -->
+
+  <!-- TOP_PILL_BLOCK — sub-agent removes if no pill needed -->
+  {{TOP_PILL_BLOCK}}
+
+  <!-- ANCHORS_BLOCK — one .big-anchor (+ optional .anchor-underline) per beat -->
+  {{ANCHORS_BLOCK}}
+
+  <!-- NUMBER_CARDS_BLOCK — "1.", "2.", "3." cards + .punkt-anchor texts -->
+  {{NUMBER_CARDS_BLOCK}}
+
+  <!-- LIST_CARD_BLOCK — optional centered card with 3-5 list items -->
+  {{LIST_CARD_BLOCK}}
+
+  <!-- Subtitle layer (populated by script below from inline cues) -->
+  <div id="subtitle-layer"></div>
+
+  <!-- Logo: continuous bottom-center -->
+  <img id="logo" src="assets/logo.png" alt="{{BRAND_NAME}}">
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+<script>
+  window.__timelines = window.__timelines || {};
+  const tl = gsap.timeline({ paused: true });
+
+  // ===== Centering offsets for elements GSAP transforms =====
+  gsap.set("#logo", { xPercent: -50 });
+  gsap.set(".top-pill", { xPercent: -50 });
+  gsap.set("#hook", { xPercent: -50 });
+  gsap.set(".big-anchor", { xPercent: -50 });
+  gsap.set(".anchor-underline", { xPercent: -50 });
+  gsap.set("#bg-video", { scale: 1.0, transformOrigin: "50% 50%" });
+
+  // ===== Logo: fade-in at 0.4s =====
+  tl.to("#logo", { opacity: 0.85, y: -10, duration: 0.6, ease: "power3.out" }, 0.4);
+
+  // ===== TWEENS_BLOCK — sub-agent inserts: hook/anchor/pill/card tweens,
+  //   the ~every-10s B-roll crossfades (step 3b), AND the mandatory speaker
+  //   Ken-Burns zoom on #bg-video (step 3c — scale 1.0..1.08, resets under cover). =====
+  {{TWEENS_BLOCK}}
+
+  // ===== Subtitle layer (cues inlined as JSON) =====
+  const cues = {{SUBTITLE_CUES_JSON}};
+  // Hide windows (ranges where subtitles should not show — e.g. during big anchor reveals)
+  const HIDE_WINDOWS = {{SUBTITLE_HIDE_WINDOWS_JSON}};
+  function inHide(t) {
+    return HIDE_WINDOWS.some(([s,e]) => t >= s && t < e);
+  }
+  const subLayer = document.getElementById("subtitle-layer");
+  cues.forEach(([s, e, text], i) => {
+    if (inHide(s)) return;
+    const div = document.createElement("div");
+    div.className = "subtitle";
+    div.id = "sub-" + i;
+    div.textContent = text;
+    subLayer.appendChild(div);
+    // Find next visible cue start or end-of-video
+    let nextS = {{DURATION}};
+    for (let j = i + 1; j < cues.length; j++) {
+      if (!inHide(cues[j][0])) { nextS = cues[j][0]; break; }
+    }
+    // Cap visibility to max 300ms past cue end (prevents subtitle overstay)
+    const exitT = Math.min(nextS - 0.05, e + 0.3);
+    tl.fromTo("#sub-" + i,
+      { opacity: 0, y: 6 },
+      { opacity: 1, y: 0, duration: 0.10, ease: "power2.out" }, s);
+    tl.to("#sub-" + i, { opacity: 0, duration: 0.08, ease: "power2.in" }, exitT);
+    tl.set("#sub-" + i, { opacity: 0, visibility: "hidden" }, exitT + 0.06);
+  });
+
+  window.__timelines["main"] = tl;
+</script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+# macOS
+.DS_Store
+
+# Node.js / Hyperframes
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg
+*.egg-info/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Python virtual envs and workspace state
+.venv/
+venv/
+env/
+ENV/
+
+# Local environment files
+.env
+.env.local
+video-use/.env
+video-use/.env.local
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.tmp
+
+# Archives and local outputs
+videomaker-fuer-freunde.zip
+
+# Ignore generated Hyperframes / local project outputs if they appear
+/edit/
+/transcripts/
+/animations/
+/clips_graded/
+/clips_preview/
+/downloads/
+/verify/
+/preview.mp4
+/final.mp4
+/base.mp4
+/base_preview.mp4
+/master.srt
+/takes_packed.md
+/edl.json
+/project.md

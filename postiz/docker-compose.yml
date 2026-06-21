@@ -1,0 +1,74 @@
+services:
+  postiz:
+    image: ghcr.io/gitroomhq/postiz-app:v2.11.3
+    container_name: postiz
+    restart: always
+    environment:
+      MAIN_URL: "${POSTIZ_MAIN_URL:-http://localhost:5000}"
+      FRONTEND_URL: "${POSTIZ_FRONTEND_URL:-http://localhost:5000}"
+      NEXT_PUBLIC_BACKEND_URL: "${POSTIZ_BACKEND_URL:-http://localhost:5000/api}"
+      JWT_SECRET: "${POSTIZ_JWT_SECRET:-change-me-to-a-long-random-string}"
+
+      DATABASE_URL: "postgresql://postiz:postiz@postiz-postgres:5432/postiz-db-local"
+      REDIS_URL: "redis://postiz-redis:6379"
+
+      BACKEND_INTERNAL_URL: "http://localhost:3000"
+      IS_GENERAL: "true"
+      DISABLE_REGISTRATION: "false"
+
+      STORAGE_PROVIDER: "local"
+      UPLOAD_DIRECTORY: "/uploads"
+      NEXT_PUBLIC_UPLOAD_DIRECTORY: "/uploads"
+    volumes:
+      - postiz-config:/config
+      - postiz-uploads:/uploads
+    ports:
+      - "5000:5000"
+    networks:
+      - postiz-network
+    depends_on:
+      postiz-postgres:
+        condition: service_healthy
+      postiz-redis:
+        condition: service_healthy
+
+  postiz-postgres:
+    image: postgres:16-alpine
+    container_name: postiz-postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: postiz
+      POSTGRES_USER: postiz
+      POSTGRES_DB: postiz-db-local
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - postiz-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postiz -d postiz-db-local"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  postiz-redis:
+    image: redis:7-alpine
+    container_name: postiz-redis
+    restart: always
+    volumes:
+      - redis-data:/data
+    networks:
+      - postiz-network
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postiz-config:
+  postiz-uploads:
+  postgres-data:
+  redis-data:
+
+networks:
+  postiz-network:
