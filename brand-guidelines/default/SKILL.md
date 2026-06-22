@@ -1,6 +1,6 @@
 ---
-name: meine-marke-design
-description: <!-- TODO: Eine Zeile — wofür steht deine Marke? Wird von Caption-/Composition-Agents als Kontext gelesen. -->
+name: palstek
+description: Unterstützung von Geschäftsführern und Führungskräften in KMU bei stabiler, psychologisch fundierter Mitarbeiterführung.
 ---
 
 # Brand-Skill (Vorlage)
@@ -12,26 +12,30 @@ description: <!-- TODO: Eine Zeile — wofür steht deine Marke? Wird von Captio
 > Skill hochladen — dann braucht es `SKILL.md` mit dem Front-Matter oben.
 
 ## Marken-Essenz (ein Satz)
-<!-- TODO: Der eine Satz, der deine Marke trägt. -->
-> *Beispiel: „Klartext statt Buzzwords."*
+> Palstek hilft Geschäftsführer:innen und Führungskräften in KMU, durch psychologisch fundierte Führung stabilere Teams zu schaffen und Ausfälle sowie Fluktuation zu reduzieren.
+
 
 ## Voice
-<!-- TODO: 3–5 Stichpunkte zum Sprachstil. -->
-- Beispiel: direkt, konkret, ohne Floskeln
-- Beispiel: kurze Sätze, Belege statt Versprechen
+- **Anrede: Du** (informell, konsequent duzen — niemals siezen, kein „Ihr“/„Ihre“)
+- Fachlich fundiert und empathisch
+- Prägnant: kurze, klare Sätze
+- Praxisorientiert: konkrete Hinweise und belegbare Empfehlungen
+- Nahbar, respektvoll, mit einer Prise Humor
+- Spannung in der Sache, nicht in der Lautstärke
 
 ## Visuelle Identität (Kurzfassung)
-<!-- TODO: Die Werte aus colors_and_type.css in Worten. -->
-- Akzentfarbe: `<!-- TODO -->`
-- Ink/Neutral: `<!-- TODO -->`
-- Display-Font / Text-Font: `<!-- TODO -->`
-- Logo: `assets/` (siehe assets/README.md)
+- Akzentfarbe: #4ebbc2
+- Sekundärfarbe: #281d67
+- Ink/Neutral: Weiß, Schwarz, Grau
+- Display-Font / Text-Font: Korbin Medium (lokal, Pfad `font_kobin_medium`)
+- Logo: `assets/logo-horizontal.png` (weiß, ohne Claim) — Watermark dezent oben-rechts im Reel; farbige/dunkle Varianten nur für helle Formate (Thumbnails, helle Karten).
 
 ## Do / Don't
-<!-- TODO -->
 - **Do:** Akzentfarbe sparsam, ein Fokus pro Beat.
 - **Don't:** keine gebannten Fonts (siehe docs/motion-philosophy.md), keine erfundenen Claims.
 
 ## Proof-Points (belegbar — NIE erfinden)
-<!-- TODO: Fakten/Zahlen, die Captions verwenden dürfen. -->
-- Beispiel: „seit 2019"
+- „psychologisch fundierte Führung"
+- „stabilere Teams in KMU"
+- „weniger Ausfälle und Fluktuation"
+- „konkrete Führungsschritte statt Buzzword-Bingo"

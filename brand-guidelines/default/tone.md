@@ -1,11 +1,14 @@
 # Tone of Voice (Vorlage)
 
-<!-- TODO: 3–5 Sätze, wie deine Marke spricht. Wird von caption_gen.py gelesen. -->
+Palstek spricht direkt, sachlich und vertrauenswürdig. Kurze, prägnante Sätze setzen auf konkrete Führungsempfehlungen ohne Marketing-Floskeln. Die Sprache ist empathisch, aber nicht weichgespült — sie zeigt, dass Führungskräfte echten Mehrwert und Orientierung bekommen.
 
-Beispiel (ersetzen): *Wir sprechen Klartext. Kurze Sätze, konkrete Beispiele,
-keine Buzzwords. Wir belegen statt zu versprechen und reden den Leser direkt
-mit „du" an.*
+**Anrede: Du** — wir duzen konsequent (informell, auf Augenhöhe). Niemals siezen, kein „Ihr“/„Ihre“ als formelle Anrede.
 
 ## Wörter, die wir NICHT benutzen
-<!-- TODO: Floskeln/Begriffe, die nicht in Captions auftauchen sollen. -->
-- Beispiel: „revolutionär", „Game-Changer", „einzigartig"
+- revolutionär
+- Game-Changer
+- einzigartig
+- disruptiv
+- wachstumsstark
+- Next-level
+- intensiviert

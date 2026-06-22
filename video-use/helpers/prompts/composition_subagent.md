@@ -19,7 +19,7 @@ You are running INSIDE the VideoMaker project folder (the repo root you were lau
 
 ### 1. Read & analyze
 - Read EDL + master.srt to understand beat structure
-- Read brand SKILL.md + colors_and_type.css for color tokens: `--brand-500` (accent), `--ink-950` (dark base), `--ink-50` (light) — use the brand's actual values, do not assume a palette
+- Read brand SKILL.md + colors_and_type.css for tokens: `--brand-500` (accent), `--ink-950` (dark base), `--ink-50` (light), `--font-display`, `--font-sans` — use the brand's actual values, do not assume a palette
 - Read packed transcript to identify key beats (hook, anchor words, list moments, punchline)
 
 ### 2. Plan beats (3-7 visual elements total for a 45-55s reel)
@@ -42,6 +42,7 @@ ffmpeg -y -i clips/edited.mp4 \
   compositions/assets/speaker.mp4
 ```
 Also copy brand logo to `compositions/assets/logo.png`.
+If the brand uses a local font file (e.g. Korbin Medium), also copy that font into `compositions/assets/` and reference it from the template as `assets/Korbin-Medium.otf`.
 
 ### 3b. B-Roll cutaways (PFLICHT wenn Clips existieren)
 **B-Roll is now a standard part of every reel, not optional.** Look for B-roll clips in this PRIORITY order (a brand's own footage wins over shared):

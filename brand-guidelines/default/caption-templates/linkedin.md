@@ -10,9 +10,8 @@
 - **Kein Emoji** (Ausnahme nur, wenn deine Brand das explizit erlaubt)
 
 ## Voice
-<!-- TODO(Design-Interview): Sprachstil deiner Marke. -->
-- Sprache/Anrede: `<!-- TODO: z.B. Deutsch, „du" -->`
-- Tonalität: `<!-- TODO: z.B. direkt, anti-Floskel -->`
+- Sprache/Anrede: Deutsch, du
+- Tonalität: direkt, fachlich souverän, pragmatisch
 - KEINE Marketing-Floskeln („revolutionär", „Game-Changer", „einzigartig")
 
 ## Struktur (3-Block)
@@ -21,9 +20,8 @@
 **Block 3 — CTA (1 Satz):** Eine konkrete Aktion ODER eine Frage an die Community.
 
 ## Hashtag-Set
-<!-- TODO: deine Hashtags eintragen. -->
-- 1–2 Brand-Hashtags: `#<!-- TODO -->`
-- 2–3 Nische-Hashtags: `#<!-- TODO -->`
+- 1–2 Brand-Hashtags: `#Palstek`, `#FührungImKMU`
+- 2–3 Nische-Hashtags: `#Mitarbeiterführung`, `#Teamstabilität`, `#KMU`
 
 ## DO NOT
 - Keine Anrede „Liebe LinkedIn-Community"

@@ -6,12 +6,11 @@
 - **125–150 Wörter** (Instagram kürzt nach ~125 Zeichen mit „… mehr")
 - Erste Zeile = Hook, muss vor dem Truncate funktionieren
 - **5–10 Hashtags** am Ende oder im ersten Kommentar
-- Emoji: `<!-- TODO: erlaubt? sparsam? gar nicht? -->`
+- Emoji: sparsam, nur wenn sie den Satz klar unterstützen und nicht ablenken
 
 ## Voice
-<!-- TODO(Design-Interview): Sprachstil. Tendenz: etwas lockerer als LinkedIn. -->
-- Sprache/Anrede: `<!-- TODO -->`
-- Tonalität: `<!-- TODO -->`
+- Sprache/Anrede: Deutsch, du
+- Tonalität: etwas lockerer als LinkedIn, aber weiterhin sachlich und auf den Punkt
 
 ## Struktur
 **Hook (Zeile 1):** Eine starke Aussage/Frage. Kein „Im heutigen Video".
@@ -19,8 +18,7 @@
 **CTA:** speichern / folgen / kommentieren — eine Aktion.
 
 ## Hashtag-Set
-<!-- TODO: deine Hashtags. -->
-- `#<!-- TODO -->`
+- `#Palstek` `#Führungstipps` `#KMU` `#Teamkultur` `#Mitarbeiterbindung`
 
 ## DO NOT
 - Kein `#fyp #viral #explorepage` (Spam-Signal)

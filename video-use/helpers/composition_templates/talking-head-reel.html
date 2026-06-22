@@ -3,11 +3,16 @@
 <head>
 <meta charset="utf-8">
 <title>{{TITLE}}</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-  html, body { margin: 0; padding: 0; background: #000; overflow: hidden; }
+  @font-face {
+    font-family: "Korbin";
+    src: local("Korbin Medium"),
+         url("assets/Korbin-Medium.otf") format("opentype");
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+  }
+  html, body { margin: 0; padding: 0; background: #000; overflow: hidden; font-family: var(--font-sans, "Korbin"), system-ui, sans-serif; }
 
   #main {
     position: relative;
@@ -51,7 +56,7 @@
     pointer-events: none;
   }
   #hook .hook-eyebrow {
-    font-family: Inter, sans-serif;
+    font-family: var(--font-sans, "Korbin"), system-ui, sans-serif;
     font-weight: 700;
     font-size: 30px;
     letter-spacing: 0.15em;
@@ -61,7 +66,7 @@
     text-shadow: 0 4px 24px rgba(7,9,16,0.95);
   }
   #hook .hook-main {
-    font-family: "Bricolage Grotesque", Inter, sans-serif;
+    font-family: var(--font-display, "Korbin"), system-ui, sans-serif;
     font-weight: 800;
     font-size: 132px;
     line-height: 0.95;
@@ -77,7 +82,7 @@
     left: 50%;
     width: 980px;
     text-align: center;
-    font-family: "Bricolage Grotesque", Inter, sans-serif;
+    font-family: var(--font-display, "Korbin"), system-ui, sans-serif;
     font-weight: 800;
     color: {{BRAND_500}};
     letter-spacing: -0.03em;
@@ -110,7 +115,7 @@
     left: 50%;
     background: {{BRAND_500}};
     color: {{INK_950}};
-    font-family: Inter, sans-serif;
+    font-family: var(--font-sans, "Korbin"), system-ui, sans-serif;
     font-weight: 800;
     font-size: 36px;
     padding: 22px 56px;
@@ -135,7 +140,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: "Bricolage Grotesque", Inter, sans-serif;
+    font-family: var(--font-display, "Korbin"), system-ui, sans-serif;
     font-weight: 800;
     font-size: 220px;
     color: {{BRAND_500}};
@@ -149,7 +154,7 @@
     top: 320px;
     left: 440px;
     right: 80px;
-    font-family: "Bricolage Grotesque", Inter, sans-serif;
+    font-family: var(--font-display, "Korbin"), system-ui, sans-serif;
     font-weight: 800;
     color: {{INK_50}};
     letter-spacing: -0.01em;
@@ -176,7 +181,7 @@
     box-shadow: 0 16px 56px rgba(7,9,16,0.7);
   }
   .list-card .list-header {
-    font-family: Inter, sans-serif;
+    font-family: var(--font-sans, "Korbin"), system-ui, sans-serif;
     font-weight: 700;
     font-size: 26px;
     letter-spacing: 0.18em;
@@ -185,7 +190,7 @@
     margin-bottom: 26px;
   }
   .list-item {
-    font-family: "Bricolage Grotesque", Inter, sans-serif;
+    font-family: var(--font-sans, "Korbin"), system-ui, sans-serif;
     font-weight: 700;
     font-size: 48px;
     line-height: 1.18;
@@ -211,7 +216,7 @@
     left: 0;
     right: 0;
     text-align: center;
-    font-family: Inter, system-ui, sans-serif;
+    font-family: var(--font-sans, "Korbin"), system-ui, sans-serif;
     font-weight: 800;
     font-size: 58px;
     line-height: 1.1;
@@ -237,7 +242,7 @@
 
 <div id="main" data-composition-id="main" data-start="0" data-duration="{{DURATION}}" data-width="1080" data-height="1920">
 
-  <video id="bg-video"
+  <video id="bg-video" class="clip"
          data-start="0"
          data-duration="{{DURATION}}"
          data-track-index="0"

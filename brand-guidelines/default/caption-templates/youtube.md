@@ -6,20 +6,18 @@
 - **Titel: max 100 Zeichen**, Hook vorne
 - Beschreibung: 1–3 Sätze + 3–5 Hashtags
 - `#Shorts` ist erlaubt (anders als TikTok-`#fyp`)
-- Emoji: `<!-- TODO: erlaubt? -->`
+- Emoji: sparsam, nur wenn klar sinnvoll
 
 ## Voice
-<!-- TODO(Design-Interview). -->
-- Sprache/Anrede: `<!-- TODO -->`
-- Tonalität: `<!-- TODO -->`
+- Sprache/Anrede: Deutsch, du
+- Tonalität: kurz, prägnant, professionell
 
 ## Struktur
 **Titel:** klare, suchbare Aussage mit Hook.
 **Beschreibung:** 1–3 Sätze Kontext + Hashtags.
 
 ## Hashtag-Set
-<!-- TODO -->
-- `#Shorts` `#<!-- TODO -->`
+- `#Shorts` `#Palstek` `#Führung` `#KMU`
 
 ## DO NOT
 - Kein Clickbait, der das Video nicht hält

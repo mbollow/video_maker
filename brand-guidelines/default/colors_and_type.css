@@ -11,24 +11,29 @@
    Fonts: keine der in docs/motion-philosophy.md gebannten Schriften verwenden.
    ========================================================================= */
 
-/* TODO(Design-Interview): Fonts wählen + hier den Google-Fonts-Import setzen.
-   Platzhalter unten = Space Grotesk (Display) + Schibsted Grotesk (Text). */
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap');
+/* Palstek-Font: local installierte Korbin Medium. */
+@font-face {
+  font-family: "Korbin";
+  src: local("Korbin Medium"),
+       url("../../font_kobin_medium/Korbin-Medium.otf") format("opentype");
+  font-weight: 500;
+  font-style: normal;
+}
 
 :root {
-  /* --- Brand (Akzentfarbe) — PLATZHALTER, im Design-Interview ersetzen ---
-     Aktuell ein neutrales Indigo. TODO: durch eure echte Akzentfarbe ersetzen. */
-  --brand-50:  #eef2ff;
-  --brand-100: #e0e7ff;
-  --brand-200: #c7d2fe;
-  --brand-300: #a5b4fc;
-  --brand-400: #818cf8;
-  --brand-500: #6366f1;  /* TODO: eure Signatur-Akzentfarbe */
-  --brand-600: #4f46e5;
-  --brand-700: #4338ca;
-  --brand-800: #3730a3;
-  --brand-900: #312e81;
-  --brand-950: #1e1b4b;
+  /* --- Brand (Akzentfarbe) ---
+     Palette angepasst für Palstek: klarer Türkis-Akzent und ein tiefes Blau-Lila als Sekundärfarbe. */
+  --brand-50:  #e7f8fb;
+  --brand-100: #d6f1f5;
+  --brand-200: #bce6ec;
+  --brand-300: #91d7e1;
+  --brand-400: #5cc1cd;
+  --brand-500: #4ebbc2;  /* Primärer Akzent */
+  --brand-600: #3c99a2;
+  --brand-700: #2f7a82;
+  --brand-800: #265f66;
+  --brand-900: #1f4f59;
+  --brand-950: #281d67; /* Sekundäre Dunkelfarbe */
 
   /* --- Ink (Neutrals) — neutrale Graustufen, meist unverändert lassen --- */
   --ink-50:  #f8fafc;
@@ -62,9 +67,9 @@
   --danger:  #dc2626;
   --warn:    #d97706;
 
-  /* --- Typography — TODO: Fonts im Design-Interview festlegen ---------- */
-  --font-display: "Space Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-sans:    "Schibsted Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* --- Typography — Korbin Local Font für Headlines und Bodytext ----- */
+  --font-display: "Korbin", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-sans:    "Korbin", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono:    ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
   /* fluid scale */
@@ -102,8 +107,8 @@
   --shadow-md:   0 4px 12px -2px rgba(2, 6, 23, 0.08);
   --shadow-lg:   0 12px 32px -8px rgba(2, 6, 23, 0.18);
   --shadow-xl:   0 24px 60px -16px rgba(2, 6, 23, 0.28);
-  /* TODO: glow-rgba an eure Akzentfarbe anpassen, sobald --brand-500 steht. */
-  --shadow-glow: 0 0 0 1px rgba(99, 102, 241, 0.5), 0 12px 40px -8px rgba(99, 102, 241, 0.45);
+  /* Accent glow tuned for Palstek's turquoise accent. */
+  --shadow-glow: 0 0 0 1px rgba(78, 187, 194, 0.35), 0 12px 40px -8px rgba(78, 187, 194, 0.25);
 
   /* --- Spacing scale (rem) ------------------------------------------- */
   --sp-1: 0.25rem;

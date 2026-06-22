@@ -25,41 +25,55 @@ sie ersetzt, produziert die Pipeline saubere, aber bewusst neutrale Reels.
 ---
 
 ## 1. Sprache
-<!-- TODO: Welche Sprache? Du oder Sie? Anglizismen erlaubt? -->
-- Beispiel: *Deutsch, „du", Fach-Anglizismen okay.*
+- Markenname: Palstek GmbH (Geschäftsführerin Juliana Wiechert)
+- Sprache: Deutsch
+- Anrede: Du
+- Zielgruppe: Geschäftsführer und Führungskräfte in KMU. Fach‑Anglizismen dürfen verwendet werden, solange sie fachlich korrekt und verständlich bleiben.
 
 ## 2. Ton & Voice
-<!-- TODO: 3–5 Sätze: Wie klingt deine Marke? Direkt? Verspielt? Sachlich? -->
-- Beispiel: *Klar, konkret, anti-Floskel. Kurze Sätze. Belege statt Versprechen.*
+- Empathische Nahbarkeit trifft souveräne Fachkompetenz.
+- Klar, direkt und fachlich souverän, mit einer Prise Humor.
+- Spannung entsteht in der Sache, nicht in der Lautstärke.
+- Fokus auf handfeste Erkenntnisse und praxisnahe Beobachtungen.
 
 ## 3. Casing & Typo-Devices
-<!-- TODO: Headlines Satz-/Title-Case? Eyebrows UPPERCASE? Punkt am Headline-Ende? -->
-- Beispiel: *Headlines Satzcase mit Punkt. Eyebrows UPPERCASE, weites Tracking.*
+- Headlines Satzcase oder Title Case, lieber keine VERSALIEN.
+- Dezente Eyebrows möglich, aber nicht schrill.
+- Punkt am Ende von Aussagen ist ok; keine unnötigen Abkürzungen.
 
 ## 4. Farben
-<!-- TODO: Hauptfarbe (Akzent), Ink/Neutral, Hintergrund. In colors_and_type.css eintragen. -->
-- Beispiel: *Dunkles Ink + EIN Akzent. Akzent nur sparsam (CTA, ein Wort pro Zeile).*
+- Akzent: #4ebbc2
+- Sekundär: #281d67
+- Basis: Weiß, Schwarz, Grau
+- Gesamt: ruhige, professionelle Farbwelt mit einem klaren, freundlichen Akzent.
 
 ## 5. Typografie
-<!-- TODO: Display-Font + Text-Font (Google Fonts). KEINE gebannte Schrift (docs/motion-philosophy.md). -->
-- Beispiel: *Display: kräftige Grotesk. Text: ruhige humanistische Sans.*
+- Display-Font / Text-Font: Korbin Medium (lokal, siehe Pfad font_kobin_medium)
+- Stil: modern, klar, gut lesbar bei Headlines und Kurztexten.
 
 ## 6. Spacing & Layout
-<!-- TODO: enge oder luftige Reels? -->
-- Beispiel: *Großzügige Ränder, ein klarer Fokus pro Beat.*
+- Layout: eher luftig, aber mit klarem Fokus pro Beat. Gebe jedem Textblock und jeder Karte Raum, damit die Botschaft bei schnellen Reels sofort lesbar bleibt.
+- Ränder: großzügig, aber keine zu großen Abstände, damit die Aufmerksamkeit nicht zu sehr verloren geht.
 
 ## 7. Motion
-<!-- TODO: Overrides zu docs/motion-philosophy.md? Sonst gelten die Defaults. -->
-- Beispiel: *Reveals power3.out, Loops sine.inOut, nie linear. Dezent.*
+- Motion-Ausprägung: dezent, professionell, rhythmisch. Keine hektischen Effect-Splats.
+- Primär: `power3.out`, `sine.inOut`, `back.out(1.4)` für Reveals und Anker-Worte. `linear` vermeiden.
+- Standard: sanfte Text-Fades, Akzent-Underlines und subtile Push/Pull-Bewegung auf dem Speaker.
 
 ## 8. Overlays & Subtitles
-<!-- TODO: Untertitel-Stil (Position, Hervorhebung des Anker-Worts), Lower-Thirds? -->
-- Beispiel: *Untertitel unten zentriert, Anker-Wort im Akzent hervorgehoben.*
+- Subtitle-Position: unten, zentriert, max. 2 Zeilen. Der wichtigste Begriff kann im Akzent hervorgehoben werden.
+- Lower-Thirds: optional, auf dunklem, leicht transparentem Hintergrund mit `brand-500`-Akzentlinie.
+- Anker-Worte: groß, markant, aber nicht bunt. Ein Farbakzent genügt.
 
 ## 9. Bildsprache / B-Roll
-<!-- TODO: Welche Stimmung? Eigene Clips? -->
-- Beispiel: *Warme, echte Clips aus dem Alltag. Eigene B-Roll nach `broll/`.*
+- Stimmung: sachlich-echt, professionell und nahbar. Keine übertriebenen Stock-Bilder.
+- Eigene Clips: wenn vorhanden, immer bevorzugen. Bringe echte Business-Szenen oder Gesprächsmomente ein.
+- B-Roll-Standard: bei vorhandenen Clips ca. alle ~10 s einen Cutaway, jede Szene 2,5–3,5 s.
 
 ## 10. Proof-Points (für Captions, NIE erfinden)
-<!-- TODO: Belegbare Fakten/Zahlen, die in Captions auftauchen dürfen. -->
-- Beispiel: *„seit 2019", „120+ Projekte" — nur was wirklich stimmt.*
+- Belegbare Fakten, die in Captions auftauchen dürfen:
+  - „Psychologisch fundierte Führung“
+  - „stabilere Teams“
+  - „weniger Ausfälle und Fluktuation“
+  - „Praxisnahe Führungstipps für KMU“
+  - „konkrete Handlungsschritte statt Buzzwords“

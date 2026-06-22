@@ -376,7 +376,7 @@ def apply_to_manifest(video: dict, reasoning: str) -> None:
 def needs_edl(video: dict, force: bool) -> bool:
     if force:
         return True
-    if "edl_planned" in video.get("stages", {}):
+    if video.get("stages", {}).get("edl_planned"):
         return False
     edl_path = REPO_ROOT / video["project_dir"] / "edl.json"
     return not edl_path.exists()

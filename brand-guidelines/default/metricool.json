@@ -1,7 +1,7 @@
 {
-  "label": "Meine Marke",
+  "label": "Palstek",
   "blog_id": null,
   "timezone": "Europe/Zurich",
-  "enabled_platforms": ["linkedin"],
+  "enabled_platforms": ["linkedin", "instagram"],
   "_comment": "blog_id = Metricool-Brand-ID (aus der Metricool-URL ?blogId=...). enabled_platforms = welche Kanäle gepostet werden (batch_init liest das). Wird von metricool_push.py über das Batch-Manifest genutzt. TODO: blog_id eintragen, sobald dein Metricool-Account verbunden ist (siehe metricool/README.md)."
 }

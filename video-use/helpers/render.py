@@ -107,11 +107,19 @@ def resolve_path(maybe_path: str, base: Path) -> Path:
 
 HDR_TRANSFERS = {"smpte2084", "arib-std-b67"}  # PQ (HDR10) and HLG
 
+# Faithful HLG->SDR: linearize with npl=1000 (HLG reference peak → system
+# gamma 1.2, the same OOTF QuickTime applies when playing the HDR source),
+# convert Rec.2020->Rec.709 primaries, then `clip` (no creative tonal
+# compression — preserves the source brightness/contrast instead of lifting
+# midtones the way `hable` did). Chosen after an npl brightness ladder on iPhone
+# HLG footage: hable washed faces out; clip@203 was still too bright (gamma <1);
+# clip@1000 matches the on-screen original. (Raise npl to darken further if a
+# future clip looks too bright; lower it if too dark.)
 TONEMAP_CHAIN = (
-    "zscale=t=linear:npl=100,"
+    "zscale=t=linear:npl=1000,"
     "format=gbrpf32le,"
     "zscale=p=bt709,"
-    "tonemap=tonemap=hable:desat=0,"
+    "tonemap=tonemap=clip,"
     "zscale=t=bt709:m=bt709:r=tv,"
     "format=yuv420p"
 )

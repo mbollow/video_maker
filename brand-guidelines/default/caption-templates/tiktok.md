@@ -9,18 +9,16 @@
 - Die ersten ~100 Zeichen sind der Hook
 
 ## Voice
-<!-- TODO(Design-Interview): noch tighter als Instagram. Fragment-Style ok. -->
-- Sprache/Anrede: `<!-- TODO -->`
-- Tonalität: `<!-- TODO -->`
+- Sprache/Anrede: Deutsch, du
+- Tonalität: knapp, direkt, auf den Punkt — Fragment-Style ist erlaubt
 
 ## Struktur
 **Hook-Fragment (max ~100 Zeichen):** Statement, Frage oder Punchline. KEIN Setup.
 **Hashtag-Block:** 4–6 am Ende.
 
 ## Hashtag-Set
-<!-- TODO -->
-- trending: `#<!-- TODO -->`
-- Nische: `#<!-- TODO -->`
+- trending: `#Führung`, `#Leadership`
+- Nische: `#KMU`, `#Mitarbeiterbindung`, `#Teamführung`
 
 ## DO NOT
 - Kein `#fyp #foryou #viral` (Spam-Signal)
