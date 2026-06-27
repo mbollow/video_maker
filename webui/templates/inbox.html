@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Inbox · Palstek VideoMaker{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>📥 Inbox</h1>
+  <p>Neue Videos hochladen und einen Batch anlegen. Die Verarbeitung stößt du danach über Claude Code an (Weg&nbsp;B).</p>
+</div>
+
+<form class="card card-pad" method="post" action="/api/upload" enctype="multipart/form-data" id="upform">
+  <div style="margin-bottom:20px">
+    <label class="fld" for="batch">Batch-Name</label>
+    <input type="text" id="batch" name="batch" value="{{ suggested_name }}" placeholder="z. B. 2026-06-23_Strandshooting" required>
+    <div class="hint">Wird zum Ordnernamen unter <code>raw/batches/</code>. Erlaubt: Buchstaben, Zahlen, <code>-</code> und <code>_</code>.</div>
+  </div>
+
+  <div style="margin-bottom:20px">
+    <label class="fld">Videodateien</label>
+    <div class="drop" id="drop">
+      <div class="big">Dateien hierher ziehen</div>
+      <div>oder klicken zum Auswählen · MP4 / MOV</div>
+      <input type="file" id="files" name="files" multiple accept="video/*,.mov,.mp4,.m4v" style="display:none">
+    </div>
+    <ul class="filelist" id="filelist"></ul>
+  </div>
+
+  <div style="margin-bottom:24px">
+    <label class="fld" for="context">Kontext / Infos für die Bearbeitung <span style="font-weight:400;color:var(--ink-500)">(optional)</span></label>
+    <textarea id="context" name="context" placeholder="Relevante Hinweise zu diesen Videos — z. B. gewünschte Hooks, Reihenfolge, Themen, Dinge die rein/raus sollen. Claude liest das beim Bearbeiten mit."></textarea>
+    <div class="hint">Wird als <code>_context.md</code> im Batch-Ordner gespeichert und beim Verarbeiten berücksichtigt.</div>
+  </div>
+
+  <button type="submit" class="btn btn-primary">📦 Hochladen &amp; Batch anlegen</button>
+</form>
+
+{% if last_batch %}
+<div class="card card-pad" style="margin-top:24px">
+  <h3 style="margin:0 0 10px">Batch <span class="badge badge-purple">{{ last_batch }}</span> ist angelegt ✅</h3>
+  <p style="margin:0 0 12px;color:var(--ink-500)">{{ last_count }} Video(s) liegen jetzt unter <code>raw/batches/{{ last_batch }}/</code>.</p>
+  <div class="callout">
+    <strong>Nächster Schritt (Weg B — günstig über Max):</strong> Sag Claude Code:<br>
+    <code>verarbeite den Batch {{ last_batch }}</code>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block script %}
+<script>
+  const drop = document.getElementById('drop');
+  const input = document.getElementById('files');
+  const list = document.getElementById('filelist');
+  function render(){
+    list.innerHTML = '';
+    [...input.files].forEach(f=>{
+      const li=document.createElement('li');
+      const mb=(f.size/1048576).toFixed(1);
+      li.innerHTML=`<span>${f.name}</span><span style="color:var(--ink-500)">${mb} MB</span>`;
+      list.appendChild(li);
+    });
+  }
+  drop.addEventListener('click',()=>input.click());
+  input.addEventListener('change',render);
+  ['dragover','dragenter'].forEach(e=>drop.addEventListener(e,ev=>{ev.preventDefault();drop.classList.add('drag');}));
+  ['dragleave','drop'].forEach(e=>drop.addEventListener(e,ev=>{ev.preventDefault();drop.classList.remove('drag');}));
+  drop.addEventListener('drop',ev=>{ input.files = ev.dataTransfer.files; render(); });
+</script>
+{% endblock %}

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Palstek VideoMaker{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/app.css">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="logo"><img src="/static/img/logo.png" alt="Palstek"></div>
+      <a class="nav-link {% if active=='inbox' %}active{% endif %}" href="/">
+        <span class="ico">📥</span> Inbox
+      </a>
+      <a class="nav-link {% if active=='batches' %}active{% endif %}" href="/batches">
+        <span class="ico">📦</span> Batches
+      </a>
+      <a class="nav-link {% if active=='library' %}active{% endif %}" href="/library">
+        <span class="ico">🎬</span> Bibliothek
+      </a>
+      <div class="foot">
+        Palstek VideoMaker<br>
+        Lokale Oberfläche · Weg B<br>
+        Verarbeitung über Claude Code
+      </div>
+    </aside>
+    <main class="main">
+      {% with msgs = get_flashed_messages() %}
+        {% if msgs %}{% for m in msgs %}<div class="flash">{{ m }}</div>{% endfor %}{% endif %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+  {% block script %}{% endblock %}
+</body>
+</html>

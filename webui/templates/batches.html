@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Batches · Palstek VideoMaker{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>📦 Batches</h1>
+  <p>Alle Batches mit Status. Öffne die Review-Seite eines Batches, um Videos, Captions und geplante Zeiten zu prüfen.</p>
+</div>
+
+{% if batches %}
+<div class="card">
+  <table>
+    <thead>
+      <tr><th>Batch</th><th>Videos</th><th>Status</th><th>Angelegt</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for b in batches %}
+      <tr>
+        <td><strong>{{ b.name }}</strong></td>
+        <td>{{ b.count }}</td>
+        <td>
+          {% if b.rendered == b.count and b.count > 0 %}
+            <span class="badge badge-ok">fertig gerendert</span>
+          {% elif b.rendered > 0 %}
+            <span class="badge badge-progress">{{ b.rendered }}/{{ b.count }} gerendert</span>
+          {% else %}
+            <span class="badge badge-pending">noch nicht verarbeitet</span>
+          {% endif %}
+          {% if b.scheduled > 0 %}<span class="badge badge-purple">{{ b.scheduled }} geplant</span>{% endif %}
+        </td>
+        <td style="color:var(--ink-500)">{{ b.created }}</td>
+        <td style="text-align:right">
+          {% if b.has_review %}
+            <a class="btn btn-ghost" href="/review/{{ b.name|urlencode }}" target="_blank">Review öffnen ↗</a>
+          {% else %}
+            <span class="hint">Review folgt nach Verarbeitung</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<div class="callout" style="margin-top:20px">
+  <strong>Verarbeiten oder ändern?</strong> Noch nicht verarbeitete Batches startest du über Claude Code
+  (<code>verarbeite den Batch &lt;Name&gt;</code>). Korrekturen an fertigen Videos ebenfalls
+  (z. B. <code>03: caption neu</code>).
+</div>
+{% else %}
+<div class="card card-pad empty">
+  <p>Noch keine Batches vorhanden.</p>
+  <a class="btn btn-primary" href="/">📥 Zur Inbox — ersten Batch anlegen</a>
+</div>
+{% endif %}
+{% endblock %}

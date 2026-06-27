@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Bibliothek · Palstek VideoMaker{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>🎬 Bibliothek</h1>
+  <p>Alle fertig gerenderten Videos — batch-übergreifend — mit den generierten Captions. {{ videos|length }} Video(s).</p>
+</div>
+
+{% if videos %}
+<div class="grid cols-3">
+  {% for v in videos %}
+  <div class="card vid-card">
+    <div class="thumb">
+      {% if v.video_url %}
+        <video src="{{ v.video_url }}" {% if v.thumb_url %}poster="{{ v.thumb_url }}"{% endif %} controls preload="none" playsinline></video>
+      {% elif v.thumb_url %}
+        <img src="{{ v.thumb_url }}" alt="{{ v.title }}">
+      {% endif %}
+    </div>
+    <div class="body">
+      <div class="title">{{ v.title }}</div>
+      <div class="meta">
+        {{ v.batch }} · #{{ v.seq }}{% if v.duration %} · {{ v.duration }}s{% endif %}
+      </div>
+      {% if v.linkedin %}
+      <div>
+        <div class="cap-h">LinkedIn{% if v.linkedin_at %} · {{ v.linkedin_at }}{% endif %}</div>
+        <div class="cap">{{ v.linkedin }}</div>
+      </div>
+      {% endif %}
+      {% if v.instagram %}
+      <div>
+        <div class="cap-h">Instagram{% if v.instagram_at %} · {{ v.instagram_at }}{% endif %}</div>
+        <div class="cap">{{ v.instagram }}</div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card card-pad empty">
+  <p>Noch keine gerenderten Videos vorhanden.</p>
+  <a class="btn btn-primary" href="/">📥 Zur Inbox</a>
+</div>
+{% endif %}
+{% endblock %}
