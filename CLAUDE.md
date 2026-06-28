@@ -75,6 +75,7 @@ Explizite **Ausnahme** zur „Plan-Bestätigung vor jedem Cut"-Regel. NUR aktiv,
 4. **Compose + Render:** 2-3 parallele Sub-Agents mit `composition_subagent.md`; rendern + Thumbnail.
 5. **Caption + Schedule:** `npm run batch:caption` + `npm run batch:schedule`.
 6. **Review:** `npm run batch:review -- --batch <name> --open`, dann ein `AskUserQuestion`.
+6b. **Freigabe extern (optional):** `npm run freigabe:push -- --batch <name>` lädt pro Video einen Ordner ins OneDrive-synchronisierte SharePoint (`Freigabeprozess – Video/NNN_<linkedin-hook>/` mit `original – <kamera>.mov`, `final_vN__<titel>.mp4`, `captions__<titel>.txt`, `FREIGABE__<titel>.txt`). Kollegin (Juliana) trägt in der `FREIGABE…txt` Zeile 1 `FREIGEGEBEN`/`AENDERN` ein + Notizen. Rückmeldungen einlesen: `npm run freigabe:check` → klassifiziert nach Status; bei `AENDERN` Notizen in Korrektur-Shorthand übersetzen und re-cutten (Re-Push legt `final_v2__<titel>.mp4` an, überschreibt nie die `FREIGABE…txt`). Siehe `FREIGABEPROZESS.md`.
 7. **Push (optional):** Metricool oder Postiz — **immer zuerst als Draft.**
 
 Oder alles am Stück: `npm run batch:pipeline -- --batch <name>` (EDL→Cut→Compose→Caption→Schedule, stoppt vor dem Posten).
@@ -105,6 +106,9 @@ npm run batch:schedule -- --batch <name>
 npm run batch:review   -- --batch <name> --open
 npm run batch:apply    -- --batch <name>                   # Korrekturen (stdin)
 npm run batch:cleanup  -- --batch <name> --apply           # Storage-Rotation (zeit-basiert)
+# Externe Freigabe via SharePoint (Juliana):
+npm run freigabe:push  -- --batch <name>                   # Videos → OneDrive-Freigabeordner (Phase 6b)
+npm run freigabe:check                                     # Rückmeldungen einlesen (Status + Notizen)
 # Posten (optional, draft-first):
 npm run metricool:push:draft -- --batch <name>             # Metricool (gehostet)
 npm run postiz:push:draft    -- --batch <name>             # Postiz (self-hosted)
