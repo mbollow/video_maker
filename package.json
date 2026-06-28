@@ -17,6 +17,8 @@
     "batch:caption": "uv run --project ./video-use python ./video-use/helpers/caption_gen.py",
     "batch:schedule": "uv run --project ./video-use python ./video-use/helpers/schedule_plan.py",
     "batch:review": "uv run --project ./video-use python ./video-use/helpers/review_dashboard.py",
+    "freigabe:push": "uv run --project ./video-use python ./video-use/helpers/freigabe_push.py",
+    "freigabe:check": "uv run --project ./video-use python ./video-use/helpers/freigabe_check.py",
     "batch:apply": "uv run --project ./video-use python ./video-use/helpers/apply_corrections.py",
     "batch:cleanup": "uv run --project ./video-use python ./video-use/helpers/batch_cleanup.py",
     "agency:onboard": "uv run --project ./video-use python ./video-use/helpers/agency_onboard.py",
