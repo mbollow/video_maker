@@ -11,10 +11,15 @@ Per video:
 Then per batch:
   4. caption_gen.py        → per-platform captions
   5. schedule_plan.py      → scheduled slots
+  6. freigabe_push.py      → copy into the OneDrive Freigabe-Ordner (review staging)
 
-It deliberately STOPS before pushing to social. The first push is always a
-manual draft (Metricool/Postiz) after you review the dashboard — this
-orchestrator never publishes.
+Step 6 (Freigabe) is the standard final step of every batch: each video lands
+in the shared Freigabe-Ordner where the user AND the reviewer (Juliana) give
+feedback via its FREIGABE.txt — that's the single feedback channel.
+
+It deliberately STOPS before pushing to SOCIAL. Copying to the Freigabe-Ordner
+is review staging, not publishing; the first social push is always a manual
+draft (Metricool/Postiz). This orchestrator never publishes.
 
 Usage:
     python run_pipeline.py --batch <name>          # one batch, end-to-end
@@ -40,7 +45,7 @@ REPO_ROOT = HELPERS.parent.parent
 # Per-video agent/cut stages, in order. (name, is_per_video)
 PER_VIDEO = ["edl", "cut", "compose"]
 # Batch-level deterministic stages, in order.
-PER_BATCH = ["caption", "schedule"]
+PER_BATCH = ["caption", "schedule", "freigabe"]
 ALL_STAGES = PER_VIDEO + PER_BATCH
 
 
@@ -75,12 +80,12 @@ def process_batch(batch: str, *, skip: set[str], dry: bool) -> bool:
     # --- per-video stages (each agent/helper is idempotent: it skips work
     #     that's already done, so we can safely call once for the whole batch) ---
     if "edl" not in skip:
-        print("  [1/5] EDL (headless agent)")
+        print("  [1/6] EDL (headless agent)")
         if _run(_py("edl_gen.py", "--batch", batch), dry=dry) != 0:
             overall_ok = False
 
     if "cut" not in skip:
-        print("  [2/5] apply EDL → cut + subtitles (render.py)")
+        print("  [2/6] apply EDL → cut + subtitles (render.py)")
         for v in videos:
             pdir = REPO_ROOT / v["project_dir"]
             edl = pdir / "edl.json"
@@ -99,25 +104,29 @@ def process_batch(batch: str, *, skip: set[str], dry: bool) -> bool:
                 overall_ok = False
 
     if "compose" not in skip:
-        print("  [3/5] composition + render (headless agent)")
+        print("  [3/6] composition + render (headless agent)")
         if _run(_py("compose_gen.py", "--batch", batch), dry=dry) != 0:
             overall_ok = False
 
     # --- batch-level deterministic stages ---
+    # 'freigabe' copies each video into the OneDrive Freigabe-Ordner (review
+    # staging for the user + Juliana) — the standard final step of every batch.
+    # This is NOT social posting; the first social push stays a manual draft.
     batch_steps = [
         ("caption", 4, _py("caption_gen.py", "--batch", batch)),
         ("schedule", 5, _py("schedule_plan.py", "--batch", batch)),
+        ("freigabe", 6, _py("freigabe_push.py", "--batch", batch)),
     ]
     for name, idx, argv in batch_steps:
         if name in skip:
             continue
-        print(f"  [{idx}/5] {name}")
+        print(f"  [{idx}/6] {name}")
         if _run(argv, dry=dry) != 0:
             overall_ok = False
 
     print(f"=== batch '{batch}': {'OK' if overall_ok else 'completed with errors'} ===")
-    print("  NOTE: not pushed. First push is a manual draft after you review "
-          f"batches/{batch}/review.html (Metricool or Postiz).")
+    print(f"  Videos liegen im Freigabe-Ordner (Review via FREIGABE.txt). NICHT social-"
+          f"gepostet — der erste Social-Push ist ein manueller Draft (Metricool/Postiz).")
     return overall_ok
 
 

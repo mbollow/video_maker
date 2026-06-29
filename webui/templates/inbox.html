@@ -21,6 +21,7 @@
       <input type="file" id="files" name="files" multiple accept="video/*,.mov,.mp4,.m4v" style="display:none">
     </div>
     <ul class="filelist" id="filelist"></ul>
+    <div class="hint">Du kannst <strong>mehrfach</strong> Dateien hinzufügen — sie sammeln sich an (jede Datei lässt sich mit ✕ wieder entfernen). Auch ein erneuter Upload in denselben Batch-Namen <strong>hängt an</strong>, solange die Verarbeitung noch nicht gestartet wurde. Inhaltsgleiche Videos werden per Prüfsumme erkannt und übersprungen — unabhängig vom Dateinamen.</div>
   </div>
 
   <div style="margin-bottom:24px">
@@ -29,7 +30,7 @@
     <div class="hint">Wird als <code>_context.md</code> im Batch-Ordner gespeichert und beim Verarbeiten berücksichtigt.</div>
   </div>
 
-  <button type="submit" class="btn btn-primary">📦 Hochladen &amp; Batch anlegen</button>
+  <button type="submit" class="btn btn-primary">📦 Hochladen / zum Batch hinzufügen</button>
 </form>
 
 {% if last_batch %}
@@ -49,19 +50,31 @@
   const drop = document.getElementById('drop');
   const input = document.getElementById('files');
   const list = document.getElementById('filelist');
+  const dt = new DataTransfer();                 // accumulates across drops/selects
+  const key = f => f.name + ':' + f.size;
+  function sync(){ input.files = dt.files; render(); }
+  function add(files){
+    const have = new Set([...dt.files].map(key));
+    [...files].forEach(f=>{ if(!have.has(key(f))){ dt.items.add(f); have.add(key(f)); } });
+    sync();
+  }
   function render(){
     list.innerHTML = '';
-    [...input.files].forEach(f=>{
+    [...dt.files].forEach((f,i)=>{
       const li=document.createElement('li');
       const mb=(f.size/1048576).toFixed(1);
-      li.innerHTML=`<span>${f.name}</span><span style="color:var(--ink-500)">${mb} MB</span>`;
+      li.innerHTML=`<span>${f.name}</span><span style="color:var(--ink-500)">${mb} MB &nbsp;`
+        +`<a href="#" class="rm" data-i="${i}" title="Entfernen" style="color:var(--ink-500);text-decoration:none">✕</a></span>`;
       list.appendChild(li);
     });
+    list.querySelectorAll('.rm').forEach(a=>a.addEventListener('click',ev=>{
+      ev.preventDefault(); dt.items.remove(+a.dataset.i); sync();
+    }));
   }
   drop.addEventListener('click',()=>input.click());
-  input.addEventListener('change',render);
+  input.addEventListener('change',()=>add(input.files));
   ['dragover','dragenter'].forEach(e=>drop.addEventListener(e,ev=>{ev.preventDefault();drop.classList.add('drag');}));
   ['dragleave','drop'].forEach(e=>drop.addEventListener(e,ev=>{ev.preventDefault();drop.classList.remove('drag');}));
-  drop.addEventListener('drop',ev=>{ input.files = ev.dataTransfer.files; render(); });
+  drop.addEventListener('drop',ev=>{ add(ev.dataTransfer.files); });
 </script>
 {% endblock %}

@@ -32,15 +32,26 @@ Identify:
 - **Final pulse:** A big closing word/phrase (taken from the actual ending line) with `back.out(1.6)` ease.
 
 ### 3. Pre-process speaker for Bundle/Render compatibility
-Keyframe-convert `clips/edited.mp4` to all-intra `compositions/assets/speaker.mp4`:
+**First DENOISE the audio (standard step), then** keyframe-convert `clips/edited.mp4`
+to all-intra `compositions/assets/speaker.mp4` muxing the cleaned audio.
+
+Denoise uses **DeepFilterNet** via `helpers/denoise.py` (isolated venv) — it drops
+the mic/background-noise floor by ~30-40 dB while keeping the voice natural. Do
+**NOT** use the old `afftdn` filter — it is ineffective on real-world noise
+(measured ~0.2 dB vs DeepFilterNet ~36 dB).
 ```bash
-ffmpeg -y -i clips/edited.mp4 \
+# 1) denoise the cut audio (DeepFilterNet)
+python video-use/helpers/denoise.py --in clips/edited.mp4 --out clips/edited_denoised.wav
+# 2) all-intra speaker video + the denoised audio
+ffmpeg -y -i clips/edited.mp4 -i clips/edited_denoised.wav \
+  -map 0:v -map 1:a \
   -c:v libx264 -preset fast -crf 18 \
   -g 1 -keyint_min 1 -sc_threshold 0 \
   -pix_fmt yuv420p -r 30 \
   -c:a aac -b:a 192k \
   compositions/assets/speaker.mp4
 ```
+(If `denoise.py` says the venv is missing, run `npm run denoise:setup` once.)
 Also copy brand logo to `compositions/assets/logo.png`.
 If the brand uses a local font file (e.g. Korbin Medium), also copy that font into `compositions/assets/` and reference it from the template as `assets/Korbin-Medium.otf`.
 

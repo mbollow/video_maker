@@ -5,6 +5,13 @@ Kollegin (Juliana) gegeben, ohne dass sie Zugriff auf den Mac braucht. Läuft
 über einen **OneDrive-synchronisierten SharePoint-Ordner** — keine API, keine
 Cloud-Integration nötig.
 
+**Das ist der einzige Feedback-Kanal — und der Pflicht-Endschritt jedes Batches.**
+Am Ende jeder Batch-Verarbeitung werden die Videos automatisch hierher kopiert
+(`freigabe:push`, auch als Schritt 6 in `batch:pipeline`). Feedback geben **alle**
+über die `FREIGABE…txt` — sowohl Juliana als auch der Nutzer selbst (wenn ihm an
+einem eigenen Video etwas auffällt). Es gibt bewusst **keinen zweiten Weg**, um
+Feedback zu geben oder Videos zu überarbeiten.
+
 ## Überblick
 
 ```

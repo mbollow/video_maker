@@ -69,3 +69,4 @@ test_clip.aiff
 chat.json
 .hf-test/
 .hf-template-check/
+video-use/.denoise-venv/

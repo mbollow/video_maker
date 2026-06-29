@@ -64,9 +64,9 @@ Explizite **Ausnahme** zur „Plan-Bestätigung vor jedem Cut"-Regel. NUR aktiv,
 ### Wann
 - Nutzer legt mehrere Videos in `raw/batches/<name>/` ab, oder sagt „batch" / „alle gleichzeitig".
 
-### Single-Review statt Per-Video-Checkpoints
+### Single-Freigabe statt Per-Video-Checkpoints
 - Pro Video keine Plan-Bestätigung — Cut-Standards werden algorithmisch enforced (`prompts/edl_subagent.md`).
-- **EIN Review am Ende** (Dashboard `batches/<name>/review.html`): Thumbnails + Captions + Schedule-Times. Nutzer OK't alles oder gibt Korrektur-Liste in Shorthand zurück.
+- **EIN Feedback-Kanal für alle:** Am Ende JEDES Batches werden die Videos in den Freigabe-Ordner kopiert (`freigabe:push`, Pflicht-Endschritt). Feedback — egal ob von der Kollegin (Juliana) ODER vom Nutzer selbst — läuft **ausschließlich** über die jeweilige `FREIGABE…txt` in diesem Ordner. Keine zweiten Wege (kein separates Shorthand-Review-Dashboard als Eingang). Rückmeldungen einlesen mit `freigabe:check`, Korrekturen abarbeiten, neue Version re-pushen.
 
 ### Phasen
 1. **Drop:** MP4 nach `raw/batches/<name>/<seq>-<slug>.mp4`.
@@ -74,11 +74,10 @@ Explizite **Ausnahme** zur „Plan-Bestätigung vor jedem Cut"-Regel. NUR aktiv,
 3. **EDL:** 4 parallele Sub-Agents mit `video-use/helpers/prompts/edl_subagent.md` → je ein `edl.json`.
 4. **Compose + Render:** 2-3 parallele Sub-Agents mit `composition_subagent.md`; rendern + Thumbnail.
 5. **Caption + Schedule:** `npm run batch:caption` + `npm run batch:schedule`.
-6. **Review:** `npm run batch:review -- --batch <name> --open`, dann ein `AskUserQuestion`.
-6b. **Freigabe extern (optional):** `npm run freigabe:push -- --batch <name>` lädt pro Video einen Ordner ins OneDrive-synchronisierte SharePoint (`Freigabeprozess – Video/NNN_<linkedin-hook>/` mit `original – <kamera>.mov`, `final_vN__<titel>.mp4`, `captions__<titel>.txt`, `FREIGABE__<titel>.txt`). Kollegin (Juliana) trägt in der `FREIGABE…txt` Zeile 1 `FREIGEGEBEN`/`AENDERN` ein + Notizen. Rückmeldungen einlesen: `npm run freigabe:check` → klassifiziert nach Status; bei `AENDERN` Notizen in Korrektur-Shorthand übersetzen und re-cutten (Re-Push legt `final_v2__<titel>.mp4` an, überschreibt nie die `FREIGABE…txt`). Siehe `FREIGABEPROZESS.md`.
-7. **Push (optional):** Metricool oder Postiz — **immer zuerst als Draft.**
+6. **Freigabe (Pflicht-Endschritt jedes Batches):** `npm run freigabe:push -- --batch <name>` kopiert pro Video einen Ordner ins OneDrive-synchronisierte SharePoint (`Freigabeprozess – Video/NNN_<linkedin-hook>/` mit `original – <kamera>.mov`, `final_vN__<titel>.mp4`, `captions__<titel>.txt`, `FREIGABE__<titel>.txt`). **Das ist der Review-Schritt** — kein separates `AskUserQuestion`/Dashboard mehr als Eingang. Nutzer **und** Juliana geben Feedback in der `FREIGABE…txt` (Zeile 1 `FREIGEGEBEN`/`AENDERN` + Notizen). Einlesen: `npm run freigabe:check` → bei `AENDERN` Notizen in Korrektur-Shorthand übersetzen, re-cutten, re-pushen (legt `final_vN+1__<titel>.mp4` daneben an, fasst die `FREIGABE…txt` nie an). Siehe `FREIGABEPROZESS.md`. (`batch:review`/`review.html` ist nur noch ein optionaler Voransicht-Helfer, kein Feedback-Eingang.)
+7. **Push (optional, erst nach `FREIGEGEBEN`):** Metricool oder Postiz — **immer zuerst als Draft.**
 
-Oder alles am Stück: `npm run batch:pipeline -- --batch <name>` (EDL→Cut→Compose→Caption→Schedule, stoppt vor dem Posten).
+Oder alles am Stück: `npm run batch:pipeline -- --batch <name>` (EDL→Cut→Compose→Caption→Schedule→**Freigabe-Push**, stoppt vor dem Social-Posten).
 
 ### Hard Rules im Batch-Modus
 - Cut-Standards bleiben unverändert (Silencedetect + Re-Transkription + Padding pro Sub-Agent).
@@ -86,7 +85,8 @@ Oder alles am Stück: `npm run batch:pipeline -- --batch <name>` (EDL→Cut→Co
 - Caption-Generation darf nie Claims erfinden — nur Transkript + Brand-Proof-Points.
 - **Erster Push immer als Draft** (Metricool `--draft` / Postiz `--draft-mode`). Posts landen als Drafts im Posting-Tool, nicht live.
 
-### Korrektur-Shorthand (nach Review)
+### Korrektur-Shorthand (interne Notation für Feedback aus `freigabe:check`)
+Feedback kommt als Freitext in den `FREIGABE…txt`; beim Einlesen via `freigabe:check` in dieses Shorthand übersetzen und abarbeiten:
 ```
 03: re-cut shorter           → Video durch Phase 3 (neue EDL)
 07: linkedin 2026-05-28 09:15 → Manifest-Schedule updaten
