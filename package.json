@@ -33,7 +33,11 @@
     "postiz:logs": "docker compose -f postiz/docker-compose.yml logs -f",
     "postiz:discover": "uv run --project ./video-use python ./video-use/helpers/postiz_discover.py",
     "postiz:push": "uv run --project ./video-use python ./video-use/helpers/postiz_push.py",
-    "postiz:push:draft": "uv run --project ./video-use python ./video-use/helpers/postiz_push.py --draft-mode"
+    "postiz:push:draft": "uv run --project ./video-use python ./video-use/helpers/postiz_push.py --draft-mode",
+    "ghl:discover": "uv run --project ./video-use python ./video-use/helpers/ghl_discover.py",
+    "ghl:plan": "uv run --project ./video-use python ./video-use/helpers/ghl_schedule.py",
+    "ghl:push": "uv run --project ./video-use python ./video-use/helpers/ghl_push.py",
+    "ghl:push:draft": "uv run --project ./video-use python ./video-use/helpers/ghl_push.py --status draft"
   },
   "dependencies": {
     "hyperframes": "^0.5.5",
