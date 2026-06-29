@@ -19,6 +19,8 @@
     "batch:review": "uv run --project ./video-use python ./video-use/helpers/review_dashboard.py",
     "freigabe:push": "uv run --project ./video-use python ./video-use/helpers/freigabe_push.py",
     "freigabe:check": "uv run --project ./video-use python ./video-use/helpers/freigabe_check.py",
+    "denoise:setup": "uv venv video-use/.denoise-venv --python 3.11 && uv pip install --python video-use/.denoise-venv/bin/python deepfilternet torch==2.1.2 torchaudio==2.1.2 soundfile",
+    "denoise": "uv run --project ./video-use python ./video-use/helpers/denoise.py",
     "batch:apply": "uv run --project ./video-use python ./video-use/helpers/apply_corrections.py",
     "batch:cleanup": "uv run --project ./video-use python ./video-use/helpers/batch_cleanup.py",
     "agency:onboard": "uv run --project ./video-use python ./video-use/helpers/agency_onboard.py",

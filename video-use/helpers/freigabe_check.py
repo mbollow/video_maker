@@ -94,8 +94,11 @@ def scan(base: Path, only_batch: str | None) -> list[dict]:
         if only_batch and meta.get("batch") != only_batch:
             continue
         status, notes = parse_freigabe(fr.read_text(encoding="utf-8"))
-        caption_files = sorted(p.name for p in folder.glob("captions*.txt"))
-        edited_captions = [c for c in caption_files if c != "captions.txt"]
+        # "edited" = an extra versioned caption file (captions_v2…), not the base
+        # one — works for both old ("captions.txt") and new ("captions__slug.txt").
+        edited_captions = sorted(
+            p.name for p in folder.glob("captions_v[0-9]*")
+        )
         results.append({
             "folder": folder.name,
             "batch": meta.get("batch"),

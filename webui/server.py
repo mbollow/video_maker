@@ -8,7 +8,7 @@ Start:  uv run --with flask python webui/server.py
         → http://127.0.0.1:8730
 """
 from __future__ import annotations
-import json, re, datetime, unicodedata
+import json, re, datetime, unicodedata, hashlib
 from pathlib import Path
 from flask import (Flask, render_template, request, redirect, url_for,
                    flash, send_from_directory, abort)
@@ -18,6 +18,7 @@ RAW_BATCHES = ROOT / "raw" / "batches"
 BATCHES = ROOT / "batches"
 PROJECTS = ROOT / "projects"
 VIDEO_EXT = {".mov", ".mp4", ".m4v"}
+HASH_REGISTRY = RAW_BATCHES / ".upload_hashes.json"   # sha256 -> {batch,file,size,uploaded_at}
 
 app = Flask(__name__)
 app.secret_key = "palstek-videomaker-local"
@@ -35,6 +36,66 @@ def slug_part(stem: str) -> str:
     s = unicodedata.normalize("NFKD", stem).encode("ascii", "ignore").decode()
     s = re.sub(r"[^A-Za-z0-9]+", "-", s).strip("-").lower()
     return s or "clip"
+
+
+def next_index(dest: Path) -> int:
+    """Next free NN- prefix for incremental uploads into a batch (max+1)."""
+    mx = 0
+    if dest.exists():
+        for p in dest.iterdir():
+            m = re.match(r"^(\d+)-", p.name)
+            if p.suffix.lower() in VIDEO_EXT and m:
+                mx = max(mx, int(m.group(1)))
+    return mx + 1
+
+
+def file_sha256(path: Path) -> str:
+    h = hashlib.sha256()
+    with open(path, "rb") as fh:
+        for chunk in iter(lambda: fh.read(1024 * 1024), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def load_hash_registry() -> dict:
+    if HASH_REGISTRY.exists():
+        try:
+            return json.loads(HASH_REGISTRY.read_text(encoding="utf-8"))
+        except Exception:
+            return {}
+    return {}
+
+
+def save_hash_registry(reg: dict) -> None:
+    HASH_REGISTRY.parent.mkdir(parents=True, exist_ok=True)
+    HASH_REGISTRY.write_text(json.dumps(reg, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def backfill_hash_registry(reg: dict) -> bool:
+    """Hash existing raw videos that aren't recorded yet, so files uploaded before
+    this feature (or outside the UI) are still recognised as duplicates. Skips
+    files already recorded by (batch,file,size) to avoid recomputing. Returns True
+    if the registry changed."""
+    known = {(e.get("batch"), e.get("file"), e.get("size")) for e in reg.values()}
+    changed = False
+    if not RAW_BATCHES.exists():
+        return False
+    for bdir in RAW_BATCHES.iterdir():
+        if not bdir.is_dir():
+            continue
+        for p in bdir.iterdir():
+            if p.suffix.lower() not in VIDEO_EXT:
+                continue
+            size = p.stat().st_size
+            if (bdir.name, p.name, size) in known:
+                continue
+            sha = file_sha256(p)
+            if sha not in reg:
+                reg[sha] = {"batch": bdir.name, "file": p.name, "size": size,
+                            "uploaded_at": datetime.datetime.fromtimestamp(
+                                p.stat().st_mtime).isoformat()[:19]}
+                changed = True
+    return changed
 
 
 def load_manifest(batch: str) -> dict | None:
@@ -81,29 +142,59 @@ def upload():
         flash("Keine Videodateien ausgewählt.")
         return redirect(url_for("inbox"))
 
-    dest = RAW_BATCHES / batch
-    if dest.exists() and any(p.suffix.lower() in VIDEO_EXT for p in dest.iterdir()):
-        flash(f"Batch „{batch}“ existiert bereits und enthält Videos — bitte einen anderen Namen wählen "
-              f"(bestehende Batches werden nie überschrieben).")
+    # Already processed? Never add to a batch that has been started/rendered.
+    if (BATCHES / batch / "manifest.json").exists():
+        flash(f"Batch „{batch}“ wurde bereits verarbeitet — bitte einen neuen Namen wählen "
+              f"(verarbeitete Batches werden nie verändert).")
         return redirect(url_for("inbox"))
+
+    dest = RAW_BATCHES / batch
+    appending = dest.exists() and any(p.suffix.lower() in VIDEO_EXT for p in dest.iterdir())
     dest.mkdir(parents=True, exist_ok=True)
 
-    saved = 0
-    for i, f in enumerate(files, start=1):
+    reg = load_hash_registry()
+    backfill_hash_registry(reg)          # so prior uploads are known for dedup
+
+    idx = next_index(dest)               # continue numbering (incremental uploads)
+    saved, dups = 0, 0
+    for f in files:
         ext = Path(f.filename).suffix.lower()
         if ext not in VIDEO_EXT:
             continue
-        out = dest / f"{i:02d}-{slug_part(Path(f.filename).stem)}{ext}"
-        f.save(out)
+        tmp = dest / f".incoming-{idx}{ext}"
+        f.save(tmp)
+        sha = file_sha256(tmp)
+        prior = reg.get(sha)
+        if prior:                        # same content already known → skip
+            dups += 1
+            pb = prior.get("batch", "?")
+            state = "bereits verarbeitet" if (BATCHES / pb / "manifest.json").exists() else "bereits hochgeladen"
+            flash(f"⚠️ „{Path(f.filename).name}“ übersprungen — inhaltsgleich zu "
+                  f"„{prior.get('file')}“ in Batch „{pb}“ ({state} am {prior.get('uploaded_at','?')[:10]}).")
+            tmp.unlink(missing_ok=True)
+            continue
+        out = dest / f"{idx:02d}-{slug_part(Path(f.filename).stem)}{ext}"
+        tmp.rename(out)
+        reg[sha] = {"batch": batch, "file": out.name, "size": out.stat().st_size,
+                    "uploaded_at": datetime.datetime.now().isoformat()[:19]}
+        idx += 1
         saved += 1
 
+    save_hash_registry(reg)
+
     ctx = request.form.get("context", "").strip()
-    if ctx:
+    if ctx:                              # set/overwrite context only when provided (don't wipe on later uploads)
         (dest / "_context.md").write_text(
             f"# Kontext für Batch {batch}\n\n{ctx}\n", encoding="utf-8")
 
-    flash(f"{saved} Video(s) hochgeladen, Batch „{batch}“ angelegt.")
-    return redirect(url_for("inbox", last=batch, count=saved))
+    total = len([p for p in dest.iterdir() if p.suffix.lower() in VIDEO_EXT])
+    if saved:
+        verb = "angehängt" if appending else "hochgeladen"
+        flash(f"{saved} Video(s) {verb} — Batch „{batch}“ enthält jetzt {total}. "
+              f"Wenn alles drin ist: in Claude Code „verarbeite den Batch {batch}“.")
+    elif not dups:
+        flash("Keine gültigen Videodateien gefunden.")
+    return redirect(url_for("inbox", last=batch, count=total))
 
 
 @app.route("/batches")
