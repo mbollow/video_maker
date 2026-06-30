@@ -24,7 +24,7 @@ You are running INSIDE the VideoMaker project folder (the repo root you were lau
 
 ### 2. Plan beats (3-7 visual elements total for a 45-55s reel)
 Identify:
-- **Hook (optional, 0-1.5s):** A pattern-interrupt text card. Skip if the audio hook is strong on its own.
+- **Hook (MANDATORY, frame 0 to ~3.0s):** A punchy, slightly provocative text hook on a flat indigo overlay, shown from the very first frame for sound-off viewers and held ~3s. Always present (never skip). See `{{HOOK_BLOCK}}` below for exact markup/CSS/timing.
 - **Big anchor reveals (2-4 total):** Single-word or 2-3-word reveals in the brand's accent color on key moments — e.g. the payoff word, the final punchline word, a contrarian assertion. Wording comes from the actual transcript, styling from the brand.
 - **Top pill (optional):** A "3 PUNKTE" or "REGEL #1" tag pinned top-center for 2-3s when announcing structure.
 - **Number cards (optional, for listicle reels):** "1.", "2.", "3." cards left side, each visible during its section + adjacent .punkt-anchor text.
@@ -119,21 +119,47 @@ Read `composition_templates/talking-head-reel.html`. Replace these placeholders:
 - `{{DURATION}}` — exact output duration from `ffprobe`
 - `{{INK_950}}` `{{INK_50}}` `{{BRAND_500}}` — from brand colors_and_type.css
 - `{{BRAND_NAME}}` — from brand SKILL.md
-- `{{HOOK_BLOCK}}` — render the `<div id="hook">...</div>` markup, or empty string if no hook
+- `{{HOOK_BLOCK}}` — MANDATORY (not optional). The opening text hook for sound-off viewers, shown from the very first frame for ~1.8-2.0s, ON TOP of a flat indigo overlay. Markup:
+  ```html
+  <div id="hook-overlay"></div>
+  <div id="hook">
+    <div class="hook-main">
+      <div class="hook-line">{{HOOK_LINE_1}}</div>
+      <div class="hook-line hook-accent">{{HOOK_LINE_2}}</div>
+    </div>
+  </div>
+  ```
+  - **No eyebrow/kicker.** Just the hook sentence(s).
+  - Write a punchy, slightly provocative, curiosity-driving hook derived from the speaker's opening (paraphrase allowed — it does NOT need to be verbatim). Line 1 = the setup/question (white), line 2 = the punchline (teal, `hook-accent`).
+  - CSS (add to `<style>`):
+    ```css
+    #hook-overlay { position:absolute; inset:0; z-index:11; pointer-events:none;
+      background: rgba(40,29,103,0.5); }   /* Canva #281D67 @ 50% — flat, NOT a gradient */
+    #hook { position:absolute; top:30%; left:76px; right:76px; text-align:left;
+      z-index:15; opacity:1; pointer-events:none; }   /* opacity:1 → visible at frame 0 */
+    #hook .hook-main { font-family: var(--font-display,"Korbin"),sans-serif; font-weight:800;
+      font-size:98px; line-height:1.12; letter-spacing:-0.02em; color:#f8fafc;
+      text-shadow:0 8px 36px rgba(7,9,16,0.55); }
+    #hook .hook-line + .hook-line { margin-top:34px; }
+    #hook .hook-accent { color: var(--brand-500, #4ebbc2); }
+    ```
 - `{{TOP_PILL_BLOCK}}` — render `<div class="top-pill" id="pill-X">TEXT</div>` per pill, or empty
 - `{{ANCHORS_BLOCK}}` — one `<div class="big-anchor" id="anchor-N">TEXT</div>` per anchor + optional `<div class="anchor-underline" id="anchor-N-underline"></div>`
 - `{{NUMBER_CARDS_BLOCK}}` — `<div id="num-1" class="num-card">1.</div>` etc. + `<div id="anchor-punkt-1" class="punkt-anchor">LIST ITEM TEXT</div>`
 - `{{LIST_CARD_BLOCK}}` — `<div id="list-1" class="list-card">...</div>` with `<div class="list-header">...</div>` + 3-5 `<div class="list-item" id="list-1-item-N">...</div>`
 - `{{TWEENS_BLOCK}}` — the GSAP tweens that animate each beat. Use:
-  - `tl.fromTo("#hook", { opacity: 0, y: 20, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "power3.out" }, 0.05);`
-  - `tl.to("#hook", { opacity: 0, y: -10, duration: 0.35, ease: "power2.in" }, 1.4);`
-  - `tl.set("#hook", { visibility: "hidden" }, 1.8);`
+  - Hook + overlay are visible FROM FRAME 0 (CSS `opacity:1`) — do NOT add an entrance tween (a fade-in leaves frame 0 blank). The hook stays up ~3s, then only the exit animates:
+  - `tl.to("#hook", { opacity: 0, y: -10, duration: 0.35, ease: "power2.in" }, 2.95);`
+  - `tl.to("#hook-overlay", { opacity: 0, duration: 0.4, ease: "power2.in" }, 2.95);`
+  - `tl.set("#hook", { visibility: "hidden" }, 3.35);`
+  - `tl.set("#hook-overlay", { visibility: "hidden" }, 3.35);`
   - Big-anchor pattern: fromTo opacity+y+scale, anchor-underline scaleX, then to opacity 0 + visibility:hidden
   - Number-card pattern: `fromTo({ opacity: 0, x: -80, scale: 0.85 }, { opacity: 1, x: 0, scale: 1, duration: 0.5, ease: "back.out(1.4)" }, AT_TIME)`
   - List-card: container fades in, items reveal at audio-aligned times
   - Use 3+ different easings per scene (power3.out, expo.out, back.out(1.4), sine.inOut)
 - `{{SUBTITLE_CUES_JSON}}` — JSON array `[[start, end, "TEXT"], ...]` parsed from master.srt
-- `{{SUBTITLE_HIDE_WINDOWS_JSON}}` — JSON array `[[start, end], ...]` of time ranges where the subtitle layer should be hidden (e.g. during big anchor reveals or list-card displays)
+- `{{SUBTITLE_HIDE_WINDOWS_JSON}}` — Full subtitles are MANDATORY: every spoken word must appear in the lower third, INCLUDING under big anchors and list cards (they sit center, subtitles sit bottom — no collision). The ONLY hide window is the hook period: set this to `[[0, 3.3]]` (the hook stays up ~3s; the first ~3s show just the hook, matching the Instagram style). Do NOT add hide windows for anchors/lists/cutaways.
+  - Subtitle font: use `font-size: 48px` (slightly smaller so 3-4 words fit per line, easier to read). Cues come from master.srt which is now grouped into 3-4 words.
 
 ### 5. Write composition files
 Write to `projects/<batch>__<seq>/compositions/`:

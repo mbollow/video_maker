@@ -348,7 +348,9 @@ def build_master_srt(edl: dict, edit_dir: Path, out_path: Path) -> None:
         transcript = json.loads(tr_path.read_text())
         words_in_seg = _words_in_range(transcript, seg_start, seg_end)
 
-        # Group into 2-word chunks, break on punctuation
+        # Group into up to 4-word chunks; break only on sentence-ending
+        # punctuation (commas stay inside, so cues read as 3-4 words — easier
+        # to read than 2-word fragments).
         chunks: list[list[dict]] = []
         current: list[dict] = []
         for w in words_in_seg:
@@ -356,9 +358,8 @@ def build_master_srt(edl: dict, edit_dir: Path, out_path: Path) -> None:
             if not text:
                 continue
             current.append(w)
-            # Break if the current text ends in punctuation or we hit 2 words
-            ends_in_punct = bool(text) and text[-1] in PUNCT_BREAK
-            if len(current) >= 2 or ends_in_punct:
+            ends_sentence = bool(text) and text[-1] in ".!?"
+            if len(current) >= 4 or ends_sentence:
                 chunks.append(current)
                 current = []
         if current:

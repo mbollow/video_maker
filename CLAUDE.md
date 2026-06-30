@@ -45,6 +45,33 @@ Bei „Direkt Hyperframes" zusätzlich nach der Brand fragen (`default` / eigene
 - **B-Roll ist Standard, nicht optional — Cadence ~alle 10s.** Wenn Clips in `assets/broll/` (oder der Brand-eigenen `broll/`) liegen, setzt die Composition-Stage etwa alle 10s einen Cutaway (`round(Dauer/10)`), je 2,5-3,5s, jeder Clip nur 1× pro Reel. Auswahl über `catalog.json` (Stichwort-Match), nicht Dateinamen. Nur eine **leere** Lib rechtfertigt 0 Cutaways.
 - **Speaker-Zoom ist Standard.** Dezenter Ken-Burns-Push/-Pull (`scale` 1.0–1.08, `sine.inOut`) auf dem Talking-Head zwischen den Cutaways.
 
+## Reel-Standard: Hook / Overlay / Untertitel / Logo (PFLICHT)
+Operativ verankert in `video-use/helpers/prompts/composition_subagent.md`, `composition_templates/talking-head-reel.html`, `render.py:build_master_srt`.
+- **Hook (Pflicht, nie optional):** ab **Frame 0** sichtbar (CSS `opacity:1`, KEIN Entrance-Tween — sonst ist Frame 0 leer), bleibt **~3 s** (Exit ~2,95 s, hidden 3,35 s). Auf **Vollton-Overlay `#281D67` @ 50 %** (`rgba(40,29,103,0.5)`, KEIN Verlauf). Linksbündig, **ohne Eyebrow/Kicker**. Schrift **Montserrat, fett**, große & **pro Zeile variierende** Größen (z. B. 64/96/108 px); Mix aus weiß / teal / **weiß auf hellblauer Marker-Box** (`.hl-mark`, bg `#4ebbc2`) auf der Punchline. Wording knackig/leicht provokant; Paraphrase der gesprochenen Eröffnung erlaubt.
+- **Volluntertitel (Pflicht):** jedes gesprochene Wort im unteren Drittel, `font-size: 48px`, **auch unter** Anchors/List-Cards (mittig vs. unten → keine Kollision). Einzige Hide-Window = Hook-Fenster `[[0, 3.3]]`. Cues aus `master.srt`, das in **3–4-Wort-Gruppen** baut (Umbruch nur an Satzende `.?!`).
+- **Logo immer oben rechts** (`top:70px; right:70px`) — nie unten/mittig (kollidiert mit Untertiteln).
+- **Transkription via Scribe** (`batch:init … --engine scribe`) — Whisper verschluckt Wörter.
+- **Nach JEDEM Render:** `ffprobe`-Check (Audiospur **aac** vorhanden + Dauer plausibel) VOR Deploy — ein degradierter Software-Render kam mal ohne Tonspur / als Standbild raus.
+
+## Freigabe / Versionierung
+- **Nach jeder Änderung an einem Video automatisch als nächste Version** (`final_vN+1`) per `freigabe:push` in den Freigabe-Ordner schieben — nicht erst auf Rückfrage. Der Nutzer schaut **ausschließlich** im Freigabe-Ordner, **nie** in `projects/<…>/renders/`.
+
+## Social-Veröffentlichung — GoHighLevel (GHL, im Test)
+Helper `video-use/helpers/ghl_*.py`, `npm run ghl:discover|plan|push|push:draft`. Postiz/Metricool bleiben parallel (evtl. späterer Rückbau).
+- **LinkedIn:** immer Julianas **persönliches Profil**, NIE die Palstek Company Page.
+- **Captions je Plattform:** LinkedIn = formeller Text; **Instagram + Facebook = Instagram-Text** (beide Meta).
+- **Scheduling:** Default **10:00 Europe/Berlin**, nächste freie **Mo/Mi/Fr**; Belegung **pro Kanal/Zeitfenster** (Cross-Posting zur selben Zeit ok, ein Kanal nie doppelt). **Draft-first.**
+- **Doppel-Upload-Schutz:** git-getrackter Ledger `ghl_publish_log.json` (SHA-256 pro Video × Kanal). Media-Name in GHL = SharePoint-Ordnername. Autor via `GHL_USER_ID` (nicht der auto-geerntete Alt-Post-Ersteller). Secrets in `.env`: `GHL_PRIVATE_INTEGRATION_TOKEN`, `GHL_LOCATION_ID`, `GHL_USER_ID`.
+
+## Brand-/Inhalts-Konventionen (Palstek / `default`)
+- **Du-Ansprache** konsequent (nie „Sie").
+- **Buchungs-/CTA-URL:** `https://palstek-gmbh.de/termin` (End-Card + Captions).
+- **Bestehende Projekte/Videos/Renders nie löschen oder überschreiben** — immer neuer Batch-/Versionsname.
+- **Kernaussagen on-screen** farblich einblenden (Anchors/List-Cards), nicht nur als Untertitel.
+- **Standard-Eyebrow/Kicker:** „Wirksamer Tipp für Führungskräfte" (nicht „Führung in KMU"). End-Card greift das Video-Thema als Frage über dem Buchungs-CTA auf.
+- **Render `-q standard`** (mobile-first Publikum), nicht `-q high`.
+- **Denoise via DeepFilterNet** (`helpers/denoise.py`), nicht `afftdn`; isolierte venv.
+
 ## Secrets / .env
 - `.env` **nie committen** (steht in `.gitignore`).
 - Projekt-Root-`.env` ist die Wahrheit; nach Änderungen nach `video-use/.env` syncen (`cp .env video-use/.env`).

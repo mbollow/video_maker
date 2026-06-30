@@ -229,9 +229,9 @@
   /* ===== Logo ===== */
   #logo {
     position: absolute;
-    bottom: 80px;
-    left: 50%;
-    width: 200px;
+    top: 70px;
+    right: 70px;
+    width: 180px;
     opacity: 0;
     z-index: 10;
     filter: drop-shadow(0 4px 18px rgba(7,9,16,0.7));
@@ -286,7 +286,7 @@
   const tl = gsap.timeline({ paused: true });
 
   // ===== Centering offsets for elements GSAP transforms =====
-  gsap.set("#logo", { xPercent: -50 });
+  // (logo sits top-right — no centering offset)
   gsap.set(".top-pill", { xPercent: -50 });
   gsap.set("#hook", { xPercent: -50 });
   gsap.set(".big-anchor", { xPercent: -50 });
