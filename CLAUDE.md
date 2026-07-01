@@ -72,6 +72,16 @@ Helper `video-use/helpers/ghl_*.py`, `npm run ghl:discover|plan|push|push:draft`
 - **Render `-q standard`** (mobile-first Publikum), nicht `-q high`.
 - **Denoise via DeepFilterNet** (`helpers/denoise.py`), nicht `afftdn`; isolierte venv.
 
+## Bild-Posts (Single-Image, neben den Video-Reels)
+Eigene Pipeline für statische Ein-Bild-Posts (echtes Juliana-Foto + Hook/Spruch-Overlay). Spiegelt den Batch-Workflow.
+- **Phasen:** `npm run bild:hooks -- --batch <name> [--count N] [--thema "…"] [--append] [--provokativ]` → kuratierbare `image-posts/<name>/hooks.txt` (Hook **und** Spruch; `typ/text/thema/status`-Felder, nur `status: ja` wird gebaut) → `npm run bild:build -- --batch <name>` (Foto-Match über Tags, KI-Layout+Captions, Render) → **Auto-Push** in den Freigabe-Ordner.
+- **Freigabe = Pflicht & automatisch:** `bild:build` pusht am Ende selbst in `FREIGABE_BILDER_DIR` (`--no-push` nur als Notausgang). Wie bei Videos schaut der Nutzer/Juliana **ausschließlich** im Freigabe-Ordner, **nie** in `image-posts/<…>/renders/`. Rückmeldungen: `npm run bild:freigabe:check`. Re-Build → `bild_vN+1` daneben, `FREIGABE.txt` nie anfassen.
+- **Visueller Standard:** Vorlage `composition_templates/static-post.html`, 1080×1350, **Teal-Overlay `#4ebbc2` @ 35 %** (abweichend vom Reel-Hook `#281d67@50%`), Logo oben rechts, Montserrat fett, Hook-Punchline in dunkler `#281d67`-Marker-Box (Spruch zentriert ohne Marker), **keine CTA aufs Bild** (CTA nur in Caption). Render via `render_image_post.cjs` (puppeteer-core + Chrome).
+- **Foto-Quelle:** read-only OneDrive (`GF_FOTOS_DIR`), hart schreibgeschützt via `deny`-Regel auf `…/Marketing/Bilder/**`. Tags in `brand-guidelines/<brand>/gf-fotos/catalog.json` (Match über Stichwörter, nicht Dateinamen). Bilder (Fotos + Renders) sind git-ignoriert; nur `catalog.json`/README werden versioniert.
+- **Bildquellen:** `--source juliana|stock` (Stock via Pexels, `PEXELS_API_KEY`). Pro Post in `hooks.txt` überschreibbar: `bild: stock|juliana`. **Faustregel:** provokante *Problem*-Hooks → Stock (Juliana wirkt sonst, als „hätte sie das Problem"); Vorstellungs-/Erfolgs-Posts → Juliana. Feintuning-Felder: `highlight: Wort1, Wort2` (in `#4ebbc2`), `fontscale: 1.15`, `stock_query: <engl. Suche>` (pinnt das Motiv). Text-Edits behalten das Bild (`--new-image` erzwingt Neuwahl); Captions bleiben (`--regen-captions` erzwingt neu).
+- **„hellblau"/„türkis" = immer `#4ebbc2`** (Marken-Akzent); dunkles Blau-Lila = `#281d67`.
+- **Später:** `gf-ki/` (KI-Juliana-Bilder + automatische KI-Kennzeichnung in Caption), Carousel.
+
 ## Secrets / .env
 - `.env` **nie committen** (steht in `.gitignore`).
 - Projekt-Root-`.env` ist die Wahrheit; nach Änderungen nach `video-use/.env` syncen (`cp .env video-use/.env`).

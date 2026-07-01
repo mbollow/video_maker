@@ -1,0 +1,806 @@
+{
+  "_hinweis": "Erst-Vorschlag der Inhalts-Tags (visuelle Sichtung). Bitte korrigieren. Wurzelpfad kommt aus der Umgebungsvariable GF_FOTOS_DIR; 'file' ist nur der Dateiname.",
+  "root_env": "GF_FOTOS_DIR",
+  "vokabular": {
+    "szene": [
+      "indoor-warm",
+      "schreibtisch",
+      "outdoor-urban",
+      "glasfassade",
+      "treppe"
+    ],
+    "outfit": [
+      "bluse-weiss",
+      "blazer-burgund",
+      "anzug-navy"
+    ],
+    "stimmung": [
+      "freundlich",
+      "nachdenklich",
+      "selbstbewusst",
+      "fokussiert"
+    ],
+    "aktion": [
+      "portrait",
+      "laptop",
+      "kaffee",
+      "telefon",
+      "tablet",
+      "sonnenbrille",
+      "smartphone"
+    ],
+    "crop": [
+      "nahaufnahme",
+      "halbtotale",
+      "ganzkoerper"
+    ],
+    "farbe": [
+      "farbe",
+      "schwarzweiss"
+    ],
+    "format": [
+      "hoch",
+      "quer",
+      "quadrat"
+    ]
+  },
+  "bilder": [
+    {
+      "file": "DSC04495-2.jpg",
+      "szene": "indoor-warm",
+      "outfit": "bluse-weiss",
+      "stimmung": "freundlich",
+      "aktion": [
+        "portrait"
+      ],
+      "crop": "nahaufnahme",
+      "farbe": "farbe",
+      "format": "quer",
+      "textraum": false,
+      "beschreibung": "Lächelndes Porträt, warmer Innenraum"
+    },
+    {
+      "file": "DSC04501-2.jpg",
+      "szene": "indoor-warm",
+      "outfit": "bluse-weiss",
+      "stimmung": "freundlich",
+      "aktion": [
+        "portrait"
+      ],
+      "crop": "nahaufnahme",
+      "farbe": "farbe",
+      "format": "quer",
+      "textraum": false,
+      "beschreibung": "Lächelndes Porträt"
+    },
+    {
+      "file": "DSC04503-2.jpg",
+      "szene": "indoor-warm",
+      "outfit": "bluse-weiss",
+      "stimmung": "freundlich",
+      "aktion": [
+        "portrait"
+      ],
+      "crop": "nahaufnahme",
+      "farbe": "farbe",
+      "format": "quer",
+      "textraum": false,
+      "beschreibung": "Lächelndes Porträt"
+    },
+    {
+      "file": "DSC04513.jpg",
+      "szene": "indoor-warm",
+      "outfit": "bluse-weiss",
+      "stimmung": "freundlich",
+      "aktion": [
+        "portrait"
+      ],
+      "crop": "nahaufnahme",
+      "farbe": "farbe",
+      "format": "quer",
+      "textraum": false,
+      "beschreibung": "Lächelndes Porträt"
+    },
+    {
+      "file": "DSC04515.jpg",
+      "szene": "indoor-warm",
+      "outfit": "bluse-weiss",
+      "stimmung": "freundlich",
+      "aktion": [
+        "portrait"
+      ],
+      "crop": "nahaufnahme",
+      "farbe": "farbe",
+      "format": "quer",
+      "textraum": false,
+      "beschreibung": "Porträt, leicht abgewandt"
+    },
+    {
+      "file": "DSC04518-2.jpg",
+      "szene": "indoor-warm",
+      "outfit": "bluse-weiss",
+      "stimmung": "freundlich",
+      "aktion": [
+        "portrait"
+      ],
+      "crop": "nahaufnahme",
+      "farbe": "schwarzweiss",
+      "format": "quer",
+      "textraum": false,
+      "beschreibung": "S/W-Porträt"
+    },
+    {
+      "file": "DSC04518.jpg",
+      "szene": "indoor-warm",
+      "outfit": "bluse-weiss",
+      "stimmung": "freundlich",
+      "aktion": [
+        "portrait"
+      ],
+      "crop": "nahaufnahme",
+      "farbe": "farbe",
+      "format": "quer",
+      "textraum": false,
+      "beschreibung": "Lächelndes Porträt"
+    },
+    {
+      "file": "DSC04531.jpg",
+      "szene": "indoor-warm",
+      "outfit": "bluse-weiss",
+      "stimmung": "freundlich",
+      "aktion": [
+        "portrait"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "quer",
+      "textraum": false,
+      "beschreibung": "Freundlich, halbnah"
+    },
+    {
+      "file": "DSC04547.jpg",
+      "szene": "indoor-warm",
+      "outfit": "bluse-weiss",
+      "stimmung": "freundlich",
+      "aktion": [
+        "portrait"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "quer",
+      "textraum": false,
+      "beschreibung": "Freundlich, halbnah"
+    },
+    {
+      "file": "DSC04549.jpg",
+      "szene": "indoor-warm",
+      "outfit": "bluse-weiss",
+      "stimmung": "freundlich",
+      "aktion": [
+        "portrait"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "quer",
+      "textraum": false,
+      "beschreibung": "Freundlich, halbnah"
+    },
+    {
+      "file": "DSC04562.jpg",
+      "szene": "indoor-warm",
+      "outfit": "bluse-weiss",
+      "stimmung": "nachdenklich",
+      "aktion": [
+        "portrait"
+      ],
+      "crop": "nahaufnahme",
+      "farbe": "farbe",
+      "format": "quer",
+      "textraum": false,
+      "beschreibung": "Hand am Kinn, nachdenklich"
+    },
+    {
+      "file": "DSC04662.jpg",
+      "szene": "schreibtisch",
+      "outfit": "bluse-weiss",
+      "stimmung": "fokussiert",
+      "aktion": [
+        "laptop"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "quer",
+      "textraum": true,
+      "beschreibung": "Am Laptop arbeitend"
+    },
+    {
+      "file": "DSC04682.jpg",
+      "szene": "schreibtisch",
+      "outfit": "bluse-weiss",
+      "stimmung": "fokussiert",
+      "aktion": [
+        "laptop"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "quer",
+      "textraum": true,
+      "beschreibung": "Am Laptop arbeitend"
+    },
+    {
+      "file": "DSC04688.jpg",
+      "szene": "schreibtisch",
+      "outfit": "bluse-weiss",
+      "stimmung": "fokussiert",
+      "aktion": [
+        "laptop"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "quer",
+      "textraum": true,
+      "beschreibung": "Am Laptop arbeitend"
+    },
+    {
+      "file": "DSC04689.jpg",
+      "szene": "schreibtisch",
+      "outfit": "bluse-weiss",
+      "stimmung": "freundlich",
+      "aktion": [
+        "kaffee"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "quer",
+      "textraum": true,
+      "beschreibung": "Mit Kaffeetasse am Tisch"
+    },
+    {
+      "file": "DSC04696.jpg",
+      "szene": "schreibtisch",
+      "outfit": "bluse-weiss",
+      "stimmung": "freundlich",
+      "aktion": [],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "quer",
+      "textraum": true,
+      "beschreibung": "Am Tisch, freundlich"
+    },
+    {
+      "file": "DSC04704.jpg",
+      "szene": "schreibtisch",
+      "outfit": "bluse-weiss",
+      "stimmung": "freundlich",
+      "aktion": [],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "quer",
+      "textraum": true,
+      "beschreibung": "Am Tisch, freundlich"
+    },
+    {
+      "file": "DSC04710-2.jpg",
+      "szene": "indoor-warm",
+      "outfit": "blazer-burgund",
+      "stimmung": "selbstbewusst",
+      "aktion": [
+        "portrait"
+      ],
+      "crop": "halbtotale",
+      "farbe": "schwarzweiss",
+      "format": "quer",
+      "textraum": false,
+      "beschreibung": "S/W, Arme verschränkt, bestimmt"
+    },
+    {
+      "file": "DSC04710.jpg",
+      "szene": "indoor-warm",
+      "outfit": "blazer-burgund",
+      "stimmung": "selbstbewusst",
+      "aktion": [],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "quer",
+      "textraum": false,
+      "beschreibung": "Sitzend, selbstbewusst"
+    },
+    {
+      "file": "DSC04715.jpg",
+      "szene": "indoor-warm",
+      "outfit": "blazer-burgund",
+      "stimmung": "freundlich",
+      "aktion": [],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "quer",
+      "textraum": false,
+      "beschreibung": "Sitzend, lächelnd"
+    },
+    {
+      "file": "DSC04748.jpg",
+      "szene": "indoor-warm",
+      "outfit": "blazer-burgund",
+      "stimmung": "selbstbewusst",
+      "aktion": [
+        "portrait"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": false,
+      "beschreibung": "Selbstbewusst, Hochformat"
+    },
+    {
+      "file": "DSC04762.jpg",
+      "szene": "indoor-warm",
+      "outfit": "blazer-burgund",
+      "stimmung": "freundlich",
+      "aktion": [],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": false,
+      "beschreibung": "Freundlich, Hochformat"
+    },
+    {
+      "file": "DSC04774.jpg",
+      "szene": "outdoor-urban",
+      "outfit": "blazer-burgund",
+      "stimmung": "freundlich",
+      "aktion": [
+        "smartphone"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "quer",
+      "textraum": true,
+      "beschreibung": "Blick aufs Smartphone"
+    },
+    {
+      "file": "DSC04821.jpg",
+      "szene": "outdoor-urban",
+      "outfit": "blazer-burgund",
+      "stimmung": "selbstbewusst",
+      "aktion": [
+        "sonnenbrille"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Sonnenbrille, lässig"
+    },
+    {
+      "file": "DSC04824.jpg",
+      "szene": "outdoor-urban",
+      "outfit": "blazer-burgund",
+      "stimmung": "selbstbewusst",
+      "aktion": [
+        "sonnenbrille"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Sonnenbrille, lässig"
+    },
+    {
+      "file": "DSC04826.jpg",
+      "szene": "outdoor-urban",
+      "outfit": "blazer-burgund",
+      "stimmung": "selbstbewusst",
+      "aktion": [
+        "sonnenbrille"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Sonnenbrille, lässig"
+    },
+    {
+      "file": "DSC04827.jpg",
+      "szene": "outdoor-urban",
+      "outfit": "blazer-burgund",
+      "stimmung": "selbstbewusst",
+      "aktion": [
+        "sonnenbrille"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Sonnenbrille, lässig"
+    },
+    {
+      "file": "DSC04829.jpg",
+      "szene": "outdoor-urban",
+      "outfit": "blazer-burgund",
+      "stimmung": "selbstbewusst",
+      "aktion": [
+        "sonnenbrille"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Sonnenbrille, lässig"
+    },
+    {
+      "file": "DSC04850.jpg",
+      "szene": "outdoor-urban",
+      "outfit": "blazer-burgund",
+      "stimmung": "selbstbewusst",
+      "aktion": [
+        "sonnenbrille",
+        "telefon"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Telefonat mit Sonnenbrille"
+    },
+    {
+      "file": "DSC04854.jpg",
+      "szene": "outdoor-urban",
+      "outfit": "blazer-burgund",
+      "stimmung": "selbstbewusst",
+      "aktion": [
+        "sonnenbrille"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Sonnenbrille, lässig"
+    },
+    {
+      "file": "DSC04858.jpg",
+      "szene": "outdoor-urban",
+      "outfit": "blazer-burgund",
+      "stimmung": "selbstbewusst",
+      "aktion": [
+        "sonnenbrille"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Sonnenbrille, lässig"
+    },
+    {
+      "file": "DSC04886.jpg",
+      "szene": "glasfassade",
+      "outfit": "anzug-navy",
+      "stimmung": "selbstbewusst",
+      "aktion": [
+        "tablet"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Vor Glasfassade, Tablet"
+    },
+    {
+      "file": "DSC04906.jpg",
+      "szene": "glasfassade",
+      "outfit": "anzug-navy",
+      "stimmung": "selbstbewusst",
+      "aktion": [
+        "tablet"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "quer",
+      "textraum": true,
+      "beschreibung": "Vor Glasfassade, Dokumente"
+    },
+    {
+      "file": "DSC04916.jpg",
+      "szene": "glasfassade",
+      "outfit": "anzug-navy",
+      "stimmung": "selbstbewusst",
+      "aktion": [
+        "tablet"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Vor Glasfassade, Tablet"
+    },
+    {
+      "file": "DSC04936.jpg",
+      "szene": "glasfassade",
+      "outfit": "anzug-navy",
+      "stimmung": "selbstbewusst",
+      "aktion": [
+        "tablet"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Vor Glasfassade, Tablet"
+    },
+    {
+      "file": "DSC04958.jpg",
+      "szene": "glasfassade",
+      "outfit": "anzug-navy",
+      "stimmung": "selbstbewusst",
+      "aktion": [
+        "tablet"
+      ],
+      "crop": "ganzkoerper",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Ganzkörper, Lobby/Glas"
+    },
+    {
+      "file": "DSC04990.jpg",
+      "szene": "glasfassade",
+      "outfit": "anzug-navy",
+      "stimmung": "selbstbewusst",
+      "aktion": [],
+      "crop": "ganzkoerper",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Weite Architektur, viel Textraum"
+    },
+    {
+      "file": "DSC04999.jpg",
+      "szene": "outdoor-urban",
+      "outfit": "anzug-navy",
+      "stimmung": "selbstbewusst",
+      "aktion": [],
+      "crop": "ganzkoerper",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Ganzkörper, urban"
+    },
+    {
+      "file": "DSC05009.jpg",
+      "szene": "outdoor-urban",
+      "outfit": "anzug-navy",
+      "stimmung": "selbstbewusst",
+      "aktion": [],
+      "crop": "ganzkoerper",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Ganzkörper, urban"
+    },
+    {
+      "file": "DSC05016-4.jpg",
+      "szene": "glasfassade",
+      "outfit": "anzug-navy",
+      "stimmung": "selbstbewusst",
+      "aktion": [
+        "telefon"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "quer",
+      "textraum": true,
+      "beschreibung": "Telefonat vor Glasfassade"
+    },
+    {
+      "file": "DSC05024-2.jpg",
+      "szene": "glasfassade",
+      "outfit": "anzug-navy",
+      "stimmung": "selbstbewusst",
+      "aktion": [
+        "telefon"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "quer",
+      "textraum": true,
+      "beschreibung": "Telefonat vor Glasfassade"
+    },
+    {
+      "file": "DSC05028.jpg",
+      "szene": "glasfassade",
+      "outfit": "anzug-navy",
+      "stimmung": "selbstbewusst",
+      "aktion": [
+        "telefon"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "quer",
+      "textraum": true,
+      "beschreibung": "Telefonat vor Glasfassade"
+    },
+    {
+      "file": "DSC05029.jpg",
+      "szene": "glasfassade",
+      "outfit": "anzug-navy",
+      "stimmung": "selbstbewusst",
+      "aktion": [
+        "telefon"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "quer",
+      "textraum": true,
+      "beschreibung": "Telefonat vor Glasfassade"
+    },
+    {
+      "file": "DSC05054.jpg",
+      "szene": "treppe",
+      "outfit": "anzug-navy",
+      "stimmung": "nachdenklich",
+      "aktion": [
+        "tablet"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Auf Treppe, Tablet"
+    },
+    {
+      "file": "DSC05066.jpg",
+      "szene": "treppe",
+      "outfit": "anzug-navy",
+      "stimmung": "nachdenklich",
+      "aktion": [
+        "telefon"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Auf Treppe, Telefonat"
+    },
+    {
+      "file": "DSC05067.jpg",
+      "szene": "treppe",
+      "outfit": "anzug-navy",
+      "stimmung": "fokussiert",
+      "aktion": [
+        "tablet"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Auf Treppe, Tablet"
+    },
+    {
+      "file": "DSC05068.jpg",
+      "szene": "treppe",
+      "outfit": "anzug-navy",
+      "stimmung": "nachdenklich",
+      "aktion": [
+        "telefon"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Auf Treppe, Telefonat"
+    },
+    {
+      "file": "DSC05076.jpg",
+      "szene": "treppe",
+      "outfit": "anzug-navy",
+      "stimmung": "nachdenklich",
+      "aktion": [],
+      "crop": "halbtotale",
+      "farbe": "schwarzweiss",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "S/W auf Treppe"
+    },
+    {
+      "file": "DSC05087.jpg",
+      "szene": "treppe",
+      "outfit": "anzug-navy",
+      "stimmung": "freundlich",
+      "aktion": [],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Auf Treppe, lächelnd"
+    },
+    {
+      "file": "DSC05103.jpg",
+      "szene": "treppe",
+      "outfit": "anzug-navy",
+      "stimmung": "freundlich",
+      "aktion": [
+        "telefon"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Auf Treppe, Telefonat lächelnd"
+    },
+    {
+      "file": "DSC05105.jpg",
+      "szene": "treppe",
+      "outfit": "anzug-navy",
+      "stimmung": "freundlich",
+      "aktion": [
+        "telefon"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Auf Treppe, Telefonat lächelnd"
+    },
+    {
+      "file": "DSC05114-2.jpg",
+      "szene": "treppe",
+      "outfit": "anzug-navy",
+      "stimmung": "freundlich",
+      "aktion": [],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Auf Treppe, lächelnd"
+    },
+    {
+      "file": "DSC05114.jpg",
+      "szene": "treppe",
+      "outfit": "anzug-navy",
+      "stimmung": "freundlich",
+      "aktion": [],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Auf Treppe, lächelnd"
+    },
+    {
+      "file": "DSC05128.jpg",
+      "szene": "treppe",
+      "outfit": "anzug-navy",
+      "stimmung": "freundlich",
+      "aktion": [],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Auf Treppe, lächelnd"
+    },
+    {
+      "file": "DSC05139.jpg",
+      "szene": "treppe",
+      "outfit": "anzug-navy",
+      "stimmung": "freundlich",
+      "aktion": [],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Auf Treppe, lächelnd"
+    },
+    {
+      "file": "_.jpg",
+      "szene": "outdoor-urban",
+      "outfit": "anzug-navy",
+      "stimmung": "freundlich",
+      "aktion": [
+        "portrait"
+      ],
+      "crop": "nahaufnahme",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": false,
+      "beschreibung": "Nahes Outdoor-Porträt"
+    }
+  ]
+}

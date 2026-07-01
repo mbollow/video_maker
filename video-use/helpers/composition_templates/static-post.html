@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<!--
+  Bild-Post-Vorlage (Single-Image, 1080x1350 / 4:5).
+  Wird von der Bild-Pipeline (Phase 2 "bild:build") gefüllt und via
+  render_image_post.cjs als Standbild-PNG gerendert. KEIN <video>.
+
+  Platzhalter (vom Build-Script ersetzt):
+    {{PHOTO_SRC}}     – Pfad/URL zum Foto (file:// oder relativ)
+    {{LOGO_SRC}}      – Pfad/URL zum Logo
+    {{OVERLAY_RGBA}}  – Overlay-Farbe, Standard rgba(78,187,194,0.35)  (#4ebbc2 @ 35%)
+    {{OBJECT_POS}}    – object-position des Fotos, z.B. "50% 28%"
+    {{TYP_CLASS}}     – "typ-hook" (linksbündig) oder "typ-spruch" (zentriert)
+    {{HOOK_HTML}}     – vorgerenderte Zeilen (.l1/.l2/.l3, optional <span class="hl-mark">)
+-->
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1080px; height: 1350px; }
+  .stage {
+    position: relative; width: 1080px; height: 1350px; overflow: hidden;
+    font-family: 'Montserrat', system-ui, sans-serif; background: #281d67;
+    --fs-scale: {{FONT_SCALE}};
+  }
+  .photo {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; object-position: {{OBJECT_POS}};
+  }
+  /* Teal-Overlay (Bild-Post-Standard, KEIN Verlauf) */
+  .overlay { position: absolute; inset: 0; background: {{OVERLAY_RGBA}}; }
+  /* Logo immer oben rechts */
+  .logo {
+    position: absolute; top: 56px; right: 56px; width: 250px; height: auto;
+    filter: drop-shadow(0 3px 12px rgba(20,14,55,.65)) drop-shadow(0 1px 3px rgba(0,0,0,.5));
+  }
+  /* Textblock (Hook ODER Spruch) */
+  .hook {
+    position: absolute; left: 70px; right: 90px; bottom: 110px;
+    text-align: left; color: #fff; line-height: 1.04;
+    text-shadow: 0 4px 22px rgba(20,14,55,.6), 0 1px 4px rgba(0,0,0,.5);
+  }
+  .hook .l1, .hook .l2 { font-weight: 800; font-size: calc(66px * var(--fs-scale)); letter-spacing: -0.01em; }
+  .hook .l3 { font-weight: 900; font-size: calc(104px * var(--fs-scale)); letter-spacing: -0.02em; line-height: 1.0; margin-top: 10px; }
+  /* Zeilen im Highlight-Modus (wenn einzelne Wörter hinterlegt werden) — einheitliche Größe, keine dunkle Punchline-Box */
+  .hook .lx { font-weight: 800; font-size: calc(80px * var(--fs-scale)); letter-spacing: -0.01em; line-height: 1.1; margin: 0 0 6px; }
+  /* --- Emphasis-Bibliothek: benannte Hervorhebungs-Formen (dezent-lebendig, alle on-brand) --- */
+  .hl { box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+  .hl-box      { background: #4ebbc2; color: #fff; text-shadow: none; padding: 0 14px 4px; border-radius: 8px; }  /* Standard */
+  .hl-boxdark  { background: #281d67; color: #fff; text-shadow: none; padding: 0 14px 4px; border-radius: 8px; }
+  .hl-farbe    { color: #4ebbc2; }
+  .hl-underline { background: linear-gradient(#4ebbc2, #4ebbc2) left bottom / 100% 0.16em no-repeat; padding-bottom: 0.02em; }
+  .hl-italic   { font-style: italic; color: #4ebbc2; }
+  .hl-fett     { font-weight: 900; color: #4ebbc2; }
+  /* Spruch: ruhiger, zentriert, mittig gesetzt */
+  .stage.typ-spruch .hook {
+    left: 80px; right: 80px; bottom: auto; top: 50%; transform: translateY(-50%);
+    text-align: center;
+  }
+  .stage.typ-spruch .hook .l1,
+  .stage.typ-spruch .hook .l2,
+  .stage.typ-spruch .hook .l3,
+  .stage.typ-spruch .hook .lx {
+    font-weight: 800; font-size: calc(80px * var(--fs-scale)); line-height: 1.1; letter-spacing: -0.01em; margin: 0 0 6px;
+  }
+</style>
+</head>
+<body>
+  <div class="stage {{TYP_CLASS}}">
+    <img class="photo" src="{{PHOTO_SRC}}" alt="" />
+    <div class="overlay"></div>
+    <img class="logo" src="{{LOGO_SRC}}" alt="Palstek" />
+    <div class="hook">
+      {{HOOK_HTML}}
+    </div>
+  </div>
+</body>
+</html>
