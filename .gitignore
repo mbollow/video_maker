@@ -68,6 +68,10 @@ test_clip.aiff
 # Bild-Posts: weder die rohen Fotos noch die fertigen Bild-Posts ins git.
 # (Rohfotos liegen ohnehin nur in OneDrive / GF_FOTOS_DIR.)
 image-posts/
+# Karussell-Posts: Arbeitsordner (outline.txt, renders/, manifest.json) nicht ins git.
+image-carousels/
+# abgeleitetes dunkles Logo (wird bei Bedarf aus logo-horizontal.png erzeugt)
+brand-guidelines/*/assets/logo-horizontal-dark.png
 # catalog.json + README.md im gf-fotos/-Ordner BLEIBEN getrackt — nur Bilddateien raus:
 brand-guidelines/*/gf-fotos/*.jpg
 brand-guidelines/*/gf-fotos/*.jpeg
