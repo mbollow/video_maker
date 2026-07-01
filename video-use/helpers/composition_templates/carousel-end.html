@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<!--
+  Karussell ENDE-Slide (1080x1350 / 4:5).
+  Gefüllt von karussell_build.py, gerendert via render_image_post.cjs.
+
+  Platzhalter:
+    {{EYEBROW}}         – Karussell-Thema (Eyebrow)
+    {{LOGO_SRC}}        – Logo (Teal-Badge, weiß invertiert)
+    {{STATEMENT_HTML}}  – Schluss-Statement (.lx-Zeilen + <span class="hl ...">)
+    {{PHOTO_SRC}}       – Foto (Juliana/Stock)
+    {{OBJECT_POS}}      – object-position des Fotos
+    {{CTA_TEXT}}        – handschriftlicher CTA-Text
+    {{FONT_SCALE}}      – Skalierung des Statements
+-->
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&family=Caveat:wght@600;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1080px; height: 1350px; }
+  .stage {
+    position: relative; width: 1080px; height: 1350px; overflow: hidden;
+    font-family: 'Montserrat', system-ui, sans-serif; background: #f8f6f2;
+    --fs-scale: {{FONT_SCALE}};
+  }
+  .badge {
+    position: absolute; top: 54px; left: 70px; width: 92px; height: 92px;
+    background: #4ebbc2; border-radius: 20px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .badge img { width: 66px; height: auto; filter: brightness(0) invert(1); }
+  .eyebrow {
+    position: absolute; top: 84px; left: 184px; height: 32px;
+    color: #4ebbc2; font-weight: 700; font-size: 27px; letter-spacing: 0.01em;
+  }
+  /* Schluss-Statement, zentriert im oberen Drittel */
+  .statement {
+    position: absolute; top: 210px; left: 84px; right: 84px; text-align: center;
+    color: #281d67; line-height: 1.16;
+  }
+  .statement .lx { font-weight: 800; font-size: calc(52px * var(--fs-scale)); letter-spacing: -0.01em; margin: 0 0 8px; }
+  .hl { box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+  .hl-box     { background: #4ebbc2; color: #fff; padding: 0 12px 4px; border-radius: 7px; }
+  .hl-boxdark { background: #281d67; color: #fff; padding: 0 12px 4px; border-radius: 7px; }
+  .hl-farbe   { color: #4ebbc2; }
+  .hl-underline { background: linear-gradient(#4ebbc2, #4ebbc2) left bottom / 100% 0.15em no-repeat; }
+  /* Foto unten links, in den Creme-Hintergrund geblendet */
+  .photo-wrap { position: absolute; left: 0; bottom: 0; width: 600px; height: 560px; }
+  .photo { width: 100%; height: 100%; object-fit: cover; object-position: {{OBJECT_POS}}; }
+  .photo-blend {
+    position: absolute; inset: 0;
+    background:
+      linear-gradient(to bottom, #f8f6f2 0%, rgba(248,246,242,0) 26%),
+      linear-gradient(to right, rgba(248,246,242,0) 62%, #f8f6f2 100%);
+  }
+  /* Handschriftlicher CTA + Pfeil, rechts neben dem Foto */
+  .cta {
+    position: absolute; right: 96px; bottom: 300px; width: 360px; text-align: left;
+    font-family: 'Caveat', cursive; font-weight: 700; font-size: 46px;
+    color: #281d67; line-height: 1.15;
+  }
+  .cta-arrow {
+    position: absolute; right: 300px; bottom: 210px; width: 150px; height: 130px;
+    color: #4ebbc2;
+  }
+  .cta-arrow svg { width: 100%; height: 100%; }
+  .footer {
+    position: absolute; bottom: 42px; left: 0; right: 0; text-align: center;
+    color: #9db3b0; font-weight: 600; font-size: 22px; letter-spacing: 0.04em;
+  }
+</style>
+</head>
+<body>
+  <div class="stage">
+    <div class="photo-wrap">
+      <img class="photo" src="{{PHOTO_SRC}}" alt="" />
+      <div class="photo-blend"></div>
+    </div>
+    <div class="badge"><img src="{{LOGO_SRC}}" alt="Palstek" /></div>
+    <div class="eyebrow">{{EYEBROW}}</div>
+    <div class="statement">
+      {{STATEMENT_HTML}}
+    </div>
+    <div class="cta">{{CTA_TEXT}}</div>
+    <div class="cta-arrow">
+      <svg viewBox="0 0 150 130" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M140 12 C 90 6, 30 28, 14 96" />
+        <path d="M6 74 L14 100 L40 90" />
+      </svg>
+    </div>
+    <div class="footer">Palstek GmbH</div>
+  </div>
+</body>
+</html>

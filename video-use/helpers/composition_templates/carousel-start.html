@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<!--
+  Karussell START-Slide (1080x1350 / 4:5).
+  Gefüllt von karussell_build.py, gerendert via render_image_post.cjs (Standbild).
+
+  Platzhalter:
+    {{EYEBROW}}     – Karussell-Thema (Eyebrow, über alle Slides identisch)
+    {{LOGO_SRC}}    – Pfad zur Logo-Wortmarke
+    {{PHOTO_SRC}}   – Pfad zum Foto (Juliana/Stock)
+    {{OBJECT_POS}}  – object-position des Fotos
+    {{HOOK_HTML}}   – vorgerenderte Headline-Zeilen (.lx / .l1-.l3 + <span class="hl ...">)
+    {{FONT_SCALE}}  – Skalierungsfaktor der Headline
+-->
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1080px; height: 1350px; }
+  .stage {
+    position: relative; width: 1080px; height: 1350px; overflow: hidden;
+    font-family: 'Montserrat', system-ui, sans-serif; background: #f8f6f2;
+    --fs-scale: {{FONT_SCALE}};
+  }
+  /* Foto in der unteren Hälfte, oben in den Creme-Hintergrund geblendet */
+  .photo-wrap { position: absolute; left: 0; right: 0; bottom: 0; height: 54%; }
+  .photo {
+    width: 100%; height: 100%; object-fit: cover; object-position: {{OBJECT_POS}};
+  }
+  .photo-blend {
+    position: absolute; inset: 0;
+    background: linear-gradient(to bottom, #f8f6f2 0%, rgba(248,246,242,0) 24%);
+  }
+  /* Logo-Wortmarke zentriert oben */
+  .logo {
+    position: absolute; top: 48px; left: 50%; transform: translateX(-50%);
+    width: 178px; height: auto;
+  }
+  /* Eyebrow (Thema), zentriert unter dem Logo */
+  .eyebrow {
+    position: absolute; top: 182px; left: 0; right: 0; text-align: center;
+    color: #4ebbc2; font-weight: 700; font-size: 27px; letter-spacing: 0.02em;
+  }
+  /* Headline im Creme-Bereich über dem Foto */
+  .hook {
+    position: absolute; top: 234px; left: 80px; right: 80px;
+    text-align: center; color: #281d67; line-height: 1.06;
+  }
+  .hook .lx { font-weight: 800; font-size: calc(66px * var(--fs-scale)); letter-spacing: -0.01em; line-height: 1.12; margin: 0 0 6px; }
+  .hook .l1, .hook .l2 { font-weight: 800; font-size: calc(66px * var(--fs-scale)); letter-spacing: -0.01em; }
+  .hook .l3 { font-weight: 900; font-size: calc(88px * var(--fs-scale)); letter-spacing: -0.02em; line-height: 1.0; margin-top: 8px; }
+  .hook .sub { font-weight: 600; font-size: calc(27px * var(--fs-scale)); color: #3a6b70; margin-top: 14px; line-height: 1.25; }
+  /* Marker-Box (Teal, weiße Schrift) – Standard-Highlight */
+  .hl { box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+  .hl-box     { background: #4ebbc2; color: #fff; padding: 0 14px 4px; border-radius: 8px; }
+  .hl-boxdark { background: #281d67; color: #fff; padding: 0 14px 4px; border-radius: 8px; }
+  .hl-farbe   { color: #4ebbc2; }
+  .hl-underline { background: linear-gradient(#4ebbc2, #4ebbc2) left bottom / 100% 0.16em no-repeat; padding-bottom: 0.02em; }
+  /* Footer */
+  .footer {
+    position: absolute; bottom: 40px; left: 0; right: 0; text-align: center;
+    color: rgba(255,255,255,0.78); font-weight: 600; font-size: 22px; letter-spacing: 0.04em;
+    text-shadow: 0 1px 6px rgba(20,14,55,.4);
+  }
+</style>
+</head>
+<body>
+  <div class="stage">
+    <div class="photo-wrap">
+      <img class="photo" src="{{PHOTO_SRC}}" alt="" />
+      <div class="photo-blend"></div>
+    </div>
+    <img class="logo" src="{{LOGO_SRC}}" alt="Palstek" />
+    <div class="eyebrow">{{EYEBROW}}</div>
+    <div class="hook">
+      {{HOOK_HTML}}
+    </div>
+    <div class="footer">Palstek GmbH</div>
+  </div>
+</body>
+</html>
