@@ -11,6 +11,7 @@ dependencies = [
     "pillow",
     "numpy",
     "anthropic>=0.104.1",
+    "json-repair>=0.61.1",
 ]
 
 [project.optional-dependencies]
