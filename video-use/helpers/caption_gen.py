@@ -165,15 +165,25 @@ def extract_json(text: str) -> dict:
     2. JSON wrapped in ```json ... ``` code fence
     3. JSON with surrounding commentary (extract the {...} block)
     """
+    def _loads(candidate: str) -> dict:
+        # Strict first; fall back to json_repair for model output with
+        # unescaped quotes / literal newlines inside string values.
+        try:
+            return json.loads(candidate)
+        except json.JSONDecodeError:
+            from json_repair import repair_json
+
+            return json.loads(repair_json(candidate))
+
     text = text.strip()
     if text.startswith("{"):
-        return json.loads(text)
+        return _loads(text)
     fence_match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.DOTALL)
     if fence_match:
-        return json.loads(fence_match.group(1))
+        return _loads(fence_match.group(1))
     brace_match = re.search(r"\{.*\}", text, re.DOTALL)
     if brace_match:
-        return json.loads(brace_match.group(0))
+        return _loads(brace_match.group(0))
     raise ValueError(f"no JSON object found in response:\n{text[:500]}")
 
 
