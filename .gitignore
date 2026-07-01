@@ -65,6 +65,21 @@ batches/
 test_edit/
 test_clip.aiff
 
+# Bild-Posts: weder die rohen Fotos noch die fertigen Bild-Posts ins git.
+# (Rohfotos liegen ohnehin nur in OneDrive / GF_FOTOS_DIR.)
+image-posts/
+# catalog.json + README.md im gf-fotos/-Ordner BLEIBEN getrackt — nur Bilddateien raus:
+brand-guidelines/*/gf-fotos/*.jpg
+brand-guidelines/*/gf-fotos/*.jpeg
+brand-guidelines/*/gf-fotos/*.png
+brand-guidelines/*/gf-fotos/*.webp
+brand-guidelines/*/gf-fotos/*.heic
+# Künftige KI-Bilder der GF (eigener Ordner) ebenfalls ignorieren:
+brand-guidelines/*/gf-ki/*.jpg
+brand-guidelines/*/gf-ki/*.jpeg
+brand-guidelines/*/gf-ki/*.png
+brand-guidelines/*/gf-ki/*.webp
+
 # Scratch / import artifacts
 chat.json
 .hf-test/
