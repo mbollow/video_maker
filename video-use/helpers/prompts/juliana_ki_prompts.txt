@@ -1,0 +1,27 @@
+# Juliana KI-Prompts (Default fuer `--subject juliana`).
+# Frau als Hauptmotiv (Juliana via {trigger}), KEINE Maenner als Hauptbestandteil.
+# Schwerpunkt: Gespraech (Partner von hinten & unscharf) + Praesentation (Flipchart).
+# Haende bewusst unauffaellig (Waist-up, Haende entspannt/ausserhalb Bild) gegen
+# kaputte-Haende-Artefakte. Mit --num-outputs 1 = jede Zeile ein eigenes Bild.
+# {trigger} wird zur Laufzeit durch das Trigger-Wort ersetzt.
+
+{trigger}, a female business coach in a light blazer, in conversation across a table, an out-of-focus person seen from behind in the blurred foreground, she is the sharp clear subject listening attentively, warm engaged expression, bright modern meeting room, waist-up framing, hands relaxed, natural window light, photorealistic
+{trigger}, businesswoman with glasses, leading a coaching conversation, two blurred participants seen from behind out of focus in the foreground, she is clearly in focus explaining calmly, bright airy office, soft daylight, upper-body framing, hands out of frame, photorealistic
+{trigger}, female leadership coach, sitting and talking to a client whose back is turned and heavily blurred, she is the crisp main subject with a warm confident smile, modern bright room, shallow depth of field, waist-up, natural light, photorealistic
+{trigger}, a woman coaching, an unfocused silhouette of a listener from behind in the foreground, she is sharp and centered, thoughtful engaged look, minimalist bright office, soft light, half-body framing, hands resting calmly, photorealistic
+{trigger}, businesswoman in conversation, blurred out-of-focus person from behind on one side, she is the clear subject nodding while listening, bright seminar room, documentary style, waist-up, natural daylight, photorealistic
+{trigger}, female executive coach in a workshop discussion, a couple of blurred back-facing participants in the soft foreground, she is sharply in focus speaking warmly, bright modern space, upper-body framing, hands lowered, photorealistic
+{trigger}, a woman in a coaching dialogue at a round table, one blurred figure from behind out of focus, she is the crisp main subject with an empathetic expression, warm interior, shallow depth of field, waist-up, photorealistic
+{trigger}, businesswoman with a friendly confident smile talking to a blurred client seen from the back, she is clearly focused, bright office with plants, soft window light, half-body, hands relaxed at her sides, photorealistic
+{trigger}, female business coach presenting at a flipchart, standing beside it and gesturing lightly toward the paper, engaged confident expression, bright seminar room, full upper body, natural light, photorealistic
+{trigger}, a woman presenting at a large flipchart, mid-explanation looking toward an unseen audience, professional light blazer, bright workshop room, waist-up framing, one hand near the flipchart, photorealistic
+{trigger}, businesswoman at a whiteboard covered with simple diagrams, explaining with an open confident posture, bright modern training room, upper-body framing, hands calm, natural daylight, photorealistic
+{trigger}, female leadership trainer standing next to a flipchart, turned slightly toward the room, warm authentic smile, bright airy seminar space, half-body, soft light, photorealistic
+{trigger}, a woman presenting at a flipchart with bullet points, calm assured expression, business casual, bright office with large windows, waist-up, hands relaxed, editorial style, photorealistic
+{trigger}, businesswoman at a whiteboard in a workshop, mid-sentence explaining a concept, engaged look toward the room, bright modern space, upper-body framing, photorealistic
+{trigger}, female executive coach beside a flipchart easel, confident open body language, bright seminar room, natural light, half-body framing, hands lowered and relaxed, photorealistic
+{trigger}, professional woman with glasses, waist-up portrait, warm genuine smile, arms relaxed at her sides, bright minimalist office background, soft natural window light, corporate lifestyle, photorealistic
+{trigger}, a female business coach seated at a desk, hands clasped calmly on the table, confident reflective expression, bright modern office, soft daylight, upper-body framing, photorealistic
+{trigger}, businesswoman in a light blazer standing by a large window, calm confident mood, morning light, waist-up, hands relaxed, premium corporate portrait, photorealistic
+{trigger}, a woman leadership coach, three-quarter view, subtle confident smile, blurred bright office background, soft even light, LinkedIn-style upper-body headshot, hands out of frame, photorealistic
+{trigger}, female coach walking through a bright modern office, business casual, warm approachable smile, motion candid, natural light, waist-up framing, photorealistic
