@@ -140,7 +140,7 @@ def upsert_slide(manifest: dict, rec: dict) -> None:
 
 
 def pick_photo(slide: dict, *, source: str, catalog: dict, used: set[str],
-               gf_dir: Path, pexels_key, used_stock_ids: set, stock_dir):
+               pexels_key, used_stock_ids: set, stock_dir):
     """Return (photo_src_path, object_pos, photo_meta) for a start/end slide."""
     src = bc.norm(slide.get("bild", "")) or source
     if src not in ("juliana", "stock"):
@@ -149,12 +149,12 @@ def pick_photo(slide: dict, *, source: str, catalog: dict, used: set[str],
     if src == "juliana":
         pinned = (slide.get("bild_file") or "").strip()
         if pinned:
-            # bestimmtes Katalog-Foto erzwingen (z.B. schöneres Lächeln)
+            # bestimmtes Foto erzwingen (z.B. schöneres Lächeln; auch KI-Bild ki_NNN.jpg)
             entry = next((b for b in catalog.get("bilder", []) if b.get("file") == pinned), None)
             default_pos = bc._object_pos(entry) if entry else "50% 30%"
-            path = gf_dir / pinned
-            if not path.exists():
-                raise RuntimeError(f"Foto nicht gefunden: {path}")
+            path = bc.resolve_photo(pinned)
+            if not path:
+                raise RuntimeError(f"Foto nicht in den GF_FOTOS_DIR-Quellen gefunden: {pinned}")
             used.add(pinned)
             object_pos = pos_override or default_pos
             meta = {"source": "juliana", "file": pinned, "object_pos": object_pos,
@@ -163,9 +163,9 @@ def pick_photo(slide: dict, *, source: str, catalog: dict, used: set[str],
         photo = bc.match_photo(slide.get("thema"), catalog, used)
         if not photo:
             raise RuntimeError("kein Foto im Katalog")
-        path = gf_dir / photo["file"]
-        if not path.exists():
-            raise RuntimeError(f"Foto nicht gefunden: {path}")
+        path = bc.resolve_photo(photo["file"])
+        if not path:
+            raise RuntimeError(f"Foto nicht in den GF_FOTOS_DIR-Quellen gefunden: {photo['file']}")
         used.add(photo["file"])
         object_pos = pos_override or photo["object_pos"]
         meta = {"source": "juliana", "file": photo["file"],
@@ -214,7 +214,6 @@ def main() -> None:
         sys.exit(f"Logo fehlt: {logo_white}")
     logo_dark = kc.start_logo(args.brand)
     catalog = bc.load_catalog(args.brand)
-    gf_dir = bc.gf_fotos_dir()
     brand_voice = read_brand_voice(args.brand)
     templates = read_caption_templates(args.brand)
     api_key = _load_env_key("ANTHROPIC_API_KEY")
@@ -264,7 +263,7 @@ def main() -> None:
                     import html as _h
                     hook_html += f'\n      <div class="sub">{_h.escape(sl["sub"])}</div>'
                 photo_src, obj_pos, pmeta = pick_photo(
-                    sl, source=args.source, catalog=catalog, used=used_photos, gf_dir=gf_dir,
+                    sl, source=args.source, catalog=catalog, used=used_photos,
                     pexels_key=pexels_key, used_stock_ids=used_stock_ids, stock_dir=stock_dir)
                 kc.render_slide(template=kc.TPL_START, out_png=out_png,
                                 replacements={"{{EYEBROW}}": eyebrow, "{{HOOK_HTML}}": hook_html,
@@ -276,7 +275,7 @@ def main() -> None:
                 lines = end_lines or [sl.get("statement", "")]
                 stmt_html = kc.build_lines_html(lines, words, style)
                 photo_src, obj_pos, pmeta = pick_photo(
-                    sl, source=args.source, catalog=catalog, used=used_photos, gf_dir=gf_dir,
+                    sl, source=args.source, catalog=catalog, used=used_photos,
                     pexels_key=pexels_key, used_stock_ids=used_stock_ids, stock_dir=stock_dir)
                 kc.render_slide(template=kc.TPL_END, out_png=out_png,
                                 replacements={"{{EYEBROW}}": eyebrow, "{{STATEMENT_HTML}}": stmt_html,

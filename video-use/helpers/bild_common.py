@@ -40,8 +40,28 @@ def env_value(key: str) -> str:
     return _load_env_key(key)
 
 
+def gf_fotos_dirs() -> list[Path]:
+    """Alle Foto-Quell-Ordner aus GF_FOTOS_DIR. Mehrere Ordner werden per '|'
+    getrennt (z.B. echtes Shooting UND freigegebene KI-Bilder). Ein einzelner
+    Pfad ohne '|' funktioniert unverändert weiter (rückwärtskompatibel)."""
+    raw = env_value("GF_FOTOS_DIR")
+    return [Path(p.strip()) for p in raw.split("|") if p.strip()]
+
+
 def gf_fotos_dir() -> Path:
-    return Path(env_value("GF_FOTOS_DIR"))
+    """Primärer (erster) Foto-Ordner — für Aufrufer, die genau einen erwarten."""
+    dirs = gf_fotos_dirs()
+    return dirs[0] if dirs else Path("")
+
+
+def resolve_photo(file: str) -> Path | None:
+    """Sucht eine Foto-Datei (nur Dateiname) über alle GF_FOTOS_DIR-Quellen.
+    Gibt den ersten Treffer zurück oder None, wenn sie nirgends existiert."""
+    for d in gf_fotos_dirs():
+        p = d / file
+        if p.exists():
+            return p
+    return None
 
 
 def brand_logo(brand: str) -> Path:
