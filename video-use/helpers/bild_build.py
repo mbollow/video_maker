@@ -233,7 +233,6 @@ def main() -> None:
         sys.exit("Keine aktiven Einträge in hooks.txt (status: ja + Text vorhanden).")
 
     catalog = bc.load_catalog(args.brand)
-    gf_dir = bc.gf_fotos_dir()
     logo = bc.brand_logo(args.brand)
     if not logo.exists():
         sys.exit(f"Logo fehlt: {logo}")
@@ -285,9 +284,9 @@ def main() -> None:
                     photo = bc.match_photo(e.get("thema"), catalog, used)
                     if not photo:
                         raise RuntimeError("kein Foto im Katalog")
-                photo_path = gf_dir / photo["file"]
-                if not photo_path.exists():
-                    raise RuntimeError(f"Foto nicht gefunden: {photo_path}")
+                photo_path = bc.resolve_photo(photo["file"])
+                if not photo_path:
+                    raise RuntimeError(f"Foto nicht in den GF_FOTOS_DIR-Quellen gefunden: {photo['file']}")
                 photo_desc = photo.get("beschreibung", "")
             else:
                 photo_desc = "(konzeptionelles Stock-Bild, kein Porträt)"
