@@ -32,6 +32,7 @@ import bild_common as bc  # noqa: E402  (norm, match_photo, catalog, _wrap_words
 REPO_ROOT = bc.REPO_ROOT
 HELPERS = bc.HELPERS
 TEMPLATES = HELPERS / "composition_templates"
+FONTS_DIR = TEMPLATES / "fonts"  # self-hosted variable fonts (deterministic render)
 TPL_START = TEMPLATES / "carousel-start.html"
 TPL_INNER = TEMPLATES / "carousel-inner.html"
 TPL_END = TEMPLATES / "carousel-end.html"
@@ -46,7 +47,8 @@ CAROUSELS_ROOT = REPO_ROOT / "image-carousels"
 # Field keys recognised in outline blocks (single-line, except `text`)
 FIELD_KEYS = {
     "hook", "sub", "titel", "icon", "text", "highlight", "hl_style",
-    "bild", "thema", "fontscale", "statement", "cta", "stock_query", "status",
+    "bild", "bild_file", "object_pos", "thema", "fontscale", "statement",
+    "cta", "stock_query", "status",
 }
 _FIELD_START_RE = re.compile(r"^(" + "|".join(sorted(FIELD_KEYS)) + r")\s*:", re.IGNORECASE)
 _LIST_FIELDS = {"thema", "highlight"}
@@ -410,6 +412,14 @@ def render_slide(*, template: Path, out_png: Path, replacements: dict[str, str],
     work = Path(tempfile.mkdtemp(prefix="karussell_"))
     try:
         filled = tmpl
+        # Self-hosted fonts: kopiere sie in den Render-Ordner und löse {{FONTS_DIR}}
+        # relativ auf (gleiche Origin wie das HTML → kein CORS, deterministisch).
+        if "{{FONTS_DIR}}" in filled and FONTS_DIR.exists():
+            fdst = work / "fonts"
+            fdst.mkdir(exist_ok=True)
+            for f in FONTS_DIR.glob("*.ttf"):
+                shutil.copy2(f, fdst / f.name)
+            filled = filled.replace("{{FONTS_DIR}}", "fonts")
         for ph, src in assets.items():
             local = f"asset_{_icon_slug(ph)}{src.suffix or '.png'}"
             shutil.copy2(src, work / local)

@@ -145,7 +145,21 @@ def pick_photo(slide: dict, *, source: str, catalog: dict, used: set[str],
     src = bc.norm(slide.get("bild", "")) or source
     if src not in ("juliana", "stock"):
         src = source
+    pos_override = (slide.get("object_pos") or "").strip() or None
     if src == "juliana":
+        pinned = (slide.get("bild_file") or "").strip()
+        if pinned:
+            # bestimmtes Katalog-Foto erzwingen (z.B. schöneres Lächeln)
+            entry = next((b for b in catalog.get("bilder", []) if b.get("file") == pinned), None)
+            default_pos = bc._object_pos(entry) if entry else "50% 30%"
+            path = gf_dir / pinned
+            if not path.exists():
+                raise RuntimeError(f"Foto nicht gefunden: {path}")
+            used.add(pinned)
+            object_pos = pos_override or default_pos
+            meta = {"source": "juliana", "file": pinned, "object_pos": object_pos,
+                    "beschreibung": (entry or {}).get("beschreibung", "")}
+            return path, object_pos, meta
         photo = bc.match_photo(slide.get("thema"), catalog, used)
         if not photo:
             raise RuntimeError("kein Foto im Katalog")
@@ -153,20 +167,22 @@ def pick_photo(slide: dict, *, source: str, catalog: dict, used: set[str],
         if not path.exists():
             raise RuntimeError(f"Foto nicht gefunden: {path}")
         used.add(photo["file"])
+        object_pos = pos_override or photo["object_pos"]
         meta = {"source": "juliana", "file": photo["file"],
-                "object_pos": photo["object_pos"], "score": photo.get("score"),
+                "object_pos": object_pos, "score": photo.get("score"),
                 "beschreibung": photo.get("beschreibung", "")}
-        return path, photo["object_pos"], meta
+        return path, object_pos, meta
     # stock
     query = slide.get("stock_query") or " ".join((slide.get("thema") or [])[:2]) or slide.get("hook") or slide.get("statement") or "leadership"
     pick = bild_stock.fetch_stock(query, pexels_key, used_stock_ids, stock_dir)
     if not pick:
         raise RuntimeError(f"kein Stock-Treffer für '{query}'")
     used_stock_ids.add(pick["id"])
+    object_pos = pos_override or "50% 30%"
     meta = {"source": "stock", "provider": "pexels", "id": pick["id"], "query": query,
             "photographer": pick.get("photographer"), "url": pick.get("url"),
-            "src_url": pick.get("src_url"), "object_pos": "50% 30%"}
-    return pick["path"], "50% 30%", meta
+            "src_url": pick.get("src_url"), "object_pos": object_pos}
+    return pick["path"], object_pos, meta
 
 
 def main() -> None:
