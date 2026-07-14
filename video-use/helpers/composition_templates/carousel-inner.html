@@ -16,7 +16,8 @@
     {{FONT_SCALE}} – Skalierung von Titel + Body
 -->
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap');
+  @font-face { font-family: 'Montserrat'; src: url('{{FONTS_DIR}}/Montserrat-var.ttf') format('truetype'); font-weight: 100 900; font-style: normal; font-display: block; }
+  @font-face { font-family: 'DM Sans'; src: url('{{FONTS_DIR}}/DMSans-var.ttf') format('truetype'); font-weight: 100 1000; font-style: normal; font-display: block; }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { width: 1080px; height: 1350px; }
   .stage {
@@ -62,10 +63,10 @@
   /* Fließtext-Absätze — DM Sans, Dunkelblau, groß (wenige Wörter pro Zeile) */
   .body {
     font-family: 'DM Sans', system-ui, sans-serif;
-    color: #281d67; font-weight: 500; font-size: calc(38px * var(--fs-scale));
-    line-height: 1.5;
+    color: #281d67; font-weight: 400; font-size: calc(38px * var(--fs-scale));
+    line-height: 1.62; letter-spacing: 0.01em;
   }
-  .body .para { margin: 0 0 32px; }
+  .body .para { margin: 0 0 34px; }
   .body .para:last-child { margin-bottom: 0; }
   /* Highlight-Formen */
   .hl { box-decoration-break: clone; -webkit-box-decoration-break: clone; }
