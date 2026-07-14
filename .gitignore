@@ -70,6 +70,8 @@ test_clip.aiff
 image-posts/
 # Karussell-Posts: Arbeitsordner (outline.txt, renders/, manifest.json) nicht ins git.
 image-carousels/
+# KI-generierte Bilder (Roh-Batches) nicht ins git.
+image-ki/
 # abgeleitetes dunkles Logo (wird bei Bedarf aus logo-horizontal.png erzeugt)
 brand-guidelines/*/assets/logo-horizontal-dark.png
 # catalog.json + README.md im gf-fotos/-Ordner BLEIBEN getrackt — nur Bilddateien raus:
