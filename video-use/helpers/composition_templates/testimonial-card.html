@@ -1,0 +1,82 @@
+<!doctype html>
+<!--
+  Testimonial-Karte — 1920x1080, gefuellt von testimonial_common.card_html().
+  Platzhalter: {{FONT}} {{LOGO}} {{BODY}}
+
+  Karten und Antwort-Clips teilen denselben Creme-Hintergrund und dasselbe Logo
+  oben rechts. Genau deshalb wirken harte Schnitte zwischen Folie und Video ruhig
+  (es wechselt nur das Sprecher-Band in der Mitte) — keine Crossfades noetig.
+
+  Anrede: Der Gast wird gesiezt, das Publikum geduzt (Outro-CTA). Kein Vorname
+  in der Anrede — nur als Namensnennung auf der Intro-Folie.
+-->
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family:'Korbin'; src:url('{{FONT}}') format('opentype'); font-weight:500; }
+
+  /* Palstek-Tokens (brand-guidelines/<brand>/colors_and_type.css) */
+  :root {
+    --cream:  #f8f6f2;   /* Hintergrund — bewusst nicht reinweiss */
+    --dark:   #281d67;   /* Sekundaer (dunkles Blau-Lila) */
+    --teal:   #4ebbc2;   /* Akzent */
+    --teal-d: #3c99a2;   /* Akzent, gedeckt (Eyebrow) */
+    --ink:    #475569;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { width:1920px; height:1080px; overflow:hidden; }
+  body {
+    font-family:'Korbin', system-ui, sans-serif;
+    background:var(--cream); color:var(--dark);
+    position:relative; -webkit-font-smoothing:antialiased;
+  }
+
+  /* Logo immer oben rechts — nie unten (kollidiert mit den Untertiteln). */
+  .logo { position:absolute; top:70px; right:70px; height:64px; }
+
+  .eyebrow {
+    position:absolute; top:88px; left:140px;
+    font-size:26px; font-weight:600; letter-spacing:.20em;
+    text-transform:uppercase; color:var(--teal-d);
+  }
+
+  .stage { position:absolute; top:50%; left:140px; right:140px; transform:translateY(-50%); }
+
+  /* Fragen-Folie */
+  .numtag {
+    display:inline-block; font-size:26px; font-weight:700; letter-spacing:.12em;
+    text-transform:uppercase; color:#fff; background:var(--teal);
+    padding:12px 26px; border-radius:999px; margin-bottom:44px;
+  }
+  .q { font-size:88px; line-height:1.14; font-weight:500; max-width:1560px; letter-spacing:-0.5px; }
+  .q.qsmall { font-size:64px; line-height:1.18; }   /* lange Fragen */
+  .q .hl { color:var(--teal); }
+  .rule { width:130px; height:8px; background:var(--teal); border-radius:99px; margin-top:56px; }
+
+  /* Intro-Folie */
+  .intro-eyebrow {
+    font-size:30px; font-weight:600; letter-spacing:.22em;
+    text-transform:uppercase; color:var(--teal-d); margin-bottom:34px;
+  }
+  .intro-name { font-size:132px; font-weight:500; line-height:1.0; letter-spacing:-1px; }
+  .intro-role { font-size:46px; color:var(--ink); margin-top:30px; font-weight:500; }
+  .intro-meta { font-size:34px; color:var(--teal-d); margin-top:46px; font-weight:600; }
+
+  /* Outro-Folie */
+  .outro-q { font-size:92px; font-weight:500; line-height:1.12; max-width:1500px; letter-spacing:-0.5px; }
+  .outro-q .hl { color:var(--teal); }
+  .outro-cta { margin-top:80px; font-size:40px; color:var(--ink); font-weight:500; }
+  .outro-url {
+    display:inline-block; margin-top:22px; font-size:52px; font-weight:700;
+    color:#fff; background:var(--dark); padding:22px 46px; border-radius:16px;
+  }
+  .outro-url .hl { color:var(--teal); }
+</style>
+</head>
+<body>
+  <img class="logo" src="{{LOGO}}">
+  {{BODY}}
+</body>
+</html>

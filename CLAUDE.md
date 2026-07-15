@@ -82,6 +82,15 @@ Eigene Pipeline für statische Ein-Bild-Posts (echtes Juliana-Foto + Hook/Spruch
 - **„hellblau"/„türkis" = immer `#4ebbc2`** (Marken-Akzent); dunkles Blau-Lila = `#281d67`.
 - **Später:** `gf-ki/` (KI-Juliana-Bilder + automatische KI-Kennzeichnung in Caption).
 
+## Testimonial-Videos (Langform für die Website)
+Kunden-Interview (Zoom/Teams) → **~vollständiges 16:9-Video zum Einbetten**, NICHT auf 30/60 s gekürzt. Details: **`TESTIMONIAL.md`**. Helper `testimonial_*.py`, Template `composition_templates/testimonial-card.html`, Ablauf `npm run testimonial:init|plan|build`.
+- **Zwei Regeln (teuer gelernt, nicht aufweichen):** **(1) Video sanft schneiden** — Füllwörter und Denkpausen bleiben im Ton; nur Pausen > `max_pause_s` (1,2 s) und inhaltlich Nötiges (Zwischenrufe, interne Absprachen) raus. Jeder Schnitt im Talking-Head ist ein sichtbarer Sprung und kostet bei Langform mehr, als die Straffung bringt. **(2) Untertitel sauber ausformulieren** — ohne Füllwörter/Wiederholungen, richtige Grammatik + Schreibweisen; der Ton bleibt unangetastet.
+- **Wirkt ein Schnitt als Sprung:** NICHT die globale Schwelle anheben, sondern `schnitt.ausnahmen` für genau diesen Block setzen.
+- **Quelle:** die saubere Cloud-/Meeting-Aufzeichnung schlägt den Bildschirm-Mitschnitt (Teams-UI). Bei mehreren Rohdateien Anfang **und** Ende beider kurz transkribieren — unterschiedliche Längen heißen nicht, dass eine unvollständig ist (Vorgespräch).
+- **Bild:** Galerie ist ~3,56:1 → nicht formatfüllend croppbar. Sprecher-Band freistellen, mittig auf Creme `#f8f6f2`, Logo oben rechts, Untertitel `#281d67` darunter. Folien + Antworten teilen den Rahmen → harte Schnitte wirken ruhig, keine Crossfades.
+- **Anrede:** Gast **siezen**, Publikum **duzen** (Outro-CTA). Kein Vorname in der Anrede — nur als Namensnennung auf der Intro-Folie.
+- **Freigabe:** `testimonial:build` pusht selbst als `final_vN+1` (`--no-push` = Notausgang). Versionen nie überschreiben.
+
 ## Karussell-Posts (Multi-Slide, optisch eigenständig)
 Mehrteilige Bildstrecken (Start → n Innen-Slides → Ende), **bewusst anders** als die Ein-Bild-Posts. Spiegelt den Bild-Post-Workflow (Entwurf → kuratieren → bauen → Auto-Push). Helper `karussell_*.py`, Templates `composition_templates/carousel-{start,inner,end}.html`, Render via `render_image_post.cjs`.
 - **Modell:** ein Karussell = ein `--batch <name>` (= ein Freigabe-Ordner). Arbeitsordner `image-carousels/<name>/` (`outline.txt`, `renders/`, `manifest.json`).
@@ -162,6 +171,10 @@ npm run postiz:push:draft    -- --batch <name>             # Postiz (self-hosted
 npm run video:concat   -- --input-dir <ordner> --brand <slug>   # mehrere Clips → ein Reel
 npm run podcast:split  -- --input <folge.mp4> --brand <slug>    # Podcast → mehrere Reels
 npm run agency:onboard -- --brand <slug> --label "Name"          # neue Marke anlegen
+# Testimonial (Langform-Interview -> Website-Embed, siehe TESTIMONIAL.md):
+npm run testimonial:init  -- --projekt <name> --quelle <datei>   # Scaffold + Transkript + interview.txt
+npm run testimonial:plan  -- --projekt <name>                    # Schnitt + Untertitel pruefen
+npm run testimonial:build -- --projekt <name>                    # rendern + Freigabe-Push
 ```
 
 ### Beim Resume einer Batch (frische Session)
