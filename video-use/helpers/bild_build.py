@@ -277,7 +277,15 @@ def main() -> None:
             ex_photo = existing.get("photo", {}) if existing else {}
             photo = None
             if source == "juliana":
-                if (not args.new_image and ex_photo.get("source") == "juliana" and ex_photo.get("file")):
+                # Gemerktes Foto nur wiederverwenden, wenn es noch im Ordner liegt —
+                # KI-Bilder werden punktuell aussortiert, das darf keinen Re-Build brechen.
+                reuse = (not args.new_image and ex_photo.get("source") == "juliana"
+                         and ex_photo.get("file"))
+                if reuse and not bc.resolve_photo(ex_photo["file"]):
+                    print(f"  Hinweis: gemerktes Foto {ex_photo['file']} liegt nicht mehr "
+                          f"in den Quellordnern — es wird neu gematcht")
+                    reuse = False
+                if reuse:
                     photo = {"file": ex_photo["file"], "object_pos": ex_photo.get("object_pos", "50% 30%"),
                              "score": ex_photo.get("score"), "beschreibung": ex_photo.get("beschreibung", "")}
                 else:

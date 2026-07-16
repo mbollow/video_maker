@@ -72,9 +72,9 @@ def brand_logo(brand: str) -> Path:
 
 # theme token -> set of catalog tag values it should match
 TOPIC_MAP: dict[str, set[str]] = {
-    "fuehrung":     {"selbstbewusst", "glasfassade", "anzug-navy", "ganzkoerper"},
-    "autoritaet":   {"selbstbewusst", "glasfassade", "anzug-navy"},
-    "auftreten":    {"selbstbewusst", "glasfassade", "anzug-navy"},
+    "fuehrung":     {"selbstbewusst", "glasfassade", "anzug-navy", "ganzkoerper", "arme-verschraenkt"},
+    "autoritaet":   {"selbstbewusst", "glasfassade", "anzug-navy", "arme-verschraenkt"},
+    "auftreten":    {"selbstbewusst", "glasfassade", "anzug-navy", "arme-verschraenkt"},
     "executive":    {"selbstbewusst", "anzug-navy", "glasfassade"},
     "vertrauen":    {"freundlich", "indoor-warm"},
     "naehe":        {"freundlich", "indoor-warm"},
@@ -87,10 +87,19 @@ TOPIC_MAP: dict[str, set[str]] = {
     "produktivitaet": {"fokussiert", "schreibtisch", "laptop"},
     "struktur":     {"fokussiert", "schreibtisch"},
     "entscheidung": {"selbstbewusst", "fokussiert"},
-    "kommunikation": {"telefon", "freundlich"},
-    "gespraech":    {"telefon", "freundlich"},
-    "feedback":     {"telefon", "freundlich"},
-    "dialog":       {"telefon", "freundlich"},
+    "kommunikation": {"telefon", "freundlich", "gespraech"},
+    "gespraech":    {"telefon", "freundlich", "gespraech"},
+    "feedback":     {"telefon", "freundlich", "gespraech"},
+    "dialog":       {"telefon", "freundlich", "gespraech"},
+    # Gruppen- und Präsentations-Motive — bisher nur in den KI-Bildern vorhanden
+    "team":         {"meeting-runde", "gespraech", "freundlich"},
+    "meeting":      {"meeting-runde", "gespraech"},
+    "besprechung":  {"meeting-runde", "gespraech"},
+    "workshop":     {"flipchart-praesentation", "flipchart", "meeting-runde"},
+    "praesentation": {"flipchart-praesentation", "flipchart", "selbstbewusst"},
+    "vortrag":      {"flipchart-praesentation", "flipchart", "selbstbewusst"},
+    "moderation":   {"flipchart-praesentation", "meeting-runde"},
+    "erklaeren":    {"flipchart-praesentation", "flipchart"},
     "veraenderung": {"sonnenbrille", "outdoor-urban"},
     "mut":          {"sonnenbrille", "outdoor-urban", "selbstbewusst"},
     "persoenlich":  {"sonnenbrille", "outdoor-urban"},
@@ -130,10 +139,54 @@ def expand_tokens(tokens: list[str]) -> set[str]:
 
 
 def load_catalog(brand: str) -> dict:
+    """Katalog laden und gegen den realen Ordnerinhalt abgleichen.
+
+    Der Katalog ist die Wunschliste, der Ordner die Wahrheit: KI-Bilder werden
+    punktuell aus Qualitätsgründen gelöscht, ihr Tag-Eintrag bleibt aber stehen.
+    Einträge ohne Datei fliegen deshalb hier raus, damit match_photo sie gar
+    nicht erst vorschlagen kann.
+    """
     path = REPO_ROOT / "brand-guidelines" / brand / "gf-fotos" / "catalog.json"
     if not path.exists():
         sys.exit(f"catalog.json fehlt: {path}")
-    return json.loads(path.read_text())
+    catalog = json.loads(path.read_text())
+
+    bilder = catalog.get("bilder", [])
+    vorhanden = [b for b in bilder if resolve_photo(b.get("file", ""))]
+    fehlend = [b.get("file") for b in bilder if not resolve_photo(b.get("file", ""))]
+    if fehlend:
+        print(f"  Hinweis: {len(fehlend)} Katalog-Eintrag/-Einträge ohne Datei "
+              f"(übersprungen): {', '.join(sorted(filter(None, fehlend)))}")
+    if bilder and not vorhanden:
+        sys.exit("Kein einziges Katalog-Foto liegt in den GF_FOTOS_DIR-Quellen — "
+                 "stimmt der Pfad in der .env? (OneDrive synchronisiert?)")
+
+    ungetaggt = untagged_photos(catalog)
+    if ungetaggt:
+        print(f"  Hinweis: {len(ungetaggt)} Bild(er) im Ordner ohne Katalog-Eintrag — "
+              f"sie werden NICHT automatisch ausgewählt: {', '.join(ungetaggt[:8])}"
+              + (" …" if len(ungetaggt) > 8 else ""))
+
+    catalog["bilder"] = vorhanden
+    return catalog
+
+
+def untagged_photos(catalog: dict) -> list[str]:
+    """Bilddateien in den Quellordnern, die keinen Katalog-Eintrag haben.
+
+    Gegenstück zum Existenz-Abgleich in load_catalog: ohne Tags kann match_photo
+    ein Bild nicht finden, es wäre also stumm unsichtbar. Neu abgelegte KI-Bilder
+    sollen deshalb direkt getaggt werden.
+    """
+    getaggt = {b.get("file") for b in catalog.get("bilder", [])}
+    gefunden: list[str] = []
+    for d in gf_fotos_dirs():
+        if not d.exists():
+            continue
+        for p in sorted(d.iterdir()):
+            if p.suffix.lower() in {".jpg", ".jpeg", ".png"} and p.name not in getaggt:
+                gefunden.append(p.name)
+    return gefunden
 
 
 def _photo_tagset(p: dict) -> set[str]:

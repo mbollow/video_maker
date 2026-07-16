@@ -7,12 +7,17 @@
       "schreibtisch",
       "outdoor-urban",
       "glasfassade",
-      "treppe"
+      "treppe",
+      "meeting-runde",
+      "flipchart-praesentation"
     ],
     "outfit": [
       "bluse-weiss",
       "blazer-burgund",
-      "anzug-navy"
+      "anzug-navy",
+      "blazer-beige",
+      "blazer-grau",
+      "bluse-hellblau"
     ],
     "stimmung": [
       "freundlich",
@@ -27,7 +32,10 @@
       "telefon",
       "tablet",
       "sonnenbrille",
-      "smartphone"
+      "smartphone",
+      "arme-verschraenkt",
+      "gespraech",
+      "flipchart"
     ],
     "crop": [
       "nahaufnahme",
@@ -801,6 +809,427 @@
       "format": "hoch",
       "textraum": false,
       "beschreibung": "Nahes Outdoor-Porträt"
+    },
+    {
+      "file": "ki_001.jpg",
+      "szene": "indoor-warm",
+      "outfit": "anzug-navy",
+      "stimmung": "freundlich",
+      "aktion": [
+        "portrait"
+      ],
+      "crop": "nahaufnahme",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Laechelnde Frau mit Brille im Buero",
+      "quelle": "ki"
+    },
+    {
+      "file": "ki_002.jpg",
+      "szene": "glasfassade",
+      "outfit": "anzug-navy",
+      "stimmung": "selbstbewusst",
+      "aktion": [
+        "portrait",
+        "arme-verschraenkt"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Frau mit verschraenkten Armen in Buerolobby",
+      "quelle": "ki"
+    },
+    {
+      "file": "ki_003.jpg",
+      "szene": "indoor-warm",
+      "outfit": "anzug-navy",
+      "stimmung": "freundlich",
+      "aktion": [
+        "portrait"
+      ],
+      "crop": "nahaufnahme",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Portraet am Fenster vor heller Wand",
+      "quelle": "ki"
+    },
+    {
+      "file": "ki_004.jpg",
+      "szene": "glasfassade",
+      "outfit": "anzug-navy",
+      "stimmung": "selbstbewusst",
+      "aktion": [
+        "portrait",
+        "arme-verschraenkt"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Frau verschraenkt die Arme im Fensterflur",
+      "quelle": "ki"
+    },
+    {
+      "file": "ki_005.jpg",
+      "szene": "schreibtisch",
+      "outfit": "anzug-navy",
+      "stimmung": "nachdenklich",
+      "aktion": [
+        "laptop",
+        "smartphone"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Nachdenklich am Laptop, Blick zur Seite",
+      "quelle": "ki"
+    },
+    {
+      "file": "ki_007.jpg",
+      "szene": "schreibtisch",
+      "outfit": "anzug-navy",
+      "stimmung": "freundlich",
+      "aktion": [
+        "laptop",
+        "kaffee"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Am Laptop mit Tasse und Unterlagen",
+      "quelle": "ki"
+    },
+    {
+      "file": "ki_009.jpg",
+      "szene": "indoor-warm",
+      "outfit": "blazer-beige",
+      "stimmung": "freundlich",
+      "aktion": [
+        "portrait",
+        "arme-verschraenkt"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Laechelnd mit verschraenkten Armen im Buero",
+      "quelle": "ki"
+    },
+    {
+      "file": "ki_010.jpg",
+      "szene": "indoor-warm",
+      "outfit": "blazer-beige",
+      "stimmung": "freundlich",
+      "aktion": [
+        "portrait",
+        "arme-verschraenkt"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Freundliches Portrait vor heller Buerowand",
+      "quelle": "ki"
+    },
+    {
+      "file": "ki_011.jpg",
+      "szene": "indoor-warm",
+      "outfit": "blazer-grau",
+      "stimmung": "selbstbewusst",
+      "aktion": [
+        "portrait",
+        "arme-verschraenkt"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Mit Brille und verschraenkten Armen im Foyer",
+      "quelle": "ki"
+    },
+    {
+      "file": "ki_012.jpg",
+      "szene": "indoor-warm",
+      "outfit": "blazer-grau",
+      "stimmung": "selbstbewusst",
+      "aktion": [
+        "portrait",
+        "arme-verschraenkt"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Verschraenkte Arme vor Glastuer im Flur",
+      "quelle": "ki"
+    },
+    {
+      "file": "ki_014.jpg",
+      "szene": "meeting-runde",
+      "outfit": "anzug-navy",
+      "stimmung": "freundlich",
+      "aktion": [
+        "gespraech",
+        "laptop",
+        "kaffee"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Gestikuliert im Gespraech am Meetingtisch",
+      "quelle": "ki"
+    },
+    {
+      "file": "ki_025.jpg",
+      "szene": "glasfassade",
+      "outfit": "anzug-navy",
+      "stimmung": "selbstbewusst",
+      "aktion": [
+        "portrait"
+      ],
+      "crop": "ganzkoerper",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Geht mit Tasche durch hellen Glasflur",
+      "quelle": "ki"
+    },
+    {
+      "file": "ki_027.jpg",
+      "szene": "glasfassade",
+      "outfit": "anzug-navy",
+      "stimmung": "freundlich",
+      "aktion": [
+        "laptop"
+      ],
+      "crop": "ganzkoerper",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Laeuft mit Laptop unterm Arm durch Bueroflur",
+      "quelle": "ki"
+    },
+    {
+      "file": "ki_029.jpg",
+      "szene": "flipchart-praesentation",
+      "outfit": "anzug-navy",
+      "stimmung": "selbstbewusst",
+      "aktion": [
+        "flipchart",
+        "gespraech"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Praesentiert am Flipchart vor Zuhoerern",
+      "quelle": "ki"
+    },
+    {
+      "file": "ki_033.jpg",
+      "szene": "indoor-warm",
+      "outfit": "anzug-navy",
+      "stimmung": "freundlich",
+      "aktion": [
+        "portrait"
+      ],
+      "crop": "nahaufnahme",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Laechelndes Brustportraet mit Brille im hellen Flur",
+      "quelle": "ki"
+    },
+    {
+      "file": "ki_037.jpg",
+      "szene": "outdoor-urban",
+      "outfit": "anzug-navy",
+      "stimmung": "selbstbewusst",
+      "aktion": [
+        "portrait",
+        "arme-verschraenkt"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Mit verschraenkten Armen an Backsteinwand gelehnt",
+      "quelle": "ki"
+    },
+    {
+      "file": "ki_038.jpg",
+      "szene": "outdoor-urban",
+      "outfit": "anzug-navy",
+      "stimmung": "freundlich",
+      "aktion": [
+        "portrait",
+        "arme-verschraenkt"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Laechelnd an Backsteinwand, Arme verschraenkt",
+      "quelle": "ki"
+    },
+    {
+      "file": "ki_039.jpg",
+      "szene": "outdoor-urban",
+      "outfit": "anzug-navy",
+      "stimmung": "selbstbewusst",
+      "aktion": [
+        "portrait",
+        "arme-verschraenkt"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Ohne Brille an Ziegelmauer, Arme verschraenkt",
+      "quelle": "ki"
+    },
+    {
+      "file": "ki_040.jpg",
+      "szene": "outdoor-urban",
+      "outfit": "anzug-navy",
+      "stimmung": "freundlich",
+      "aktion": [
+        "portrait",
+        "arme-verschraenkt"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Seitlich an Backsteinwand gelehnt, offenes Lachen",
+      "quelle": "ki"
+    },
+    {
+      "file": "ki_041.jpg",
+      "szene": "schreibtisch",
+      "outfit": "bluse-weiss",
+      "stimmung": "nachdenklich",
+      "aktion": [
+        "laptop"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Nachdenklich am Stehschreibtisch vor dem Laptop",
+      "quelle": "ki"
+    },
+    {
+      "file": "ki_043.jpg",
+      "szene": "schreibtisch",
+      "outfit": "bluse-hellblau",
+      "stimmung": "fokussiert",
+      "aktion": [
+        "laptop"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Konzentriert am Laptop im hellen Buero",
+      "quelle": "ki"
+    },
+    {
+      "file": "ki_048.jpg",
+      "szene": "indoor-warm",
+      "outfit": "blazer-burgund",
+      "stimmung": "freundlich",
+      "aktion": [
+        "portrait"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Sitzend im Sessel, laechelnd, warmes Interieur",
+      "quelle": "ki"
+    },
+    {
+      "file": "ki_056.jpg",
+      "szene": "flipchart-praesentation",
+      "outfit": "bluse-weiss",
+      "stimmung": "selbstbewusst",
+      "aktion": [
+        "flipchart"
+      ],
+      "crop": "ganzkoerper",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": false,
+      "beschreibung": "Praesentiert am Flipchart vor sitzendem Publikum",
+      "quelle": "ki"
+    },
+    {
+      "file": "ki_062.jpg",
+      "szene": "flipchart-praesentation",
+      "outfit": "anzug-navy",
+      "stimmung": "freundlich",
+      "aktion": [
+        "flipchart",
+        "gespraech"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Offene Geste vor leerem Flipchart",
+      "quelle": "ki"
+    },
+    {
+      "file": "ki_063.jpg",
+      "szene": "schreibtisch",
+      "outfit": "anzug-navy",
+      "stimmung": "freundlich",
+      "aktion": [
+        "portrait"
+      ],
+      "crop": "halbtotale",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Laechelnd mit Brille im hellen Buero",
+      "quelle": "ki"
+    },
+    {
+      "file": "ki_065.jpg",
+      "szene": "indoor-warm",
+      "outfit": "anzug-navy",
+      "stimmung": "freundlich",
+      "aktion": [
+        "portrait"
+      ],
+      "crop": "nahaufnahme",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Nahes Portraet mit Brille, Buero im Hintergrund",
+      "quelle": "ki"
+    },
+    {
+      "file": "ki_066.jpg",
+      "szene": "glasfassade",
+      "outfit": "anzug-navy",
+      "stimmung": "selbstbewusst",
+      "aktion": [
+        "tablet"
+      ],
+      "crop": "ganzkoerper",
+      "farbe": "farbe",
+      "format": "hoch",
+      "textraum": true,
+      "beschreibung": "Gehend im Flur, Mappe unter dem Arm",
+      "quelle": "ki"
     }
   ]
 }
