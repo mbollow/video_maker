@@ -13,20 +13,35 @@ Read-only Bibliothek echter Fotos der Geschäftsführerin (Juliana). Quelle für
   `deny`-Regel in `.claude/settings.json`); die Pipeline liest dort nur.
 - Hier im Repo liegt nur **`catalog.json`** — die Stichwort-Tags je Foto, mit
   denen Phase 2 das passende Bild zu einem Hook/Spruch auswählt (Match über Tags,
-  nicht über Dateinamen). Hinweis: KI-Bilder (`ki_NNN.jpg`) sind bislang **nicht**
-  im `catalog.json` getaggt — sie lassen sich per `bild_file: ki_NNN.jpg` gezielt
-  anpinnen, werden aber noch nicht automatisch über Tags gematcht.
+  nicht über Dateinamen). Echte Fotos **und** freigegebene KI-Bilder (`ki_NNN.jpg`)
+  sind getaggt und damit gleichberechtigt auswählbar; KI-Einträge tragen
+  `"quelle": "ki"`.
+
+## Der Katalog ist die Wunschliste, der Ordner ist die Wahrheit
+Beide Richtungen werden zur Laufzeit in `bild_common.load_catalog` abgeglichen:
+- **Eintrag ohne Datei** (Bild aus Qualitätsgründen gelöscht) → Eintrag wird
+  übersprungen, `match_photo` kann ihn nicht mehr vorschlagen. Kein Abbruch.
+  Der Eintrag darf ruhig in der `catalog.json` stehen bleiben.
+- **Datei ohne Eintrag** (neues Bild abgelegt, Tags vergessen) → Warnung beim
+  Build. Ohne Tags ist ein Bild für `match_photo` unsichtbar und nur per
+  `bild_file: <name>` anpinnbar.
+
+**Regel: neue KI-Bilder direkt nach dem Ablegen taggen** — sonst liegen sie da,
+ohne je gewählt zu werden.
 
 ## catalog.json
 - `root_env`: Name der Env-Variable mit dem Wurzelpfad (`GF_FOTOS_DIR`).
 - `bilder[]`: je Foto `file` (nur Dateiname) + kontrollierte Tags
   (`szene`, `outfit`, `stimmung`, `aktion[]`, `crop`, `farbe`, `format`, `textraum`).
 - `vokabular`: erlaubte Werte je Kategorie (beim Tagging daran halten).
+- Optional bei KI-Bildern: `quelle: "ki"` sowie `qualitaet: "maengel"` +
+  `qualitaet_hinweis` (rein informativ aus der Sichtung — **beeinflusst die
+  Auswahl nicht**, dient als Hinweis, welche Bilder man aussortieren möchte).
 
-## Spätere Bildquellen (noch nicht aktiv)
-- `gf-ki/` — KI-generierte Juliana-Bilder (separater Ordner; triggert die
-  KI-Kennzeichnung in der Caption). Wird nachgerüstet.
-- Pexels-Stock — on-demand per API, kein Ordner.
+## Weitere Bildquellen
+- Pexels-Stock — on-demand per API, kein Ordner (`--source stock`).
+- **Keine KI-Kennzeichnung** in Caption/Post — bewusste Entscheidung; KI-Bilder
+  werden wie echte Fotos behandelt.
 
 ## Visueller Standard (Bild-Post)
 - Vorlage: `video-use/helpers/composition_templates/static-post.html`
