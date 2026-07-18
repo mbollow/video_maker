@@ -314,14 +314,103 @@ def detect_band(video: Path, probe_at: float = 60.0, seconds: float = 4.0) -> di
     return {"w": w, "h": h, "x": x, "y": y}
 
 
+def _zoom_curve(z: dict, dur: float) -> str:
+    """Zeitkurve des Zoom-Faktors z(t) ueber einen Antwort-Clip (fuenf Phasen).
+
+    `t` startet pro Antwort bei 0 (setpts nach trim/concat — also genau nach der
+    vorangestellten Fragen-Folie):
+
+        0 .. start_s            voller Zwei-Shot (Faktor 1)
+        .. +ramp_s              Einfahrt auf Faktor z (sine.inOut)
+        .. bis Rueckfahrt       gehalten auf dem Gast
+        out_ramp_s lang         Ausfahrt zurueck auf 1.0 (sine.inOut)
+        letzte end_pad_s        wieder voller Zwei-Shot, bevor der Redeteil endet
+
+    Die Rueckfahrt wird vom Ende her terminiert (`dur`), damit sie unabhaengig
+    von der Antwortlaenge immer `end_pad_s` vor Schluss fertig ist.
+    """
+    s = float(z.get("start_s", 5.0))
+    r = max(0.1, float(z.get("ramp_s", 2.5)))
+    rout = max(0.1, float(z.get("out_ramp_s", z.get("ramp_s", 2.5))))
+    endpad = float(z.get("end_pad_s", 4.0))
+    z1 = float(z.get("z", 1.9))
+
+    tin0, tin1 = s, s + r
+    tout1 = dur - endpad           # hier ist die Rueckfahrt fertig
+    tout0 = tout1 - rout           # hier beginnt sie
+    tout0 = max(tout0, tin1)       # bei knappen Clips: Hold darf 0 werden, kein Overlap
+    tout1 = max(tout1, tout0 + rout)
+
+    ein = f"(0.5-0.5*cos(PI*(t-{tin0})/{r}))"
+    eout = f"(0.5-0.5*cos(PI*({tout1}-t)/{rout}))"
+    return (f"if(lt(t,{tin0}),1,"
+            f"if(lt(t,{tin1}),1+({z1}-1)*{ein},"
+            f"if(lt(t,{tout0}),{z1},"
+            f"if(lt(t,{tout1}),1+({z1}-1)*{eout},1))))")
+
+
 def frame_filter(band: dict, bg: str, logo_h: int = 64, logo_margin: int = 60,
-                 logo_top: int = 96) -> str:
-    """Speaker band -> centred on the brand backdrop, logo top-right."""
-    pad_y = max(0, (CANVAS_H - band["h"]) // 2)
-    return (f"crop={band['w']}:{band['h']}:{band['x']}:{band['y']},"
-            f"pad={CANVAS_W}:{CANVAS_H}:0:{pad_y}:color={bg},fps={FPS},format=yuv420p[base];"
-            f"[1:v]scale=-1:{logo_h}[logo];"
-            f"[base][logo]overlay=W-w-{logo_margin}:{logo_top}[bl]")
+                 logo_top: int = 96, zoom: dict | None = None,
+                 dur: float | None = None, vollbild: dict | None = None) -> str:
+    """Speaker band -> centred on the brand backdrop, logo top-right.
+
+    Ohne `zoom`: Band in fester Hoehe mittig auf Creme (Zwei-Shot).
+
+    Mit `zoom`: Beim Heranzoomen waechst der Mitschnitt auch in der HOEHE, statt
+    den Kopf in das schmale 540er-Band zu quetschen. Umgesetzt als wachsendes
+    Band ueber einer Creme-Basis: die UNTERKANTE bleibt fix (damit der
+    Untertitel-Streifen unten frei bleibt), das Band waechst nach oben; die
+    Leinwand beschneidet den Ueberstand. Der Gast (Suhr) sitzt links, deshalb
+    ist das Band links verankert — beim Zoom fuellt seine Kachel das Bild von
+    links, die rechte Kachel (Juliana) laeuft aus dem Rahmen. `dur` ist Pflicht
+    (fuer die Rueckfahrt-Terminierung). Bewusst NICHT `zoompan` — das blaeht die
+    Framezahl auf (17 s -> ~1,5 h) und laesst den Render OOM-sterben.
+    """
+    w, h, bx, by = band["w"], band["h"], band["x"], band["y"]
+    pad_x = max(0, (CANVAS_W - w) // 2)
+    pad_y = max(0, (CANVAS_H - h) // 2)
+    logo_in = f"[1:v]scale=-1:{logo_h}[logo];"
+
+    if vollbild:
+        # Nur der Gast, formatfuellend: seine Kachel (crop) auf volle Breite
+        # skaliert und in den oberen Bereich gesetzt; unten bleibt ein
+        # Creme-Streifen (sub_strip) fuer die Untertitel im Marken-Look.
+        cr = vollbild.get("crop", {})
+        cw, ch = int(cr.get("w", w)), int(cr.get("h", h))
+        cx, cy = int(cr.get("x", bx)), int(cr.get("y", by))
+        strip = int(vollbild.get("sub_strip", 270))
+        vh = CANVAS_H - strip                      # Hoehe der Videoflaeche (oben)
+        scaled_h = round(ch * CANVAS_W / cw)       # Kachel auf volle Breite
+        yoff = vollbild.get("crop_y_offset")
+        if yoff is None:
+            yoff = max(0, (scaled_h - vh) // 2)    # mittig; via crop_y_offset justierbar
+        return (
+            f"split[bgsrc][fg];"
+            f"[bgsrc]scale={CANVAS_W}:{CANVAS_H},drawbox=x=0:y=0:w={CANVAS_W}:h={CANVAS_H}:color={bg}:t=fill,"
+            f"fps={FPS},format=yuv420p[base];"
+            f"[fg]crop={cw}:{ch}:{cx}:{cy},scale={CANVAS_W}:-2,crop={CANVAS_W}:{vh}:0:{int(yoff)},"
+            f"fps={FPS},format=yuv420p[vid];"
+            f"[base][vid]overlay=x=0:y=0[framed];"
+            + logo_in +
+            f"[framed][logo]overlay=W-w-{logo_margin}:{logo_top}[bl]"
+        )
+
+    if not zoom:
+        return (f"crop={w}:{h}:{bx}:{by},"
+                f"pad={CANVAS_W}:{CANVAS_H}:{pad_x}:{pad_y}:color={bg},fps={FPS},format=yuv420p[base];"
+                + logo_in +
+                f"[base][logo]overlay=W-w-{logo_margin}:{logo_top}[bl]")
+    zt = _zoom_curve(zoom, float(dur or 0.0))
+    bottom = pad_y + h   # feste Unterkante des Mitschnitts (Zwei-Shot-Unterkante)
+    return (
+        f"split[bgsrc][bandsrc];"
+        f"[bgsrc]scale={CANVAS_W}:{CANVAS_H},drawbox=x=0:y=0:w={CANVAS_W}:h={CANVAS_H}:color={bg}:t=fill,"
+        f"fps={FPS},format=yuv420p[base];"
+        f"[bandsrc]crop={w}:{h}:{bx}:{by},scale=w='{w}*({zt})':h='{h}*({zt})':eval=frame[vid];"
+        f"[base][vid]overlay=x={pad_x}:y='{bottom}-overlay_h'[framed];"
+        + logo_in +
+        f"[framed][logo]overlay=W-w-{logo_margin}:{logo_top}[bl]"
+    )
 
 
 # -------- Config / interview.txt --------------------------------------------
@@ -432,15 +521,17 @@ ENC = ["-c:v", "libx264", "-preset", "medium", "-crf", "18", "-pix_fmt", "yuv420
 
 
 def build_clip(src: Path, logo: Path, ranges: list[list[float]], srt: Path,
-               band: dict, bg: str, sub_style: str, out: Path) -> Path:
+               band: dict, bg: str, sub_style: str, out: Path,
+               zoom: dict | None = None, vollbild: dict | None = None) -> Path:
     parts, labels = [], []
     for i, (s, e) in enumerate(ranges):
         parts.append(f"[0:v]trim=start={s}:end={e},setpts=PTS-STARTPTS[v{i}]")
         parts.append(f"[0:a]atrim=start={s}:end={e},asetpts=PTS-STARTPTS[a{i}]")
         labels.append(f"[v{i}][a{i}]")
+    dur = sum(e - s for s, e in ranges)   # exakte Clip-Laenge (fuer die Zoom-Rueckfahrt)
     graph = ";".join(parts + [
         f"{''.join(labels)}concat=n={len(ranges)}:v=1:a=1[cv][ca]",
-        f"[cv]{frame_filter(band, bg)}",
+        f"[cv]{frame_filter(band, bg, zoom=zoom, dur=dur, vollbild=vollbild)}",
         f"[bl]subtitles='{str(srt)}':force_style='{sub_style}'[vo]",
         "[ca]loudnorm=I=-16:TP=-1.5:LRA=11,aformat=sample_rates=48000:channel_layouts=stereo[ao]",
     ])

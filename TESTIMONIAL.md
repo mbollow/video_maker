@@ -73,6 +73,46 @@ Freigabe-Ordner, nie in `projects/<…>/renders/`. Rückmeldungen kommen über d
 `FREIGABE__….txt` (Zeile 1 `FREIGEGEBEN` / `AENDERN`). Bestehende Versionen werden
 **nie** überschrieben.
 
+### Heranzoomen auf den Gast (optional, KEIN Automatismus)
+
+Es gibt einen Ken-Burns-Zoom, der bei längeren Antworten sanft auf den Gast
+heranfährt (der Mitschnitt wächst dabei in der Höhe) und vor Antwortende wieder
+in den Zwei-Shot zurückkehrt. **Das ist bewusst ein Versuch pro Video, keine
+pauschale Regel.** Ein frisch aufgesetztes Video zoomt **nie von allein**.
+
+- Ausprobieren: `npm run testimonial:build -- --projekt <name> --zoom` — dann dem
+  Nutzer zeigen und **auf Feedback warten**. NICHT ungefragt bei jedem Video anwenden.
+- Das Framing ist **gast-/videospezifisch** (aktuell links verankert, weil Suhr
+  links im Bild sitzt) — pro Video prüfen, ob Sitzposition und Höhenwachstum passen.
+- Erst **nach Freigabe** durch den Nutzer den Zoom dauerhaft machen: einen
+  `zoom`-Block mit `"enabled": true` (+ Feintuning `start_s`, `ramp_s`,
+  `out_ramp_s`, `end_pad_s`, `z`, `min_answer_s`) in die `testimonial.json` des
+  Projekts schreiben. Dann greift er auch ohne `--zoom` bei jedem Rebuild dieses
+  einen Projekts.
+
+### Bild-Modus: Zwei-Shot ODER Vollbild (pro Video wählen)
+
+Zwei gleichwertige Optionen — **pro Gespräch bewusst entscheiden**, nicht pauschal:
+
+- **Zwei-Shot (Standard):** Das ganze Sprecher-Band (beide Kacheln) mittig auf
+  Creme. Richtig, **wenn auch der Interviewer sichtbar spricht** — z. B. Juliana
+  stellt spontane Rückfragen oder reagiert on-camera. Dann wirkt der
+  konventionelle Schnitt natürlicher. Kein `vollbild`-Block → dieser Modus.
+- **Vollbild:** Nur die Kachel des Gasts, formatfüllend (der Interviewer „fällt
+  weg"), unten ein Creme-Streifen für die Untertitel. Richtig, **wenn nur der
+  Gast spricht** und die Fragen ohnehin als Folie eingeblendet werden (dann ist
+  der Interviewer im Bild nur „totes" Beiwerk). So beim Suhr-Video gewählt.
+
+Vollbild aktivieren: einen `vollbild`-Block in die `testimonial.json`:
+```json
+"vollbild": { "enabled": true,
+  "crop": {"w":960,"h":540,"x":0,"y":270},   // Kachel des GASTS im Quellbild
+  "sub_strip": 270, "crop_y_offset": 260 }    // Creme-Streifen-Höhe / vertik. Ausschnitt
+```
+`crop` = die Kachel, in der der Gast sitzt (Suhr = links → x0). Sitzt der Gast
+rechts, entsprechend `x` verschieben. `crop_y_offset` justiert die Kopffreiheit.
+Vollbild ersetzt den Zwei-Shot; ein Zoom ist dann hinfällig.
+
 ---
 
 ## Visueller Standard
