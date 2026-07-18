@@ -43,7 +43,7 @@ def slugify(text: str, max_len: int = 48) -> str:
     return text[:max_len].rstrip("-")
 
 
-def plan(projekt: str) -> tuple[dict, list[dict]]:
+def plan(projekt: str, zoom_experiment: bool = False) -> tuple[dict, list[dict]]:
     cfg = tc.load_config(projekt)
     proj = tc.project_dir(projekt)
     blocks = tc.parse_interview(proj / "interview.txt")
@@ -55,6 +55,19 @@ def plan(projekt: str) -> tuple[dict, list[dict]]:
     exceptions = cfg["schnitt"].get("ausnahmen", {})
     fixes = cfg.get("textfixes", [])
     spellings = {k.lower(): v for k, v in cfg.get("schreibweisen", {}).items()}
+    zoomcfg = cfg.get("zoom") or {}
+    # Der Ken-Burns-Push auf den Gast ist bewusst KEIN Automatismus: er greift nur,
+    # wenn dieser Build explizit mit --zoom als Experiment laeuft ODER die
+    # testimonial.json fuer dieses Projekt zoom.enabled=true setzt (nach Freigabe).
+    # Ein frisch aufgesetztes Video zoomt nie von allein — pro Video ausprobieren
+    # und Feedback abwarten (Framing ist gast-/videospezifisch, z.B. Sitzposition).
+    zoom_on = zoom_experiment or bool(zoomcfg.get("enabled"))
+    # Technisches Minimum: rein + mind. 1 s halten + raus + Rueckfahrt-Puffer.
+    # Sonst wuerde die 5-Phasen-Kurve auf kurzen Antworten zerdrueckt.
+    tech_min = (float(zoomcfg.get("start_s", 5.0)) + float(zoomcfg.get("ramp_s", 2.5))
+                + float(zoomcfg.get("out_ramp_s", zoomcfg.get("ramp_s", 2.5)))
+                + float(zoomcfg.get("end_pad_s", 4.0)) + 1.0)
+    zoom_min = max(float(zoomcfg.get("min_answer_s", 12)), tech_min)
 
     planned = []
     for b in blocks:
@@ -68,7 +81,8 @@ def plan(projekt: str) -> tuple[dict, list[dict]]:
         if not field:
             continue
         windows = tc.parse_ranges_field(field)
-        speaker = gast if b.get("antwort") else None
+        is_answer = bool(b.get("antwort"))   # Gast spricht — nur hier zoomen wir auf ihn
+        speaker = gast if is_answer else None
         ws = tc.words_in(words, windows, speaker=speaker)
         if not ws:
             print(f"  [warn] Block [{name}]: keine Woerter im Bereich {field} — uebersprungen")
@@ -76,8 +90,14 @@ def plan(projekt: str) -> tuple[dict, list[dict]]:
         gap = float(exceptions.get(name, default_gap))
         ranges = tc.build_ranges(ws, gap)
         tokens = tc.clean_tokens(ws, fixes, spellings)
+        dur = round(sum(r[1] - r[0] for r in ranges), 2)
+        # Ken-Burns-Push auf den Gast nur bei laengeren Antworten (nicht bei kurzen
+        # Zitaten wie Begruessung/Abschluss, die 'quelle' statt 'antwort' nutzen).
+        # zoomcfg kann leer sein (--zoom ohne Config-Block) -> Defaults nutzen,
+        # aber ein truthy Dict weiterreichen, damit build_clip den Zoom anwendet.
+        zoom = (zoomcfg or {"enabled": True}) if (zoom_on and is_answer and dur >= zoom_min) else None
         planned.append({**b, "kind": kind, "ranges": ranges, "tokens": tokens,
-                        "dur": round(sum(r[1] - r[0] for r in ranges), 2)})
+                        "dur": dur, "zoom": zoom})
     return cfg, planned
 
 
@@ -115,13 +135,16 @@ def render_cards(projekt: str, cfg: dict, planned: list[dict]) -> None:
         b["card"] = png
 
 
-def build(projekt: str, push: bool = True) -> Path:
-    cfg, planned = plan(projekt)
+def build(projekt: str, push: bool = True, zoom_experiment: bool = False) -> Path:
+    cfg, planned = plan(projekt, zoom_experiment)
     proj = tc.project_dir(projekt)
     src = proj / cfg["quelle"]
     logo = tc.REPO_ROOT / "brand-guidelines" / cfg["brand"] / "assets/logo-color.png"
     band, bg = cfg["band"], cfg["hintergrund"]
     kd = cfg["karten"]
+    # Vollbild-Modus: nur der Gast, formatfuellend (Juliana faellt weg). Ersetzt
+    # den Zwei-Shot; der Zoom ist dann hinfaellig.
+    vollbild = cfg["vollbild"] if cfg.get("vollbild", {}).get("enabled") else None
 
     render_cards(projekt, cfg, planned)
 
@@ -140,11 +163,13 @@ def build(projekt: str, push: bool = True) -> Path:
             srt = proj / "work" / f"{slug}.srt"
             srt.write_text(tc.build_srt(b["ranges"], b["tokens"]))
             c = tc.build_clip(src, logo, b["ranges"], srt, band, bg, SUB_STYLE,
-                              proj / "work" / f"{slug}.mp4")
+                              proj / "work" / f"{slug}.mp4",
+                              zoom=None if vollbild else b.get("zoom"), vollbild=vollbild)
             clips.append(c)
             expected += b["dur"]
             cuts = len(b["ranges"]) - 1
-            print(f"  [build] {name:14s} {b['dur']:6.1f}s  {cuts} Schnitt(e)")
+            zmark = "  +Zoom" if b.get("zoom") else ""
+            print(f"  [build] {name:14s} {b['dur']:6.1f}s  {cuts} Schnitt(e){zmark}")
 
     version = next_version(projekt, cfg)
     out = proj / "renders" / f"testimonial_v{version}.mp4"
@@ -225,16 +250,20 @@ def main() -> None:
     ap.add_argument("--projekt", required=True)
     ap.add_argument("--no-push", action="store_true", help="Notausgang: nicht in die Freigabe kopieren")
     ap.add_argument("--nur-plan", action="store_true", help="nur Schnitt/Untertitel zeigen, nichts rendern")
+    ap.add_argument("--zoom", action="store_true",
+                    help="Zoom-Experiment fuer DIESEN Build aktivieren (Standard: aus). Der Ken-Burns-"
+                         "Push auf den Gast ist bewusst kein Automatismus — pro Video ausprobieren "
+                         "und Feedback abwarten.")
     args = ap.parse_args()
 
     if args.nur_plan:
-        _, planned = plan(args.projekt)
+        _, planned = plan(args.projekt, zoom_experiment=args.zoom)
         for b in planned:
             if b.get("ranges"):
                 print(f"\n### {b['block']}  {b['dur']}s  {len(b['ranges']) - 1} Schnitt(e)  {b['ranges']}")
                 print("   ", " ".join(t["t"] for t in b["tokens"]))
         return
-    build(args.projekt, push=not args.no_push)
+    build(args.projekt, push=not args.no_push, zoom_experiment=args.zoom)
 
 
 if __name__ == "__main__":
