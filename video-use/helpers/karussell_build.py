@@ -277,10 +277,12 @@ def main() -> None:
                 photo_src, obj_pos, pmeta = pick_photo(
                     sl, source=args.source, catalog=catalog, used=used_photos,
                     pexels_key=pexels_key, used_stock_ids=used_stock_ids, stock_dir=stock_dir)
+                mirror = "scaleX(-1)" if bc.norm(sl.get("bild_spiegeln", "")) in ("ja", "true", "1", "yes") else "none"
                 kc.render_slide(template=kc.TPL_END, out_png=out_png,
                                 replacements={"{{EYEBROW}}": eyebrow, "{{STATEMENT_HTML}}": stmt_html,
                                               "{{OBJECT_POS}}": obj_pos, "{{FONT_SCALE}}": f"{fs:g}",
-                                              "{{CTA_TEXT}}": sl.get("cta", DEFAULT_CTA)},
+                                              "{{CTA_TEXT}}": sl.get("cta", DEFAULT_CTA),
+                                              "{{PHOTO_TRANSFORM}}": mirror},
                                 assets={"{{LOGO_SRC}}": logo_white, "{{PHOTO_SRC}}": photo_src})
                 rec.update({"lines": lines, "photo": pmeta, "cta": sl.get("cta", DEFAULT_CTA),
                             "highlight": words, "style": style})
