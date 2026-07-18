@@ -48,7 +48,7 @@ CAROUSELS_ROOT = REPO_ROOT / "image-carousels"
 FIELD_KEYS = {
     "hook", "sub", "titel", "icon", "text", "highlight", "hl_style",
     "bild", "bild_file", "object_pos", "thema", "fontscale", "statement",
-    "cta", "stock_query", "status",
+    "cta", "stock_query", "status", "bild_spiegeln",
 }
 _FIELD_START_RE = re.compile(r"^(" + "|".join(sorted(FIELD_KEYS)) + r")\s*:", re.IGNORECASE)
 _LIST_FIELDS = {"thema", "highlight"}
