@@ -198,19 +198,22 @@ class GHLClient:
 
     # -------- Media upload ---------------------------------------------------
 
-    def upload_media(self, video_path: Path, file_name: str | None = None) -> dict:
+    def upload_media(self, video_path: Path, file_name: str | None = None,
+                     mime: str = "video/mp4") -> dict:
         """Upload a media file to the GHL Media Library.
 
         POST /medias/upload-file  (multipart, field "file")
         Form also carries the location target (altType/altId).
         `file_name` overrides the name shown in the GHL media library (defaults
-        to the local filename). Returns a dict normalized to {"id", "url"} when
-        possible, else the raw response so the caller can inspect.
+        to the local filename). `mime` is the multipart content type — pass
+        "image/png" for carousel slides, "image/jpeg" for photos, etc.
+        Returns a dict normalized to {"id", "url"} when possible, else the raw
+        response so the caller can inspect.
         """
         url = f"{BASE_URL}/medias/upload-file"
         name = file_name or video_path.name
         with open(video_path, "rb") as f:
-            files = {"file": (name, f, "video/mp4")}
+            files = {"file": (name, f, mime)}
             data = {
                 "hosted": "false",
                 "fileName": name,

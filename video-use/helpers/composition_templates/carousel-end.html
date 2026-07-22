@@ -4,14 +4,14 @@
 <meta charset="utf-8" />
 <!--
   Karussell ENDE-Slide (1080x1350 / 4:5).
-  Gefüllt von karussell_build.py, gerendert via render_image_post.cjs.
+  Freigestellte Person auf einer Teal-Fläche mit welligem oberem Rand (statt
+  hartem Foto-Rechteck). Gefüllt von karussell_build.py, gerendert via render_image_post.cjs.
 
   Platzhalter:
     {{EYEBROW}}         – Karussell-Thema (Eyebrow)
     {{LOGO_SRC}}        – Logo (Teal-Badge, weiß invertiert)
     {{STATEMENT_HTML}}  – Schluss-Statement (.lx-Zeilen + <span class="hl ...">)
-    {{PHOTO_SRC}}       – Foto (Juliana/Stock)
-    {{OBJECT_POS}}      – object-position des Fotos
+    {{PHOTO_SRC}}       – FREIGESTELLTES Foto (transparentes PNG, unten bündig)
     {{CTA_TEXT}}        – handschriftlicher CTA-Text
     {{FONT_SCALE}}      – Skalierung des Statements
 -->
@@ -25,7 +25,16 @@
     font-family: 'Montserrat', system-ui, sans-serif; background: #f8f6f2;
     --fs-scale: {{FONT_SCALE}};
   }
-  /* Badge identisch zu den Innen-Slides: eckig, oben randbündig, ~2cm vom linken Rand */
+  /* Teal-Fläche mit welligem Rand, füllt das untere Drittel und wölbt sich ÜBER
+     den Kopf der Person (grenzt ihren Bereich vom Rest der Folie ab). */
+  .wave {
+    position: absolute; left: 0; bottom: 0; width: 1080px; height: 760px;
+  }
+  /* Freigestellte Person, unten bündig, links-mittig — Kopf liegt INNERHALB der Welle */
+  .cutout {
+    position: absolute; left: -14px; bottom: 0; height: 600px; width: auto;
+    transform: {{CUTOUT_TRANSFORM}};
+  }
   .badge {
     position: absolute; top: 0; left: 120px; width: 140px; height: 140px;
     background: #4ebbc2; border-radius: 0;
@@ -38,7 +47,7 @@
   }
   /* Schluss-Statement, zentriert im oberen Drittel */
   .statement {
-    position: absolute; top: 210px; left: 84px; right: 84px; text-align: center;
+    position: absolute; top: 206px; left: 84px; right: 84px; text-align: center;
     color: #281d67; line-height: 1.16;
   }
   .statement .lx { font-weight: 800; font-size: calc(52px * var(--fs-scale)); letter-spacing: -0.01em; margin: 0 0 8px; }
@@ -47,39 +56,26 @@
   .hl-boxdark { background: #281d67; color: #fff; padding: 0 12px 4px; border-radius: 7px; }
   .hl-farbe   { color: #4ebbc2; }
   .hl-underline { background: linear-gradient(#4ebbc2, #4ebbc2) left bottom / 100% 0.15em no-repeat; }
-  /* Foto unten links, in den Creme-Hintergrund geblendet */
-  .photo-wrap { position: absolute; left: 0; bottom: 0; width: 600px; height: 560px; }
-  .photo { width: 100%; height: 100%; object-fit: cover; object-position: {{OBJECT_POS}}; transform: {{PHOTO_TRANSFORM}}; }
-  .photo-blend {
-    position: absolute; inset: 0;
-    background:
-      linear-gradient(to bottom, #f8f6f2 0%, rgba(248,246,242,0) 26%),
-      linear-gradient(to right, rgba(248,246,242,0) 62%, #f8f6f2 100%);
-  }
-  /* Handschriftlicher CTA + Pfeil, rechts neben dem Foto */
+  /* Handschriftlicher CTA + Pfeil, rechts über der Teal-Fläche */
   .cta {
-    position: absolute; right: 96px; bottom: 300px; width: 360px; text-align: left;
+    position: absolute; right: 84px; bottom: 322px; width: 340px; text-align: left;
     font-family: 'Caveat', cursive; font-weight: 700; font-size: 46px;
     color: #281d67; line-height: 1.15;
   }
-  /* Handschriftlicher Pfeil UNTER dem CTA-Text, zeigt nach rechts */
   .cta-arrow {
-    position: absolute; right: 110px; bottom: 224px; width: 210px; height: 58px;
+    position: absolute; right: 104px; bottom: 236px; width: 210px; height: 58px;
     color: #4ebbc2;
   }
   .cta-arrow svg { width: 100%; height: 100%; }
-  .footer {
-    position: absolute; bottom: 42px; left: 0; right: 0; text-align: center;
-    color: #9db3b0; font-weight: 600; font-size: 22px; letter-spacing: 0.04em;
-  }
 </style>
 </head>
 <body>
   <div class="stage">
-    <div class="photo-wrap">
-      <img class="photo" src="{{PHOTO_SRC}}" alt="" />
-      <div class="photo-blend"></div>
-    </div>
+    <svg class="wave" viewBox="0 0 1080 760" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,75 C 70,30 150,8 240,10 C 320,12 420,22 500,48 C 600,82 720,170 830,192 C 940,214 1030,196 1080,188 L1080,760 L0,760 Z" fill="#4ebbc2" opacity="0.12"/>
+      <path d="M0,130 C 70,80 150,55 240,58 C 320,60 420,70 500,95 C 600,128 720,215 830,235 C 940,255 1030,235 1080,225 L1080,760 L0,760 Z" fill="#4ebbc2" opacity="0.20"/>
+    </svg>
+    <img class="cutout" src="{{PHOTO_SRC}}" alt="" />
     <div class="badge"><img src="{{LOGO_SRC}}" alt="Palstek" /></div>
     <div class="eyebrow">{{EYEBROW}}</div>
     <div class="statement">
@@ -92,7 +88,6 @@
         <path d="M178 14 L202 30 L178 46" />
       </svg>
     </div>
-    <div class="footer">Palstek GmbH</div>
   </div>
 </body>
 </html>

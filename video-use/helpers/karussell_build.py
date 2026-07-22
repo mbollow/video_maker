@@ -13,8 +13,10 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import html as _html
 import json
 import os
+import re
 import shutil
 import sys
 import tempfile
@@ -37,6 +39,18 @@ DEFAULT_CTA = "Folge mir, wenn du deine Führung bewusst gestalten willst."
 
 def now_iso() -> str:
     return datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds")
+
+
+def _emph_b(text: str, words) -> str:
+    """Escape `text` and wrap each highlight word in <b> (teal via template CSS)."""
+    out = _html.escape(kc.no_dashes(text or ""))
+    for w in (words or []):
+        w = (w or "").strip()
+        if not w:
+            continue
+        out = re.sub(re.escape(_html.escape(w)) + r"\w*",
+                     lambda m: f"<b>{m.group(0)}</b>", out, flags=re.IGNORECASE)
+    return out
 
 
 def generate_json(prompt: str, *, model: str, api_key: str) -> dict:
@@ -74,8 +88,15 @@ Erzeuge zusätzlich Captions für den GESAMTEN Karussell-Post:
   https://palstek-gmbh.de/termin. Hashtags moderat.
 - instagram: gleicher Text auch für Facebook; lockerer, Emojis ok, mehr Hashtags,
   CTA Link in Bio / palstek-gmbh.de/termin.
-Erfinde KEINE Fakten — nur die Aussagen des Karussells + Marken-Proof-Points.
+WICHTIG - Perspektive: Der Post läuft auf Julianas PERSÖNLICHEM Profil. Schreibe
+durchgehend in der ICH-Form aus ihrer Sicht. Sie spricht NIE in der dritten Person
+über sich selbst (also nicht „Juliana zeigt", „im Profil von Juliana", sondern
+„ich zeige", „hier in meinem Profil", „folge mir", „schreib mir").
+Nenne das Poster konsequent „Experten-Poster". Weise am Ende darauf hin, dass es das
+komplette Experten-Poster mit allen 6 Faktoren zum Ausdrucken per DM gibt.
+Erfinde KEINE Fakten, nur die Aussagen des Karussells + Marken-Proof-Points.
 Keine geraden Anführungszeichen (") in Caption-Texten; jede caption EINZEILIG.
+KEINE Gedankenstriche (— oder –); nutze stattdessen Kommas (wirkt sonst KI-generiert).
 
 ## MARKEN-STIMME
 {brand_voice}
@@ -262,9 +283,17 @@ def main() -> None:
                 if sl.get("sub"):
                     import html as _h
                     hook_html += f'\n      <div class="sub">{_h.escape(sl["sub"])}</div>'
-                photo_src, obj_pos, pmeta = pick_photo(
-                    sl, source=args.source, catalog=catalog, used=used_photos,
-                    pexels_key=pexels_key, used_stock_ids=used_stock_ids, stock_dir=stock_dir)
+                foto_rel = (sl.get("foto_file") or "").strip()
+                if foto_rel:
+                    photo_src = (batch_dir / foto_rel).resolve()
+                    if not photo_src.exists():
+                        raise RuntimeError(f"foto_file nicht gefunden: {foto_rel}")
+                    obj_pos = (sl.get("object_pos") or "").strip() or "50% 30%"
+                    pmeta = {"source": "local", "file": foto_rel, "object_pos": obj_pos}
+                else:
+                    photo_src, obj_pos, pmeta = pick_photo(
+                        sl, source=args.source, catalog=catalog, used=used_photos,
+                        pexels_key=pexels_key, used_stock_ids=used_stock_ids, stock_dir=stock_dir)
                 kc.render_slide(template=kc.TPL_START, out_png=out_png,
                                 replacements={"{{EYEBROW}}": eyebrow, "{{HOOK_HTML}}": hook_html,
                                               "{{OBJECT_POS}}": obj_pos, "{{FONT_SCALE}}": f"{fs:g}"},
@@ -274,31 +303,73 @@ def main() -> None:
             elif sl["kind"] == "end":
                 lines = end_lines or [sl.get("statement", "")]
                 stmt_html = kc.build_lines_html(lines, words, style)
-                photo_src, obj_pos, pmeta = pick_photo(
-                    sl, source=args.source, catalog=catalog, used=used_photos,
-                    pexels_key=pexels_key, used_stock_ids=used_stock_ids, stock_dir=stock_dir)
-                mirror = "scaleX(-1)" if bc.norm(sl.get("bild_spiegeln", "")) in ("ja", "true", "1", "yes") else "none"
+                # Ende-Folie zeigt eine FREIGESTELLTE Person auf Teal-Welle.
+                # Bevorzugt ein vorbereitetes Cutout-PNG (foto_cutout), sonst
+                # Foto-Match (dann sollte das Motiv selbst freigestellt sein).
+                cutout_rel = (sl.get("foto_cutout") or "").strip()
+                if cutout_rel:
+                    photo_src = (batch_dir / cutout_rel).resolve()
+                    if not photo_src.exists():
+                        raise RuntimeError(f"foto_cutout nicht gefunden: {cutout_rel}")
+                    pmeta = {"source": "cutout", "file": cutout_rel}
+                else:
+                    photo_src, _pos, pmeta = pick_photo(
+                        sl, source=args.source, catalog=catalog, used=used_photos,
+                        pexels_key=pexels_key, used_stock_ids=used_stock_ids, stock_dir=stock_dir)
+                mirror = "scaleX(-1)" if bc.norm(sl.get("foto_spiegeln", "")) in ("ja", "true", "1", "yes") else "none"
                 kc.render_slide(template=kc.TPL_END, out_png=out_png,
                                 replacements={"{{EYEBROW}}": eyebrow, "{{STATEMENT_HTML}}": stmt_html,
-                                              "{{OBJECT_POS}}": obj_pos, "{{FONT_SCALE}}": f"{fs:g}",
-                                              "{{CTA_TEXT}}": sl.get("cta", DEFAULT_CTA),
-                                              "{{PHOTO_TRANSFORM}}": mirror},
+                                              "{{FONT_SCALE}}": f"{fs:g}", "{{CUTOUT_TRANSFORM}}": mirror,
+                                              "{{CTA_TEXT}}": kc.no_dashes(sl.get("cta", DEFAULT_CTA))},
                                 assets={"{{LOGO_SRC}}": logo_white, "{{PHOTO_SRC}}": photo_src})
                 rec.update({"lines": lines, "photo": pmeta, "cta": sl.get("cta", DEFAULT_CTA),
                             "highlight": words, "style": style})
 
-            else:  # inner
+            else:  # inner (Standard oder Sonder-Layout)
                 import html as _h
-                icon_svg = kc.resolve_icon_svg(sl.get("icon"), sl.get("thema"), sl.get("titel"))
-                title_html = _h.escape(sl.get("titel", ""))
-                body_html = kc.build_body_html(sl.get("text_lines", []), words, style)
-                kc.render_slide(template=kc.TPL_INNER, out_png=out_png,
-                                replacements={"{{EYEBROW}}": eyebrow, "{{NUMBER}}": seq,
-                                              "{{ICON_SVG}}": icon_svg, "{{TITLE_HTML}}": title_html,
-                                              "{{BODY_HTML}}": body_html, "{{FONT_SCALE}}": f"{fs:g}"},
-                                assets={"{{LOGO_SRC}}": logo_white})
-                rec.update({"titel": sl.get("titel", ""), "icon": sl.get("icon", ""),
-                            "highlight": words, "style": style})
+                layout = bc.norm(sl.get("layout", ""))
+                if layout in ("uebersicht", "übersicht", "overview", "serie"):
+                    # Serien-Übersicht: alle Teile, aktueller hervorgehoben
+                    try:
+                        active = int(re.sub(r"\D", "", str(sl.get("aktiv", "0"))) or 0)
+                    except ValueError:
+                        active = 0
+                    items = [l.strip() for l in sl.get("text_lines", []) if l.strip()]
+                    list_html = kc.build_overview_list_html(items, active)
+                    kc.render_slide(template=kc.TPL_OVERVIEW, out_png=out_png,
+                                    replacements={"{{EYEBROW}}": eyebrow,
+                                                  "{{HEADLINE_HTML}}": _h.escape(sl.get("titel", "")),
+                                                  "{{SUBHEAD}}": _h.escape(sl.get("subhead", "")),
+                                                  "{{LIST_HTML}}": list_html,
+                                                  "{{SUBLINE}}": _emph_b(sl.get("subline", ""), words),
+                                                  "{{FONT_SCALE}}": f"{fs:g}"},
+                                    assets={"{{LOGO_SRC}}": logo_white})
+                    rec.update({"layout": "uebersicht", "titel": sl.get("titel", ""),
+                                "aktiv": active})
+                elif layout in ("poster", "ausschnitt", "embed"):
+                    # Eingebetteter Poster-Ausschnitt (Beleg + Teaser)
+                    embed_rel = (sl.get("embed_file") or "").strip()
+                    embed_path = (batch_dir / embed_rel).resolve()
+                    if not embed_path.exists():
+                        raise RuntimeError(f"embed_file nicht gefunden: {embed_rel}")
+                    kc.render_slide(template=kc.TPL_POSTER, out_png=out_png,
+                                    replacements={"{{EYEBROW}}": eyebrow,
+                                                  "{{CAPTION_HTML}}": _emph_b(sl.get("caption", ""), words),
+                                                  "{{NOTE}}": _h.escape(sl.get("note", "")),
+                                                  "{{FONT_SCALE}}": f"{fs:g}"},
+                                    assets={"{{LOGO_SRC}}": logo_white, "{{EMBED_SRC}}": embed_path})
+                    rec.update({"layout": "poster", "embed_file": embed_rel})
+                else:
+                    icon_svg = kc.resolve_icon_svg(sl.get("icon"), sl.get("thema"), sl.get("titel"))
+                    title_html = _h.escape(sl.get("titel", ""))
+                    body_html = kc.build_body_html(sl.get("text_lines", []), words, style)
+                    kc.render_slide(template=kc.TPL_INNER, out_png=out_png,
+                                    replacements={"{{EYEBROW}}": eyebrow, "{{NUMBER}}": seq,
+                                                  "{{ICON_SVG}}": icon_svg, "{{TITLE_HTML}}": title_html,
+                                                  "{{BODY_HTML}}": body_html, "{{FONT_SCALE}}": f"{fs:g}"},
+                                    assets={"{{LOGO_SRC}}": logo_white})
+                    rec.update({"titel": sl.get("titel", ""), "icon": sl.get("icon", ""),
+                                "highlight": words, "style": style})
 
             rec["render"] = str(out_png.relative_to(kc.REPO_ROOT))
             upsert_slide(manifest, rec)
@@ -313,10 +384,10 @@ def main() -> None:
         li = data.get("linkedin") or {}
         ig = data.get("instagram") or {}
         if li.get("caption"):
-            manifest["posts"]["linkedin"] = {**empty_post(True), "caption": li.get("caption"),
+            manifest["posts"]["linkedin"] = {**empty_post(True), "caption": kc.no_dashes(li.get("caption")),
                                              "hashtags": li.get("hashtags", [])}
         if ig.get("caption"):
-            manifest["posts"]["instagram"] = {**empty_post(True), "caption": ig.get("caption"),
+            manifest["posts"]["instagram"] = {**empty_post(True), "caption": kc.no_dashes(ig.get("caption")),
                                               "hashtags": ig.get("hashtags", [])}
     manifest["stages"] = {"built": now_iso(), "captioned": now_iso()}
     save_manifest(manifest_path, manifest)

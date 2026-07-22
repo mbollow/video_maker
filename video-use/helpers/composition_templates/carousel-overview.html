@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<!--
+  Karussell SERIEN-ÜBERSICHT-Slide (1080x1350 / 4:5).
+  Zeigt alle Teile einer Miniserie, der aktuelle Teil hervorgehoben.
+  Gefüllt von karussell_build.py (layout: uebersicht), gerendert via render_image_post.cjs.
+
+  Platzhalter:
+    {{EYEBROW}}       – Karussell-Thema (Eyebrow, identisch über alle Slides)
+    {{LOGO_SRC}}      – Logo (Teal-Badge, weiß invertiert)
+    {{HEADLINE_HTML}} – Überschrift, z.B. „Teil 3 von 6"
+    {{SUBHEAD}}       – Unterzeile unter der Überschrift
+    {{LIST_HTML}}     – vorgerenderte Liste (.item / .item.active)
+    {{SUBLINE}}       – Abschlusszeile unten, z.B. „Heute: …"
+    {{FONT_SCALE}}    – Skalierung
+-->
+<style>
+  @font-face { font-family: 'Montserrat'; src: url('{{FONTS_DIR}}/Montserrat-var.ttf') format('truetype'); font-weight: 100 900; font-style: normal; font-display: block; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1080px; height: 1350px; }
+  .stage {
+    position: relative; width: 1080px; height: 1350px; overflow: hidden;
+    font-family: 'Montserrat', system-ui, sans-serif; background: #f8f6f2;
+    --fs-scale: {{FONT_SCALE}};
+  }
+  .badge {
+    position: absolute; top: 0; left: 120px; width: 140px; height: 140px;
+    background: #4ebbc2; border-radius: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .badge img { width: 118px; height: auto; filter: brightness(0) invert(1); }
+  .eyebrow {
+    position: absolute; top: 60px; left: 288px; height: 32px;
+    color: #4ebbc2; font-weight: 600; font-size: 27px; letter-spacing: 0.01em;
+  }
+  /* Überschrift */
+  .headline {
+    position: absolute; top: 214px; left: 96px; right: 96px;
+    color: #281d67; font-weight: 800; font-size: calc(72px * var(--fs-scale));
+    letter-spacing: -0.02em; line-height: 1.02;
+  }
+  .headline .hl-farbe { color: #4ebbc2; }
+  .subhead {
+    position: absolute; top: 314px; left: 98px; right: 96px;
+    color: #3a6b70; font-weight: 600; font-size: calc(30px * var(--fs-scale));
+    line-height: 1.25;
+  }
+  /* Liste der Serienteile */
+  .list {
+    position: absolute; top: 402px; left: 96px; right: 96px; bottom: 150px;
+    display: flex; flex-direction: column; justify-content: center; gap: 16px;
+  }
+  .item {
+    display: flex; align-items: center; gap: 26px;
+    padding: 16px 26px; border-radius: 16px;
+  }
+  .item .n {
+    font-weight: 800; font-size: calc(40px * var(--fs-scale));
+    color: #cfe8e5; min-width: 52px; text-align: center; line-height: 1;
+  }
+  .item .t {
+    font-weight: 600; font-size: calc(37px * var(--fs-scale));
+    color: #281d67; line-height: 1.08; letter-spacing: -0.01em;
+  }
+  /* aktueller Teil: gefüllte Teal-Box, weiße Schrift */
+  .item.active { background: #4ebbc2; box-shadow: 0 14px 30px rgba(78,187,194,0.34); }
+  .item.active .n { color: #ffffff; }
+  .item.active .t { color: #ffffff; font-weight: 800; }
+  .item.active .now {
+    margin-left: auto; font-weight: 800; font-size: calc(22px * var(--fs-scale));
+    color: #281d67; background: #ffffff; border-radius: 999px;
+    padding: 6px 18px; letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  /* Abschlusszeile */
+  .subline {
+    position: absolute; bottom: 84px; left: 96px; right: 96px; text-align: left;
+    color: #281d67; font-weight: 600; font-size: calc(31px * var(--fs-scale));
+    line-height: 1.28;
+  }
+  .subline b { color: #4ebbc2; font-weight: 800; }
+  .footer {
+    position: absolute; bottom: 42px; left: 0; right: 0; text-align: center;
+    color: #9db3b0; font-weight: 600; font-size: 22px; letter-spacing: 0.04em;
+  }
+</style>
+</head>
+<body>
+  <div class="stage">
+    <div class="badge"><img src="{{LOGO_SRC}}" alt="Palstek" /></div>
+    <div class="eyebrow">{{EYEBROW}}</div>
+    <div class="headline">{{HEADLINE_HTML}}</div>
+    <div class="subhead">{{SUBHEAD}}</div>
+    <div class="list">
+      {{LIST_HTML}}
+    </div>
+    <div class="subline">{{SUBLINE}}</div>
+  </div>
+</body>
+</html>

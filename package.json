@@ -49,7 +49,9 @@
     "ghl:discover": "uv run --project ./video-use python ./video-use/helpers/ghl_discover.py",
     "ghl:plan": "uv run --project ./video-use python ./video-use/helpers/ghl_schedule.py",
     "ghl:push": "uv run --project ./video-use python ./video-use/helpers/ghl_push.py",
-    "ghl:push:draft": "uv run --project ./video-use python ./video-use/helpers/ghl_push.py --status draft"
+    "ghl:push:draft": "uv run --project ./video-use python ./video-use/helpers/ghl_push.py --status draft",
+    "ghl:auto": "uv run --project ./video-use python ./video-use/helpers/ghl_plan.py",
+    "ghl:auto:push": "uv run --project ./video-use python ./video-use/helpers/ghl_plan.py --execute"
   },
   "dependencies": {
     "hyperframes": "^0.5.5",
