@@ -320,15 +320,46 @@ def _words_in_range(transcript: dict, t_start: float, t_end: float) -> list[dict
     return out
 
 
-def build_master_srt(edl: dict, edit_dir: Path, out_path: Path) -> None:
+def _fulltext_punct_map(transcript: dict) -> dict:
+    """Map word.start -> trailing punctuation, recovered positionally from Whisper's
+    punctuated `text` field. The per-word tokens are bare (no punctuation), but the
+    full `text` carries commas/periods/question marks and is the SAME word sequence,
+    so a positional zip re-attaches punctuation deterministically (no LLM needed).
+    Returns {} if the counts don't line up (then we fall back to no punctuation)."""
+    words = transcript.get("words") or []
+    ft = re.findall(r"\S+", transcript.get("text") or "")
+    if not ft or len(ft) != len(words):
+        return {}
+    out: dict = {}
+    for w, tok in zip(words, ft):
+        m = re.search(r"([.,!?;:]+)$", tok)
+        if m and w.get("start") is not None:
+            out[round(float(w["start"]), 3)] = m.group(1)
+    return out
+
+
+def build_master_srt(edl: dict, edit_dir: Path, out_path: Path, clean: bool = True) -> None:
     """Build an output-timeline SRT from per-source transcripts.
 
-    - 2-word chunks (break on any punctuation in between)
-    - UPPERCASE text
-    - Output times computed as word.start - segment_start + segment_offset
+    clean=True (DEFAULT): Untertitel werden grammatikalisch bereinigt — Fuellwoerter
+    raus, Versprecher-Wiederholungen zusammengezogen, 'n/'ne ausgeschrieben,
+    Schreibweisen/Textfixes angewandt (via testimonial_common.clean_tokens, dieselbe
+    Logik wie beim Testimonial). Ergebnis: durchgehende, saubere Untertitel, die bewusst
+    leicht vom gesprochenen Ton abweichen — damit man das Video am Handy OHNE Ton lesen
+    kann. `--no-clean-subs` -> verbatim (Opt-out). Optionale Projekt-Korrekturen ueber
+    edl['textfixes'] / edl['schreibweisen'] (gleiches Format wie testimonial.json).
+
+    - gemischte Schreibweise + Satzzeichen (Kommata/Punkt/Fragezeichen aus dem Whisper-
+      Volltext zurueckgemappt) — nicht UPPERCASE, damit es am Handy gut lesbar ist
+    - bis zu 4-Wort-Chunks, Umbruch an Satzende (. ! ?)
+    - Output-Zeiten = word.start - segment_start + segment_offset
     """
     transcripts_dir = edit_dir / "transcripts"
     sources = edl["sources"]
+    textfixes = edl.get("textfixes")
+    spellings = {k.lower(): v for k, v in (edl.get("schreibweisen") or {}).items()} or None
+    if clean:
+        import testimonial_common as tc
 
     entries: list[tuple[float, float, str]] = []
     seg_offset = 0.0
@@ -348,36 +379,63 @@ def build_master_srt(edl: dict, edit_dir: Path, out_path: Path) -> None:
         transcript = json.loads(tr_path.read_text())
         words_in_seg = _words_in_range(transcript, seg_start, seg_end)
 
-        # Group into up to 4-word chunks; break only on sentence-ending
-        # punctuation (commas stay inside, so cues read as 3-4 words — easier
-        # to read than 2-word fragments).
-        chunks: list[list[dict]] = []
-        current: list[dict] = []
-        for w in words_in_seg:
-            text = (w.get("text") or "").strip()
-            if not text:
-                continue
-            current.append(w)
-            ends_sentence = bool(text) and text[-1] in ".!?"
-            if len(current) >= 4 or ends_sentence:
+        if clean:
+            # Bereinigte Tokens (Fuellwoerter/Versprecher raus, Schreibweisen); Timings bleiben.
+            toks = tc.clean_tokens(words_in_seg, textfixes, spellings)
+            # Satzzeichen aus dem Whisper-Volltext (positionell) zurueckmappen.
+            punct = _fulltext_punct_map(transcript)
+            if punct:
+                for w in toks:
+                    p = punct.get(round(float(w.get("s", -1)), 3), "")
+                    if p:
+                        w["t"] = (w.get("t") or "").rstrip() + p
+            chunks = []
+            current = []
+            for w in toks:
+                current.append(w)
+                t = (w.get("t") or "").rstrip()
+                if len(current) >= 4 or (t and t[-1] in ".!?"):
+                    chunks.append(current)
+                    current = []
+            if current:
                 chunks.append(current)
-                current = []
-        if current:
-            chunks.append(current)
-
-        for chunk in chunks:
-            local_start = max(seg_start, chunk[0].get("start", seg_start))
-            local_end = min(seg_end, chunk[-1].get("end", seg_end))
-            out_start = max(0.0, local_start - seg_start) + seg_offset
-            out_end = max(0.0, local_end - seg_start) + seg_offset
-            if out_end <= out_start:
-                out_end = out_start + 0.4
-            text = " ".join((w.get("text") or "").strip() for w in chunk)
-            text = re.sub(r"\s+", " ", text).strip()
-            # Strip trailing punctuation for cleaner uppercase look
-            text = text.rstrip(",;:")
-            text = text.upper()
-            entries.append((out_start, out_end, text))
+            for chunk in chunks:
+                local_start = max(seg_start, chunk[0]["s"])
+                local_end = min(seg_end, chunk[-1]["e"])
+                out_start = max(0.0, local_start - seg_start) + seg_offset
+                out_end = max(0.0, local_end - seg_start) + seg_offset
+                if out_end <= out_start:
+                    out_end = out_start + 0.4
+                # Gemischte Schreibweise + Satzzeichen behalten (kein .upper()); nur
+                # ein evtl. haengendes ';'/':' am Cue-Ende raus (Komma/Punkt bleiben).
+                text = " ".join((w.get("t") or "").strip() for w in chunk)
+                text = re.sub(r"\s+", " ", text).strip().rstrip(";:")
+                entries.append((out_start, out_end, text))
+        else:
+            # Verbatim (Opt-out): bis zu 4-Wort-Chunks, Umbruch an Satzende.
+            chunks = []
+            current = []
+            for w in words_in_seg:
+                text = (w.get("text") or "").strip()
+                if not text:
+                    continue
+                current.append(w)
+                ends_sentence = bool(text) and text[-1] in ".!?"
+                if len(current) >= 4 or ends_sentence:
+                    chunks.append(current)
+                    current = []
+            if current:
+                chunks.append(current)
+            for chunk in chunks:
+                local_start = max(seg_start, chunk[0].get("start", seg_start))
+                local_end = min(seg_end, chunk[-1].get("end", seg_end))
+                out_start = max(0.0, local_start - seg_start) + seg_offset
+                out_end = max(0.0, local_end - seg_start) + seg_offset
+                if out_end <= out_start:
+                    out_end = out_start + 0.4
+                text = " ".join((w.get("text") or "").strip() for w in chunk)
+                text = re.sub(r"\s+", " ", text).strip().rstrip(",;:").upper()
+                entries.append((out_start, out_end, text))
 
         seg_offset += seg_duration
 
@@ -606,6 +664,12 @@ def main() -> None:
         help="Skip subtitles even if the EDL references one",
     )
     ap.add_argument(
+        "--no-clean-subs",
+        action="store_true",
+        help="Untertitel NICHT bereinigen (verbatim, mit Fuellwoertern). Default: bereinigt "
+             "(durchgehend, grammatikalisch sauber, ohne Fuellwoerter — weicht bewusst vom Ton ab).",
+    )
+    ap.add_argument(
         "--no-loudnorm",
         action="store_true",
         help="Skip audio loudness normalization. Default is on (-14 LUFS, -1 dBTP, LRA 11).",
@@ -643,7 +707,7 @@ def main() -> None:
     srt_path: Path | None = None
     if args.build_subtitles:
         srt_path = edit_dir / "master.srt"
-        build_master_srt(edl, edit_dir, srt_path)
+        build_master_srt(edl, edit_dir, srt_path, clean=not args.no_clean_subs)
 
     subs_path: Path | None = None
     if not args.no_subtitles:

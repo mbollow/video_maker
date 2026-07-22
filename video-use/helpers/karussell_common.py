@@ -36,6 +36,8 @@ FONTS_DIR = TEMPLATES / "fonts"  # self-hosted variable fonts (deterministic ren
 TPL_START = TEMPLATES / "carousel-start.html"
 TPL_INNER = TEMPLATES / "carousel-inner.html"
 TPL_END = TEMPLATES / "carousel-end.html"
+TPL_OVERVIEW = TEMPLATES / "carousel-overview.html"  # layout: uebersicht (Serien-Teile)
+TPL_POSTER = TEMPLATES / "carousel-poster.html"      # layout: poster (Poster-Ausschnitt)
 RENDERER = bc.RENDERER
 CANVAS_W, CANVAS_H = bc.CANVAS_W, bc.CANVAS_H
 
@@ -46,9 +48,15 @@ CAROUSELS_ROOT = REPO_ROOT / "image-carousels"
 
 # Field keys recognised in outline blocks (single-line, except `text`)
 FIELD_KEYS = {
+    "thema", "eyebrow",  # Vorspann-Meta (gelten für alle Slides)
     "hook", "sub", "titel", "icon", "text", "highlight", "hl_style",
-    "bild", "bild_file", "object_pos", "thema", "fontscale", "statement",
+    "bild", "bild_file", "object_pos", "fontscale", "statement",
     "cta", "stock_query", "status", "bild_spiegeln",
+    # Sonder-Layouts für Innen-Slides (Serien-Übersicht / Poster-Ausschnitt)
+    "layout", "aktiv", "embed_file", "caption", "subhead", "subline", "note",
+    "foto_cutout",  # freigestelltes PNG für die Ende-Folie (lokaler Batch-Pfad)
+    "foto_file",    # lokales Foto direkt nutzen (Start/Ende), umgeht Katalog/Stock
+    "foto_spiegeln",  # Ende-Freisteller horizontal spiegeln (ja/nein)
 }
 _FIELD_START_RE = re.compile(r"^(" + "|".join(sorted(FIELD_KEYS)) + r")\s*:", re.IGNORECASE)
 _LIST_FIELDS = {"thema", "highlight"}
@@ -101,6 +109,19 @@ def resolve_icon_svg(name: str | None, thema_tokens: list[str] | None = None,
 
 def _strip_svg_comment(svg: str) -> str:
     return re.sub(r"<!--.*?-->\s*", "", svg, flags=re.DOTALL).strip()
+
+
+# ---------- text sanitising --------------------------------------------------
+
+# Gedankenstriche (em/en dash, auch als Bindestrich-mit-Spaces) → Komma.
+# Wirkt wie ein KI-Fingerabdruck; die Marke schreibt lieber mit Komma.
+# Bindestriche IN Komposita (ohne umgebende Spaces) bleiben unangetastet.
+_DASH_RE = re.compile(r"\s*[—–]\s*|\s+-\s+")
+
+
+def no_dashes(s: str) -> str:
+    """Ersetze Gedankenstriche durch Kommas; Kompositum-Bindestriche bleiben."""
+    return _DASH_RE.sub(", ", s or "")
 
 
 # ---------- env / freigabe dir ----------------------------------------------
@@ -383,8 +404,17 @@ def build_body_html(text_lines: list[str], words: list[str] | None, style: str) 
     words = [w for w in (words or []) if w and w.strip()]
     out: list[str] = []
     for para in paragraphs_from_lines(text_lines):
-        line_html = [_wrap_words(html.escape(l), words, style) for l in para]
-        out.append('<p class="para">' + "<br>".join(line_html) + "</p>")
+        # Zeilen eines Absatzes zu Fließtext verbinden (mit Leerzeichen), nicht mit
+        # hartem <br>: der Browser bricht per Breite um, `text-wrap: pretty` (CSS)
+        # verhindert Einzelwort-Zeilen. Manuelle Umbrüche = nur Autoren-Bequemlichkeit.
+        line_html = [_wrap_words(html.escape(no_dashes(l)), words, style) for l in para]
+        inner = " ".join(line_html)
+        # Widow-Schutz: die letzten zwei Wörter mit geschütztem Leerzeichen binden,
+        # damit kein Einzelwort allein in der Schlusszeile landet. Übersprungen, wenn
+        # der Absatz mit einem Highlight-<span> endet (dort säße das Leerzeichen im Tag).
+        if not inner.endswith("</span>"):
+            inner = re.sub(r" (\S+)$", r"&nbsp;\1", inner)
+        out.append('<p class="para">' + inner + "</p>")
     return "\n      ".join(out)
 
 
@@ -392,10 +422,24 @@ def build_lines_html(lines: list[str], words: list[str] | None, style: str) -> s
     """Centered .lx lines (for start hook / end statement) with word emphasis."""
     words = [w for w in (words or []) if w and w.strip()]
     out: list[str] = []
-    for l in [x.strip() for x in lines if x and x.strip()]:
+    for l in [no_dashes(x.strip()) for x in lines if x and x.strip()]:
         inner = _wrap_words(html.escape(l), words, style) if words else html.escape(l)
         out.append(f'<div class="lx">{inner}</div>')
     return "\n      ".join(out)
+
+
+def build_overview_list_html(items: list[str], active: int, *, now_label: str = "Heute") -> str:
+    """Render the series-overview list (.item rows). `active` is 1-based; the
+    matching row gets the filled highlight box + a small „Heute"-pill."""
+    rows: list[str] = []
+    for i, label in enumerate([no_dashes(x.strip()) for x in items if x and x.strip()], start=1):
+        cls = "item active" if i == active else "item"
+        now = f'<span class="now">{html.escape(now_label)}</span>' if i == active else ""
+        rows.append(
+            f'<div class="{cls}"><span class="n">{i}</span>'
+            f'<span class="t">{html.escape(label)}</span>{now}</div>'
+        )
+    return "\n      ".join(rows)
 
 
 # ---------- render -----------------------------------------------------------

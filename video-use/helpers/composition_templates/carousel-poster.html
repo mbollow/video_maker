@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<!--
+  Karussell POSTER-AUSSCHNITT-Slide (1080x1350 / 4:5).
+  Bettet einen scharfen Ausschnitt aus dem Experten-Poster ein (Beleg + Teaser).
+  Gefüllt von karussell_build.py (layout: poster), gerendert via render_image_post.cjs.
+
+  Platzhalter:
+    {{EYEBROW}}       – Karussell-Thema (Eyebrow, identisch über alle Slides)
+    {{LOGO_SRC}}      – Logo (Teal-Badge, weiß invertiert)
+    {{CAPTION_HTML}}  – kleine Zeile über dem Ausschnitt
+    {{EMBED_SRC}}     – Pfad zum Ausschnitt-Bild (PNG)
+    {{NOTE}}          – kleine Zeile unter dem Ausschnitt (optional)
+    {{FONT_SCALE}}    – Skalierung
+-->
+<style>
+  @font-face { font-family: 'Montserrat'; src: url('{{FONTS_DIR}}/Montserrat-var.ttf') format('truetype'); font-weight: 100 900; font-style: normal; font-display: block; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1080px; height: 1350px; }
+  .stage {
+    position: relative; width: 1080px; height: 1350px; overflow: hidden;
+    font-family: 'Montserrat', system-ui, sans-serif; background: #f8f6f2;
+    --fs-scale: {{FONT_SCALE}};
+  }
+  .badge {
+    position: absolute; top: 0; left: 120px; width: 140px; height: 140px;
+    background: #4ebbc2; border-radius: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .badge img { width: 118px; height: auto; filter: brightness(0) invert(1); }
+  .eyebrow {
+    position: absolute; top: 60px; left: 288px; height: 32px;
+    color: #4ebbc2; font-weight: 600; font-size: 27px; letter-spacing: 0.01em;
+  }
+  /* kleine Zeile über dem Ausschnitt */
+  .caption {
+    position: absolute; top: 200px; left: 110px; right: 110px; text-align: center;
+    color: #281d67; font-weight: 600; font-size: calc(30px * var(--fs-scale));
+    line-height: 1.3;
+  }
+  .caption b { color: #4ebbc2; font-weight: 800; }
+  /* eingebetteter Ausschnitt, zentriert, wie ein herausgetrenntes Stück Poster */
+  .embed-wrap {
+    position: absolute; top: 296px; left: 0; right: 0; bottom: 190px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .embed {
+    max-height: 100%; max-width: 78%;
+    border-radius: 20px;
+    box-shadow: 0 26px 64px rgba(40,29,103,0.30), 0 4px 12px rgba(40,29,103,0.18);
+  }
+  /* kleine Notiz unten — klarer Abstand zur Grafik */
+  .note {
+    position: absolute; bottom: 74px; left: 110px; right: 110px; text-align: center;
+    color: #3a6b70; font-weight: 600; font-size: calc(27px * var(--fs-scale));
+    line-height: 1.3;
+  }
+</style>
+</head>
+<body>
+  <div class="stage">
+    <div class="badge"><img src="{{LOGO_SRC}}" alt="Palstek" /></div>
+    <div class="eyebrow">{{EYEBROW}}</div>
+    <div class="caption">{{CAPTION_HTML}}</div>
+    <div class="embed-wrap">
+      <img class="embed" src="{{EMBED_SRC}}" alt="Ausschnitt aus dem Experten-Poster" />
+    </div>
+    <div class="note">{{NOTE}}</div>
+  </div>
+</body>
+</html>

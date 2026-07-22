@@ -53,7 +53,11 @@ DEFAULT_FREIGABE_DIR = (
 
 FREIGABE_TEMPLATE = """STATUS: OFFEN
 ============================================================
-Anleitung für Juliana:
+Veröffentlichen auf?   (x = ja — einfach ein x in die Klammer setzen)
+  [x] Instagram   — immer aktiv (Standard, bitte so lassen)
+  [ ] LinkedIn    — ankreuzen, wenn zusätzlich auf LinkedIn gewünscht
+============================================================
+Anleitung für Juliana / Michael:
   - Wenn alles passt: ersetze in Zeile 1  OFFEN  durch  FREIGEGEBEN
   - Wenn etwas geändert werden soll: ersetze  OFFEN  durch  AENDERN
     und schreibe deine Anmerkungen einfach hier unten drunter.

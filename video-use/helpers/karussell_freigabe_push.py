@@ -37,10 +37,27 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import karussell_common as kc  # noqa: E402
 import bild_common as bc  # noqa: E402
 from freigabe_push import (  # noqa: E402
-    slugify_hook, next_global_number, src_signature, FREIGABE_TEMPLATE,
+    slugify_hook, next_global_number, src_signature,
 )
 
 REPO_ROOT = kc.REPO_ROOT
+
+# Karussell-Posts werden pauschal auf BEIDEN Kanaelen veroeffentlicht (Instagram +
+# LinkedIn vorangehakt) — anders als Video/Bild, wo nur Instagram vorausgewaehlt ist.
+FREIGABE_TEMPLATE = """STATUS: OFFEN
+============================================================
+Veröffentlichen auf?   (x = ja — einfach ein x in die Klammer setzen)
+  [x] Instagram   — immer aktiv (Standard, bitte so lassen)
+  [x] LinkedIn    — immer aktiv (Standard, bitte so lassen)
+============================================================
+Anleitung für Juliana / Michael:
+  - Wenn alles passt: ersetze in Zeile 1  OFFEN  durch  FREIGEGEBEN
+  - Wenn etwas geändert werden soll: ersetze  OFFEN  durch  AENDERN
+    und schreibe deine Anmerkungen einfach hier unten drunter.
+  - Du kannst die Datei ganz normal speichern. Das war's.
+============================================================
+
+"""
 
 
 def ordered_slides(manifest: dict) -> list[dict]:
@@ -162,6 +179,9 @@ def main() -> None:
                     help="Ziel-Ordner (Default: FREIGABE_KARUSSELL_DIR, sonst FREIGABE_BILDER_DIR)")
     ap.add_argument("--label", default=None,
                     help="Ordner-/Datei-Slug statt Thema (z.B. energie-a-sachlich)")
+    ap.add_argument("--number", type=int, default=None,
+                    help="Feste Ordner-Nummer statt globalem Zähler — für Serien-Chronologie "
+                         "(z.B. bei einer 6-teiligen Serie je Teil die passende Nummer)")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 
@@ -179,7 +199,8 @@ def main() -> None:
     if args.dry_run:
         print("  (DRY RUN — es wird nichts geschrieben)\n")
 
-    allocator = [next_global_number(base) if base.exists() else 1]
+    allocator = [args.number if args.number is not None
+                 else (next_global_number(base) if base.exists() else 1)]
     res = push(manifest, base, args.batch, args.dry_run, allocator, label=args.label)
     if res.get("skipped"):
         print(f"  übersprungen: {res['skipped']}")
