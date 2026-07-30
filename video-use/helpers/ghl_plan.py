@@ -44,6 +44,7 @@ from ghl_ledger import (  # noqa: E402
 )
 from ghl_push import resolve_caption  # noqa: E402
 from freigabe_push import DEFAULT_FREIGABE_DIR  # noqa: E402
+from ghl_sync_captions import newest_caption_file, sync_video_area  # noqa: E402
 
 SLOT_HOUR, SLOT_MIN = 9, 55
 
@@ -106,7 +107,8 @@ def newest_carousel_slides(folder: Path) -> list[Path]:
 
 
 def caption_file(folder: Path) -> Path | None:
-    return next(iter(sorted(folder.glob("captions*.txt"))), None)
+    # NEWEST captions version (captions_v3 beats captions_v2 beats captions__).
+    return newest_caption_file(folder)
 
 
 def sha_of_files(paths: list[Path]) -> str:
@@ -206,6 +208,14 @@ def main() -> None:
     print("Verbundene Konten (Plattform → Konto):")
     for acc, plat in platform_map.items():
         print(f"   {plat:<10} {acc}")
+    print()
+
+    # PFLICHT vor jedem Upload: die handgepflegten captions.txt sind die Wahrheit —
+    # ins Manifest spiegeln, bevor irgendetwas zu GHL geht. Blockiert den Push nie.
+    try:
+        sync_video_area(SM_BASE / "Freigabeprozess – Video")
+    except Exception as e:
+        print(f"[ghl-sync] Warnung: Caption-Sync übersprungen ({e})")
     print()
 
     # Gather all FREIGEGEBEN items across the selected areas.
