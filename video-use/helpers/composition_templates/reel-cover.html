@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<!--
+  Reel-Cover-Vorlage (eigenständiges Titelbild, 1080x1920 / 9:16).
+  Erzeugt von cover_build.py: ein sauberer Standbild-Frame aus dem Reel
+  (base.mp4, ohne eingebrannte Untertitel) + Titel im Reel-Hook-Look,
+  gerendert via render_image_post.cjs als PNG. KEIN Video, KEIN Logo, KEINE Eyebrow.
+
+  Platzhalter (vom Build-Script ersetzt):
+    {{PHOTO_SRC}}   – Pfad zum Standbild (relativ zur HTML-Datei)
+    {{OBJECT_POS}}  – object-position des Fotos, z.B. "50% 16%"
+    {{TITLE_HTML}}  – vorgerenderte Titelzeilen (.top / .mark-line>.mark / .bot)
+
+  Design: Corporate-Dunkelblau-Overlay #281D67 @ 50% (flach, KEIN Verlauf),
+  Montserrat fett, Punchline in Teal-Marker-Box #4ebbc2, Akzentwörter in Teal.
+  Titelblock hoch genug, dass er auch im zentrierten Grid-Crop vollständig sitzt.
+-->
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1080px; height: 1920px; }
+  .stage {
+    position: relative; width: 1080px; height: 1920px; overflow: hidden;
+    font-family: 'Montserrat', system-ui, sans-serif; background: #281d67;
+  }
+  .photo {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; object-position: {{OBJECT_POS}};
+  }
+  /* Reel-Hook-Overlay: Corporate-Dunkelblau #281D67 @ 50%, flach (KEIN Verlauf) */
+  .overlay { position: absolute; inset: 0; background: rgba(40,29,103,0.5); }
+  /* Titelblock unten links — in der Grid-Sicherheitszone */
+  .title {
+    position: absolute; left: 56px; right: 56px; bottom: 300px;
+    text-align: left; color: #fff; line-height: 1.06;
+    text-shadow: 0 4px 22px rgba(20,14,55,.6), 0 1px 4px rgba(0,0,0,.5);
+  }
+  .title .top { font-weight: 800; font-size: 146px; letter-spacing: -0.02em; white-space: nowrap; }
+  .title .mark-line { margin: 16px 0 24px; }
+  .title .mark {
+    display: inline-block; background: #4ebbc2; color: #fff; text-shadow: none;
+    font-weight: 900; font-size: {{MARK_FONT}}px; letter-spacing: -0.02em; line-height: 1.0;
+    padding: 4px 26px 14px; border-radius: 14px; white-space: nowrap;
+  }
+  .title .bot { font-weight: 800; font-size: 124px; letter-spacing: -0.02em; line-height: 1.08; white-space: nowrap; }
+  .title .tl { color: #4ebbc2; }
+</style>
+</head>
+<body>
+  <div class="stage">
+    <img class="photo" src="{{PHOTO_SRC}}" alt="" />
+    <div class="overlay"></div>
+    <div class="title">{{TITLE_HTML}}</div>
+  </div>
+  <script>
+    // Zeilen automatisch verkleinern, falls sie den Titelrahmen überlaufen —
+    // so passt auch ein längerer Hook (gleiche Message wie im Video) sauber ins Bild.
+    function fitTitle() {
+      var box = document.querySelector('.title');
+      if (!box) return;
+      var maxW = box.clientWidth;
+      document.querySelectorAll('.title .top, .title .bot, .title .mark').forEach(function (el) {
+        var fs = parseFloat(window.getComputedStyle(el).fontSize);
+        var guard = 0;
+        while (el.scrollWidth > maxW && fs > 24 && guard < 300) { fs -= 2; el.style.fontSize = fs + 'px'; guard++; }
+      });
+    }
+    fitTitle();
+    window.addEventListener('load', fitTitle);
+    if (document.fonts && document.fonts.ready) { document.fonts.ready.then(fitTitle); }
+  </script>
+</body>
+</html>
