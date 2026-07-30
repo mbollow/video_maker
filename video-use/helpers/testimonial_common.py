@@ -488,7 +488,7 @@ def card_html(brand_dir: Path, kind: str, fields: dict) -> str:
     font = REPO_ROOT / "font_kobin_medium/Korbin-Medium.otf"
     logo = brand_dir / "assets/logo-color.png"
     body = {
-        "intro": ("<div class='stage'>"
+        "intro": ("{intro_logo}<div class='stage'>"
                   "<div class='intro-eyebrow'>{eyebrow}</div>"
                   "<div class='intro-name'>{name}</div>"
                   "<div class='intro-role'>{rolle}</div>"

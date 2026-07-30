@@ -92,10 +92,20 @@ def short_title(video: dict, max_len: int = 24) -> str:
 
 
 def next_global_number(base: Path) -> int:
-    """Highest NNN_ folder prefix across the whole review dir, plus one."""
+    """Highest NNN_ folder prefix across the whole review dir, plus one.
+
+    Scannt auch den `veröffentlicht/`-Unterordner mit, damit bereits archivierte
+    (veröffentlichte) Videos ihre Nummer behalten und keine Nummer doppelt vergeben wird.
+    """
     highest = 0
+    dirs_to_scan = []
     if base.exists():
-        for child in base.iterdir():
+        dirs_to_scan.append(base)
+        published = base / "veröffentlicht"
+        if published.exists():
+            dirs_to_scan.append(published)
+    for d in dirs_to_scan:
+        for child in d.iterdir():
             m = re.match(r"^(\d{3,})_", child.name)
             if child.is_dir() and m:
                 highest = max(highest, int(m.group(1)))
@@ -207,21 +217,37 @@ def push_video(video: dict, base: Path, dry_run: bool, allocator: list[int]) -> 
         })
         actions.append(final_dst.name)
 
-    # --- captions (write once; new versions on change) ---
-    captions_text = build_captions_text(video)
-    if captions_text:
-        existing_caps = sorted(folder.glob("captions*.txt")) if folder.exists() else []
-        if not existing_caps:
+    # --- captions: NUR einmalig seeden, wenn noch KEINE Caption existiert. ---
+    # Die Captions im Freigabe-Ordner sind handgepflegt (Wahrheit). Ein Re-Push
+    # darf sie NIE überschreiben und auch KEINE captions_vN aus dem Manifest anlegen
+    # (das Manifest weicht bewusst vom handgepflegten Text ab). Also: nur seeden,
+    # damit ein brandneues Video überhaupt eine Datei zum Bearbeiten hat.
+    existing_caps = sorted(folder.glob("captions*.txt")) if folder.exists() else []
+    if not existing_caps:
+        captions_text = build_captions_text(video)
+        if captions_text:
             cap_dst = folder / f"captions__{title}.txt"
             if not dry_run:
                 cap_dst.write_text(captions_text, encoding="utf-8")
             actions.append(cap_dst.name)
-        else:
-            prev = existing_caps[-1].read_text(encoding="utf-8") if not dry_run else ""
-            if not dry_run and prev.strip() != captions_text.strip():
-                cap_dst = folder / f"captions_v{len(existing_caps) + 1}__{title}.txt"
-                cap_dst.write_text(captions_text, encoding="utf-8")
-                actions.append(cap_dst.name)
+
+    # --- cover_vN.png (Reel-Titelbild; write once, neue Version bei Änderung) ---
+    # Quelle: neuestes cover_v*.png im renders-Ordner des Projekts (aus cover_build.py).
+    cover_srcs = sorted(final_src.parent.glob("cover_v*.png"))
+    if cover_srcs:
+        cover_src = cover_srcs[-1]
+        existing_covers = sorted(folder.glob("cover*.png")) if folder.exists() else []
+        if not existing_covers:
+            cover_dst = folder / f"cover__{title}.png"
+            if not dry_run:
+                shutil.copy2(cover_src, cover_dst)
+            actions.append(cover_dst.name)
+        elif src_signature(cover_src) > src_signature(existing_covers[-1]):
+            # copy2 erhält mtime -> neuerer Cover-Frame = neuere mtime als die Kopie
+            cover_dst = folder / f"cover_v{len(existing_covers) + 1}__{title}.png"
+            if not dry_run:
+                shutil.copy2(cover_src, cover_dst)
+            actions.append(cover_dst.name)
 
     # --- FREIGABE (write once, NEVER overwrite) ---
     freigabe_exists = folder.exists() and any(folder.glob("FREIGABE*.txt"))

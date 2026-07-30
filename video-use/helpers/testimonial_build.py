@@ -111,9 +111,19 @@ def render_cards(projekt: str, cfg: dict, planned: list[dict]) -> None:
         k, name = b["kind"], b["block"]
         png = proj / "cards" / f"{slugify(name)}.png"
         if k == "intro":
+            # Optionales Kunden-Logo (logo: <pfad> im [intro]-Block), relativ zum Projekt.
+            logo_rel = b.get("logo", "").strip()
+            intro_logo = ""
+            if logo_rel:
+                lp = (proj / logo_rel).resolve()
+                if lp.exists():
+                    intro_logo = f"<img class='intro-logo' src='file://{lp}'>"
+                else:
+                    print(f"  [warn] Kunden-Logo nicht gefunden: {lp}")
             html = tc.card_html(brand, "intro", {
                 "eyebrow": b.get("eyebrow", "Kundenstimme"), "name": b.get("name", ""),
-                "rolle": b.get("rolle", ""), "meta": b.get("meta", "")})
+                "rolle": b.get("rolle", ""), "meta": b.get("meta", ""),
+                "intro_logo": intro_logo})
         elif k == "outro":
             html = tc.card_html(brand, "outro", {
                 "eyebrow": b.get("eyebrow", ""),
@@ -155,8 +165,11 @@ def build(projekt: str, push: bool = True, zoom_experiment: bool = False) -> Pat
         slug = slugify(name)
         if b.get("card") is not None:
             dur = kd["intro_s"] if k == "intro" else kd["outro_s"] if k == "outro" else kd["frage_s"]
+            # Outro NICHT nach Schwarz ausblenden — sonst wird der CTA-Text am
+            # Ende unlesbar (und das letzte Bild taugt nicht als Poster/Vorschau).
+            # Nur das Intro sanft aus Schwarz einblenden.
             c = tc.build_card_clip(b["card"], proj / "work" / f"card_{slug}.mp4", dur,
-                                   fade_in=(k == "intro"), fade_out=(k == "outro"))
+                                   fade_in=(k == "intro"), fade_out=False)
             clips.append(c)
             expected += dur
         if b.get("ranges"):

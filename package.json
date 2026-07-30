@@ -12,12 +12,15 @@
     "batch:next": "uv run --project ./video-use python ./video-use/helpers/batch_next.py",
     "batch:edl": "uv run --project ./video-use python ./video-use/helpers/edl_gen.py",
     "batch:compose": "uv run --project ./video-use python ./video-use/helpers/compose_gen.py",
+    "cover:build": "uv run --project ./video-use python ./video-use/helpers/cover_build.py",
+    "cover:prepend": "uv run --project ./video-use python ./video-use/helpers/cover_prepend.py",
     "batch:pipeline": "uv run --project ./video-use python ./video-use/helpers/run_pipeline.py",
     "batch:pipeline:all": "uv run --project ./video-use python ./video-use/helpers/run_pipeline.py --all",
     "batch:caption": "uv run --project ./video-use python ./video-use/helpers/caption_gen.py",
     "batch:schedule": "uv run --project ./video-use python ./video-use/helpers/schedule_plan.py",
     "batch:review": "uv run --project ./video-use python ./video-use/helpers/review_dashboard.py",
     "freigabe:push": "uv run --project ./video-use python ./video-use/helpers/freigabe_push.py",
+    "freigabe:archive": "uv run --project ./video-use python ./video-use/helpers/freigabe_archive.py",
     "freigabe:check": "uv run --project ./video-use python ./video-use/helpers/freigabe_check.py",
     "bild:hooks": "uv run --project ./video-use python ./video-use/helpers/bild_hooks.py",
     "bild:build": "uv run --project ./video-use python ./video-use/helpers/bild_build.py",
@@ -51,7 +54,8 @@
     "ghl:push": "uv run --project ./video-use python ./video-use/helpers/ghl_push.py",
     "ghl:push:draft": "uv run --project ./video-use python ./video-use/helpers/ghl_push.py --status draft",
     "ghl:auto": "uv run --project ./video-use python ./video-use/helpers/ghl_plan.py",
-    "ghl:auto:push": "uv run --project ./video-use python ./video-use/helpers/ghl_plan.py --execute"
+    "ghl:auto:push": "uv run --project ./video-use python ./video-use/helpers/ghl_plan.py --execute",
+    "ghl:sync-captions": "uv run --project ./video-use python ./video-use/helpers/ghl_sync_captions.py"
   },
   "dependencies": {
     "hyperframes": "^0.5.5",

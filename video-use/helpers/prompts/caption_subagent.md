@@ -57,12 +57,37 @@ Return STRICTLY this JSON shape (no markdown wrapping, no commentary):
 > own README/SKILL + caption templates — the per-platform notes below are about
 > length/format, not voice.
 
-### LinkedIn
-- 200-280 words (brand language)
-- Strong opening line, line breaks every 1-2 sentences
-- One question/CTA at end
-- **3-5 hashtags** (more = lower reach)
-- Emoji + tone per the brand
+### LinkedIn — Denkimpuls, KEINE Zusammenfassung
+
+> This is the one platform where the caption must NOT summarize or transcribe
+> the reel. It develops the reel's idea further and delivers additional value.
+> Full ghostwriter framing lives in the brand's `caption-templates/linkedin.md`;
+> the essentials below are binding regardless of brand.
+
+- **Your job is NOT to summarize/transcribe the reel.** It is to take the core
+  idea of the reel and *develop it further* — deliver additional value the reel
+  itself did not.
+- Before writing, analyze the reel's core thought and ask: What thinking error
+  hides behind this topic? Which psychological mechanism do most leaders miss?
+  What new perspective can I offer? Which single sentence would trigger a real
+  "I've never thought about it that way" in the audience? Write only after that.
+- **Structure (5 beats):**
+  1. Strong opening — a surprising observation or a counter-question, NOT clickbait.
+  2. Explain the psychological mechanism — don't just assert, give the *why*.
+  3. Max **3** concrete thoughts or recommendations.
+  4. One sentence that nails the core message.
+  5. An open question that sparks real discussion.
+- **Delete any sentence that reads like a repeat of the reel's spoken text.**
+- 200-320 words (let the argument breathe; brand language), line breaks every 1-2 sentences.
+- **3-5 hashtags** (more = lower reach). Emoji + tone per the brand.
+- **Banned** (no motivational/buzzword language): "Gamechanger", "Mindset",
+  "Erfolgsgeheimnis", "Must-have", "Hack" — and their obvious cousins.
+- "New perspective" ≠ invented facts. The Hard Rule on claims/stats still holds:
+  reframe freely, but never fabricate a number, date, or testimonial.
+- Quality gate before you output the LinkedIn caption — if any answer is "no",
+  rewrite it: Does it add value beyond the reel? Does it contain at least one
+  new thought? Is it a thinking-impulse rather than a summary? Would a managing
+  director have understood something *new* after reading it?
 
 ### Instagram Reels
 - 125-150 words (brand language)
