@@ -206,10 +206,16 @@ def clean_tokens(words: list[dict], textfixes: list[dict] | None = None,
 
 def build_ranges(words: list[dict], max_pause_s: float,
                  lead_pad: float = 0.10, tail_pad: float = 0.14,
-                 end_pad: float = 0.45, min_seg: float = 1.20) -> list[list[float]]:
+                 end_pad: float = 0.45, min_seg: float = 1.20,
+                 hard_end: float | None = None) -> list[list[float]]:
     """Keep-ranges in source time. Only pauses longer than max_pause_s are collapsed.
 
     Segmente unter min_seg werden wieder zusammengefuehrt (Stakkato-Schnitte vermeiden).
+
+    hard_end: harte Obergrenze fuer das End-Padding des letzten Segments. Steht direkt
+    hinter dem letzten Gast-Wort schon ein anderer Sprecher (z.B. die naechste Frage des
+    Interviewers), wuerde das feste end_pad dessen Stimme mit reinziehen. hard_end =
+    Startzeit dieses fremden Worts; das Segment endet dann knapp davor statt zu bluten.
     """
     ranges: list[list[float]] = []
     cur = None
@@ -225,7 +231,12 @@ def build_ranges(words: list[dict], max_pause_s: float,
             cur[1] = w["end"]
         prev = w
     if cur:
-        cur[1] = prev["end"] + end_pad
+        end = prev["end"] + end_pad
+        if hard_end is not None and hard_end < end:
+            # Nicht in den naechsten (fremden) Sprecher bluten: knapp davor kappen,
+            # aber dem letzten Wort einen minimalen natuerlichen Nachklang lassen.
+            end = max(prev["end"] + 0.02, hard_end - 0.03)
+        cur[1] = end
         ranges.append(cur)
     merged: list[list[float]] = []
     for r in ranges:
@@ -261,6 +272,27 @@ def _srt_time(t: float) -> str:
     return f"{h:02d}:{m:02d}:{s:06.3f}".replace(".", ",")
 
 
+def _wrap_cue(words: list[str], max_chars: int = 32) -> str:
+    """Zentrierte Untertitelzeile bei Bedarf auf zwei ausbalancierte Zeilen umbrechen.
+
+    Zu breite Einzeiler laufen sonst rechts unter die Sprecher-ID-Box (linke Kante
+    ~x=1456 px). Bei FontSize=15 Bold sind das ~34 Zeichen; ueber max_chars wird an
+    der Wortgrenze gesplittet, die die breitere der beiden Zeilen minimiert (das
+    ueberlaufende letzte Wort rutscht so in die zweite, kuerzere Zeile).
+    """
+    text = " ".join(words).strip()
+    if len(text) <= max_chars or len(words) < 2:
+        return text
+    best = None
+    for k in range(1, len(words)):
+        l1 = " ".join(words[:k]).strip()
+        l2 = " ".join(words[k:]).strip()
+        score = max(len(l1), len(l2))
+        if best is None or score < best[0]:
+            best = (score, l1, l2)
+    return best[1] + "\n" + best[2]
+
+
 def build_srt(ranges: list[list[float]], tokens: list[dict], max_words: int = 5) -> str:
     """Cues in OUTPUT time (after the ranges are concatenated)."""
     starts, acc = [], 0.0
@@ -290,7 +322,8 @@ def build_srt(ranges: list[list[float]], tokens: list[dict], max_words: int = 5)
         s, e = out_t(c[0]["s"]), out_t(c[-1]["e"])
         if e <= s:
             e = s + 0.4
-        lines.append(f"{i}\n{_srt_time(s)} --> {_srt_time(e)}\n{' '.join(w['t'] for w in c).strip()}\n")
+        text = _wrap_cue([w["t"] for w in c])
+        lines.append(f"{i}\n{_srt_time(s)} --> {_srt_time(e)}\n{text}\n")
     return "\n".join(lines)
 
 

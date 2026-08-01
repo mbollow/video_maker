@@ -73,6 +73,12 @@ Freigabe-Ordner, nie in `projects/<…>/renders/`. Rückmeldungen kommen über d
 `FREIGABE__….txt` (Zeile 1 `FREIGEGEBEN` / `AENDERN`). Bestehende Versionen werden
 **nie** überschrieben.
 
+Testimonials haben einen **eigenen Freigabe-Ordner** `Freigabeprozess - Testimonial`
+(getrennt von den Social-Video-Posts — es ist ein völlig anderer Prozess/Nutzung).
+Pfad überschreibbar via Env `FREIGABE_TESTIMONIAL_DIR`; eigene Nummerierung
+`NNN_<projekt>` ab 001. `npm run freigabe:check` liest Video- **und**
+Testimonial-Ordner zusammen (je ein Abschnitt).
+
 ### Heranzoomen auf den Gast (optional, KEIN Automatismus)
 
 Es gibt einen Ken-Burns-Zoom, der bei längeren Antworten sanft auf den Gast

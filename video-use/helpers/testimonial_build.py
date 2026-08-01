@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import shutil
 import sys
@@ -25,7 +26,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import testimonial_common as tc  # noqa: E402
-from freigabe_push import DEFAULT_FREIGABE_DIR, FREIGABE_TEMPLATE  # noqa: E402
+from freigabe_push import DEFAULT_TESTIMONIAL_FREIGABE_DIR, FREIGABE_TEMPLATE  # noqa: E402
 
 # Untertitel: dunkles Marken-Blau auf dem cremefarbenen Streifen unter dem Sprecher-Band.
 # Achtung: MarginL/R/V zaehlen in der libass-Skriptaufloesung (klein!), nicht in Pixeln.
@@ -88,7 +89,18 @@ def plan(projekt: str, zoom_experiment: bool = False) -> tuple[dict, list[dict]]
             print(f"  [warn] Block [{name}]: keine Woerter im Bereich {field} — uebersprungen")
             continue
         gap = float(exceptions.get(name, default_gap))
-        ranges = tc.build_ranges(ws, gap)
+        # Interviewer-Bleed verhindern: folgt direkt nach dem letzten Gast-Wort schon
+        # der naechste (fremde) Sprecher, darf das End-Padding nicht in dessen Stimme
+        # laufen. Nur bei Antwort-Bloecken (fester Gast); bei 'quelle' (beliebiger
+        # Sprecher) gibt es kein "fremd".
+        hard_end = None
+        if is_answer and speaker:
+            last_end = ws[-1]["end"]
+            nxt = [w["start"] for w in words
+                   if w["start"] >= last_end and w.get("speaker_id") != speaker]
+            if nxt:
+                hard_end = min(nxt)
+        ranges = tc.build_ranges(ws, gap, hard_end=hard_end)
         tokens = tc.clean_tokens(ws, fixes, spellings)
         dur = round(sum(r[1] - r[0] for r in ranges), 2)
         # Ken-Burns-Push auf den Gast nur bei laengeren Antworten (nicht bei kurzen
@@ -203,8 +215,13 @@ def build(projekt: str, push: bool = True, zoom_experiment: bool = False) -> Pat
 
 
 def freigabe_folder(cfg: dict) -> Path:
-    base = Path(cfg.get("freigabe_dir") or DEFAULT_FREIGABE_DIR)
-    return base
+    # Testimonials haben einen eigenen Freigabe-Ordner (getrennt von den Social-Video-
+    # Posts). Reihenfolge: projektspezifischer Override in testimonial.json
+    # ("freigabe_dir") > Umgebungsvariable FREIGABE_TESTIMONIAL_DIR > Default.
+    base = (cfg.get("freigabe_dir")
+            or os.environ.get("FREIGABE_TESTIMONIAL_DIR")
+            or DEFAULT_TESTIMONIAL_FREIGABE_DIR)
+    return Path(base)
 
 
 def next_version(projekt: str, cfg: dict) -> int:
