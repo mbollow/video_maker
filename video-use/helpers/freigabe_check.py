@@ -33,6 +33,15 @@ DEFAULT_FREIGABE_DIR = (
     "Palstek GmbH - Gäste - General/Social_Media_Prototyp/Freigabeprozess – Video"
 )
 
+# Testimonials liegen in einem eigenen Freigabe-Ordner (normaler Bindestrich " - ").
+# freigabe:check liest standardmaessig BEIDE Ordner, damit Rueckmeldungen zu Social-
+# Videos und Testimonials in einem Rutsch sichtbar sind.
+DEFAULT_TESTIMONIAL_FREIGABE_DIR = (
+    "/Users/marc/Library/CloudStorage/"
+    "OneDrive-FreigegebeneBibliotheken–PalstekGmbH/"
+    "Palstek GmbH - Gäste - General/Social_Media_Prototyp/Freigabeprozess - Testimonial"
+)
+
 KNOWN = {"OFFEN", "FREIGEGEBEN", "AENDERN"}
 # tolerate common reviewer spellings
 ALIASES = {
@@ -112,48 +121,72 @@ def scan(base: Path, only_batch: str | None) -> list[dict]:
     return results
 
 
+def _default_bases() -> list[Path]:
+    """Standard: Video- + Testimonial-Freigabe-Ordner (je per Env ueberschreibbar)."""
+    bases: list[Path] = []
+    seen: set[str] = set()
+    for env, default in (("FREIGABE_DIR", DEFAULT_FREIGABE_DIR),
+                         ("FREIGABE_TESTIMONIAL_DIR", DEFAULT_TESTIMONIAL_FREIGABE_DIR)):
+        p = Path(os.environ.get(env, default))
+        if str(p) not in seen:
+            seen.add(str(p))
+            bases.append(p)
+    return bases
+
+
 def main() -> None:
-    ap = argparse.ArgumentParser(description="Read reviewer feedback from the Freigabe folder")
+    ap = argparse.ArgumentParser(description="Read reviewer feedback from the Freigabe folder(s)")
     ap.add_argument("--batch", help="Filter to one batch")
-    ap.add_argument("--dir", default=os.environ.get("FREIGABE_DIR", DEFAULT_FREIGABE_DIR))
+    ap.add_argument("--dir", help="Nur DIESEN Ordner lesen (Default: Video- + Testimonial-Ordner)")
     ap.add_argument("--json", action="store_true", help="Machine-readable output")
     args = ap.parse_args()
 
-    base = Path(args.dir)
-    if not base.exists():
-        sys.exit(f"Review-Ordner nicht gefunden:\n  {base}\nIst OneDrive synchronisiert?")
+    bases = [Path(args.dir)] if args.dir else _default_bases()
+    bases = [b for b in bases if b.exists()]
+    if not bases:
+        sys.exit("Kein Review-Ordner gefunden. Ist OneDrive synchronisiert? "
+                 "Pfad per --dir oder FREIGABE_DIR / FREIGABE_TESTIMONIAL_DIR setzen.")
 
-    results = scan(base, args.batch)
+    all_results = []
+    for base in bases:
+        for r in scan(base, args.batch):
+            r["dir"] = str(base)
+            all_results.append(r)
+
     if args.json:
-        print(json.dumps(results, ensure_ascii=False, indent=2))
+        print(json.dumps(all_results, ensure_ascii=False, indent=2))
         return
 
-    if not results:
+    if not all_results:
         print("Keine FREIGABE.txt gefunden. Erst hochladen mit:  npm run freigabe:push -- --batch <name>")
         return
 
-    groups = {"AENDERN": [], "FREIGEGEBEN": [], "OFFEN": []}
-    for r in results:
-        groups.get(r["status"], groups["OFFEN"]).append(r)
-
     icon = {"AENDERN": "✏️ ", "FREIGEGEBEN": "✅", "OFFEN": "⏳"}
-    print(f"Freigabe-Status  ({base})\n")
-    print(f"  ✅ {len(groups['FREIGEGEBEN'])} freigegeben   "
-          f"✏️  {len(groups['AENDERN'])} Änderung   "
-          f"⏳ {len(groups['OFFEN'])} offen\n")
+    any_aendern = False
+    for base in bases:
+        results = [r for r in all_results if r["dir"] == str(base)]
+        if not results:
+            continue
+        groups = {"AENDERN": [], "FREIGEGEBEN": [], "OFFEN": []}
+        for r in results:
+            groups.get(r["status"], groups["OFFEN"]).append(r)
+        any_aendern = any_aendern or bool(groups["AENDERN"])
+        print(f"Freigabe-Status — {base.name}\n")
+        print(f"  ✅ {len(groups['FREIGEGEBEN'])} freigegeben   "
+              f"✏️  {len(groups['AENDERN'])} Änderung   "
+              f"⏳ {len(groups['OFFEN'])} offen\n")
+        for status in ("AENDERN", "FREIGEGEBEN", "OFFEN"):
+            for r in groups[status]:
+                ref = f"{r['batch']}/{r['seq']}" if r["batch"] else r["folder"]
+                print(f"{icon[status]} {r['folder']}   [{ref}]")
+                if r["edited_captions"]:
+                    print(f"     ↳ geänderte Captions: {', '.join(r['edited_captions'])}")
+                if status == "AENDERN" and r["notes"]:
+                    for line in r["notes"].splitlines():
+                        print(f"     │ {line}")
+                print()
 
-    for status in ("AENDERN", "FREIGEGEBEN", "OFFEN"):
-        for r in groups[status]:
-            ref = f"{r['batch']}/{r['seq']}" if r["batch"] else r["folder"]
-            print(f"{icon[status]} {r['folder']}   [{ref}]")
-            if r["edited_captions"]:
-                print(f"     ↳ geänderte Captions: {', '.join(r['edited_captions'])}")
-            if status == "AENDERN" and r["notes"]:
-                for line in r["notes"].splitlines():
-                    print(f"     │ {line}")
-            print()
-
-    if groups["AENDERN"]:
+    if any_aendern:
         print("→ Für die ✏️-Videos: gib mir den Ordnernamen oder die [batch/seq], "
               "ich übersetze die Anmerkungen ins Korrektur-Shorthand und re-cutte.")
 

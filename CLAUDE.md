@@ -91,7 +91,7 @@ Kunden-Interview (Zoom/Teams) → **~vollständiges 16:9-Video zum Einbetten**, 
 - **Quelle:** die saubere Cloud-/Meeting-Aufzeichnung schlägt den Bildschirm-Mitschnitt (Teams-UI). Bei mehreren Rohdateien Anfang **und** Ende beider kurz transkribieren — unterschiedliche Längen heißen nicht, dass eine unvollständig ist (Vorgespräch).
 - **Bild:** Galerie ist ~3,56:1 → nicht formatfüllend croppbar. Sprecher-Band freistellen, mittig auf Creme `#f8f6f2`, Logo oben rechts, Untertitel `#281d67` darunter. Folien + Antworten teilen den Rahmen → harte Schnitte wirken ruhig, keine Crossfades.
 - **Anrede:** Gast **siezen**, Publikum **duzen** (Outro-CTA). Kein Vorname in der Anrede — nur als Namensnennung auf der Intro-Folie.
-- **Freigabe:** `testimonial:build` pusht selbst als `final_vN+1` (`--no-push` = Notausgang). Versionen nie überschreiben.
+- **Freigabe:** `testimonial:build` pusht selbst als `final_vN+1` (`--no-push` = Notausgang). Versionen nie überschreiben. **Eigener Freigabe-Ordner `Freigabeprozess - Testimonial`** (bewusst getrennt von den Social-Video-Posts — anderer Prozess/Nutzung; Env `FREIGABE_TESTIMONIAL_DIR`, normaler Bindestrich). Eigene Nummerierung `NNN_<projekt>` (startet bei 001). `npm run freigabe:check` liest Video- **und** Testimonial-Ordner in einem Rutsch (Abschnitt je Ordner).
 
 ## Karussell-Posts (Multi-Slide, optisch eigenständig)
 Mehrteilige Bildstrecken (Start → n Innen-Slides → Ende), **bewusst anders** als die Ein-Bild-Posts. Spiegelt den Bild-Post-Workflow (Entwurf → kuratieren → bauen → Auto-Push). Helper `karussell_*.py`, Templates `composition_templates/carousel-{start,inner,end}.html`, Render via `render_image_post.cjs`.

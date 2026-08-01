@@ -51,6 +51,16 @@ DEFAULT_FREIGABE_DIR = (
     "Palstek GmbH - Gäste - General/Social_Media_Prototyp/Freigabeprozess – Video"
 )
 
+# Testimonial-Videos sind ein voellig anderer Prozess (Langform, Website-Embed statt
+# Social-Post) und haben deshalb einen eigenen Freigabe-Ordner. Ueberschreibbar mit
+# der Umgebungsvariable FREIGABE_TESTIMONIAL_DIR. Achtung: normaler Bindestrich " - ",
+# NICHT der Halbgeviantstrich " – " der anderen Freigabe-Ordner.
+DEFAULT_TESTIMONIAL_FREIGABE_DIR = (
+    "/Users/marc/Library/CloudStorage/"
+    "OneDrive-FreigegebeneBibliotheken–PalstekGmbH/"
+    "Palstek GmbH - Gäste - General/Social_Media_Prototyp/Freigabeprozess - Testimonial"
+)
+
 FREIGABE_TEMPLATE = """STATUS: OFFEN
 ============================================================
 Veröffentlichen auf?   (x = ja — einfach ein x in die Klammer setzen)
