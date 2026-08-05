@@ -283,22 +283,44 @@ def main() -> None:
                 if sl.get("sub"):
                     import html as _h
                     hook_html += f'\n      <div class="sub">{_h.escape(sl["sub"])}</div>'
-                foto_rel = (sl.get("foto_file") or "").strip()
-                if foto_rel:
-                    photo_src = (batch_dir / foto_rel).resolve()
+                # Freigestellte Variante (foto_cutout) hat Vorrang: Motiv steht frei auf
+                # einem Verlauf (unten hellblau -> oben weiß), Headline normal (nicht fett).
+                cutout_rel = (sl.get("foto_cutout") or "").strip()
+                if cutout_rel:
+                    photo_src = (batch_dir / cutout_rel).resolve()
                     if not photo_src.exists():
-                        raise RuntimeError(f"foto_file nicht gefunden: {foto_rel}")
-                    obj_pos = (sl.get("object_pos") or "").strip() or "50% 30%"
-                    pmeta = {"source": "local", "file": foto_rel, "object_pos": obj_pos}
+                        raise RuntimeError(f"foto_cutout (start) nicht gefunden: {cutout_rel}")
+                    # Platzierung: 'full' = randlos/volle Breite (breite Gruppenmotive),
+                    # sonst 'contain' = ganzes Motiv unten, Türkis läuft darüber aus.
+                    fill = (sl.get("start_fill") or "contain").strip().lower()
+                    if fill == "full":
+                        cutout_css = "bottom: 0; width: 100%; height: auto;"
+                    else:
+                        cutout_css = ("bottom: 0; width: 100%; height: 730px; "
+                                      "object-fit: contain; object-position: center bottom;")
+                    kc.render_slide(template=kc.TPL_START_CUTOUT, out_png=out_png,
+                                    replacements={"{{EYEBROW}}": eyebrow, "{{HOOK_HTML}}": hook_html,
+                                                  "{{FONT_SCALE}}": f"{fs:g}", "{{CUTOUT_CSS}}": cutout_css},
+                                    assets={"{{LOGO_SRC}}": logo_dark, "{{PHOTO_SRC}}": photo_src})
+                    rec.update({"lines": lines, "photo": {"source": "cutout", "file": cutout_rel},
+                                "highlight": words, "style": style})
                 else:
-                    photo_src, obj_pos, pmeta = pick_photo(
-                        sl, source=args.source, catalog=catalog, used=used_photos,
-                        pexels_key=pexels_key, used_stock_ids=used_stock_ids, stock_dir=stock_dir)
-                kc.render_slide(template=kc.TPL_START, out_png=out_png,
-                                replacements={"{{EYEBROW}}": eyebrow, "{{HOOK_HTML}}": hook_html,
-                                              "{{OBJECT_POS}}": obj_pos, "{{FONT_SCALE}}": f"{fs:g}"},
-                                assets={"{{LOGO_SRC}}": logo_dark, "{{PHOTO_SRC}}": photo_src})
-                rec.update({"lines": lines, "photo": pmeta, "highlight": words, "style": style})
+                    foto_rel = (sl.get("foto_file") or "").strip()
+                    if foto_rel:
+                        photo_src = (batch_dir / foto_rel).resolve()
+                        if not photo_src.exists():
+                            raise RuntimeError(f"foto_file nicht gefunden: {foto_rel}")
+                        obj_pos = (sl.get("object_pos") or "").strip() or "50% 30%"
+                        pmeta = {"source": "local", "file": foto_rel, "object_pos": obj_pos}
+                    else:
+                        photo_src, obj_pos, pmeta = pick_photo(
+                            sl, source=args.source, catalog=catalog, used=used_photos,
+                            pexels_key=pexels_key, used_stock_ids=used_stock_ids, stock_dir=stock_dir)
+                    kc.render_slide(template=kc.TPL_START, out_png=out_png,
+                                    replacements={"{{EYEBROW}}": eyebrow, "{{HOOK_HTML}}": hook_html,
+                                                  "{{OBJECT_POS}}": obj_pos, "{{FONT_SCALE}}": f"{fs:g}"},
+                                    assets={"{{LOGO_SRC}}": logo_dark, "{{PHOTO_SRC}}": photo_src})
+                    rec.update({"lines": lines, "photo": pmeta, "highlight": words, "style": style})
 
             elif sl["kind"] == "end":
                 lines = end_lines or [sl.get("statement", "")]

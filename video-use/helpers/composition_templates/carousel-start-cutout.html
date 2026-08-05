@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<!--
+  Karussell START-Slide, FREIGESTELLTE Variante (1080x1350 / 4:5).
+  Wird von karussell_build.py verwendet, wenn der [start]-Block ein `foto_cutout:`
+  hat (transparentes PNG). Motiv (Personen/Tisch) steht frei auf einem Verlauf,
+  der UNTEN hellblau ist und nach OBEN in Creme/Weiß ausläuft — fließt in die
+  Headline. Gerendert via render_image_post.cjs.
+
+  Platzhalter:
+    {{EYEBROW}}    – Karussell-Thema (Eyebrow)
+    {{LOGO_SRC}}   – Logo-Wortmarke (zweifarbig)
+    {{PHOTO_SRC}}  – FREIGESTELLTES Foto (transparentes PNG, unten bündig)
+    {{HOOK_HTML}}  – vorgerenderte Headline-Zeilen (.lx + <span class="hl ...">)
+    {{FONT_SCALE}} – Skalierung der Headline
+-->
+<style>
+  @font-face { font-family: 'Korbin'; src: url('{{FONTS_DIR}}/Korbin-Medium.otf') format('opentype'); font-weight: 100 900; font-style: normal; font-display: block; }
+  @font-face { font-family: 'DM Sans'; src: url('{{FONTS_DIR}}/DMSans-var.ttf') format('truetype'); font-weight: 100 1000; font-style: normal; font-display: block; }
+  @font-face { font-family: 'Montserrat'; src: url('{{FONTS_DIR}}/Montserrat-var.ttf') format('truetype'); font-weight: 100 900; font-style: normal; font-display: block; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1080px; height: 1350px; }
+  .stage {
+    position: relative; width: 1080px; height: 1350px; overflow: hidden;
+    font-family: 'Korbin', 'DM Sans', system-ui, sans-serif; background: #f8f6f2;
+    font-synthesis: none;
+    --fs-scale: {{FONT_SCALE}};
+  }
+  /* Verlauf: UNTEN hellblau -> nach OBEN weiß/creme (fließt in die Headline) */
+  .bg {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top,
+      rgba(78,187,194,0.92) 0%, rgba(78,187,194,0.60) 20%,
+      rgba(78,187,194,0.24) 38%, rgba(248,246,242,0) 58%);
+  }
+  /* Freigestellte Gruppe, unten bündig, VOLLE BREITE (blutet links/rechts an den Rand).
+     Motiv sollte quer/brustbildartig sein, damit die Köpfe unter der Headline bleiben. */
+  .cutout {
+    position: absolute; left: 0;
+    {{CUTOUT_CSS}}
+  }
+  /* Logo-Wortmarke zentriert oben */
+  .logo {
+    position: absolute; top: 62px; left: 50%; transform: translateX(-50%);
+    width: 178px; height: auto; z-index: 3;
+  }
+  .eyebrow {
+    position: absolute; top: 232px; left: 0; right: 0; text-align: center; z-index: 3;
+    color: #4ebbc2; font-weight: 700; font-size: 27px; letter-spacing: 0.02em;
+  }
+  /* Headline im hellen oberen Bereich — bewusst NORMAL (nicht fett) */
+  .hook {
+    position: absolute; top: 312px; left: 80px; right: 80px; z-index: 3;
+    text-align: center; color: #281d67; line-height: 1.12;
+  }
+  .hook .lx { font-weight: 400; font-size: calc(66px * var(--fs-scale)); letter-spacing: -0.01em; margin: 0 0 6px; }
+  .hook .l1, .hook .l2 { font-weight: 400; font-size: calc(66px * var(--fs-scale)); letter-spacing: -0.01em; }
+  .hook .l3 { font-weight: 500; font-size: calc(80px * var(--fs-scale)); letter-spacing: -0.01em; line-height: 1.0; margin-top: 8px; }
+  .hook .sub { font-weight: 500; font-size: calc(27px * var(--fs-scale)); color: #281d67; margin-top: 14px; line-height: 1.25; }
+  /* Marker-Box (Türkis-Fläche, dunkelblaue Schrift) – Standard-Highlight */
+  .hl { box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+  .hl-box     { background: #4ebbc2; color: #281d67; padding: 0 14px 4px; border-radius: 8px; }
+  .hl-boxdark { background: #4ebbc2; color: #281d67; padding: 0 14px 4px; border-radius: 8px; }
+  .hl-farbe   { color: #4ebbc2; }
+  .hl-underline { background: linear-gradient(#4ebbc2, #4ebbc2) left bottom / 100% 0.16em no-repeat; padding-bottom: 0.02em; }
+</style>
+</head>
+<body>
+  <div class="stage">
+    <div class="bg"></div>
+    <img class="cutout" src="{{PHOTO_SRC}}" alt="" />
+    <img class="logo" src="{{LOGO_SRC}}" alt="Palstek" />
+    <div class="eyebrow">{{EYEBROW}}</div>
+    <div class="hook">
+      {{HOOK_HTML}}
+    </div>
+  </div>
+</body>
+</html>

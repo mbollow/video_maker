@@ -16,6 +16,7 @@
 -->
 <style>
   @font-face { font-family: 'Montserrat'; src: url('{{FONTS_DIR}}/Montserrat-var.ttf') format('truetype'); font-weight: 100 900; font-style: normal; font-display: block; }
+  @font-face { font-family: 'DM Sans'; src: url('{{FONTS_DIR}}/DMSans-var.ttf') format('truetype'); font-weight: 100 1000; font-style: normal; font-display: block; }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { width: 1080px; height: 1350px; }
   .stage {
@@ -23,14 +24,27 @@
     font-family: 'Montserrat', system-ui, sans-serif; background: #f8f6f2;
     --fs-scale: {{FONT_SCALE}};
   }
-  /* Foto in der unteren Hälfte, oben in den Creme-Hintergrund geblendet */
+  /* Türkises Feld, das nach oben in Creme ausläuft (Referenz-Look: freigestellte
+     Person / Stock-Foto sitzt auf hellblauem, oben ausgeblendetem Hintergrund) */
+  .bg-teal {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 64%;
+    background: linear-gradient(to top,
+      rgba(78,187,194,0.58) 0%, rgba(78,187,194,0.40) 22%,
+      rgba(78,187,194,0.14) 42%, rgba(248,246,242,0) 62%);
+  }
+  /* Foto in der unteren Hälfte; obere Kante weich ins türkise Feld geblendet */
   .photo-wrap { position: absolute; left: 0; right: 0; bottom: 0; height: 54%; }
   .photo {
     width: 100%; height: 100%; object-fit: cover; object-position: {{OBJECT_POS}};
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 20%);
+            mask-image: linear-gradient(to bottom, transparent 0%, #000 20%);
   }
-  .photo-blend {
-    position: absolute; inset: 0;
-    background: linear-gradient(to bottom, #f8f6f2 0%, rgba(248,246,242,0) 24%);
+  /* Türkis-Schleier auf der oberen Fotokante → verschmilzt mit dem türkisen Feld */
+  .photo-teal {
+    position: absolute; left: 0; right: 0; top: 0; height: 100%; pointer-events: none;
+    background: linear-gradient(to bottom,
+      rgba(78,187,194,0.85) 0%, rgba(78,187,194,0.45) 12%,
+      rgba(78,187,194,0.12) 28%, rgba(78,187,194,0) 44%);
   }
   /* Logo-Wortmarke zentriert oben */
   .logo {
@@ -40,21 +54,23 @@
   /* Eyebrow (Thema), zentriert unter dem Logo — großzügiger Abstand zum Logo */
   .eyebrow {
     position: absolute; top: 232px; left: 0; right: 0; text-align: center;
+    font-family: 'DM Sans', system-ui, sans-serif;
     color: #4ebbc2; font-weight: 700; font-size: 27px; letter-spacing: 0.02em;
   }
   /* Headline im Creme-Bereich über dem Foto — deutlicher Abstand zum Eyebrow */
   .hook {
     position: absolute; top: 312px; left: 80px; right: 80px;
+    font-family: 'DM Sans', system-ui, sans-serif;
     text-align: center; color: #281d67; line-height: 1.06;
   }
   .hook .lx { font-weight: 800; font-size: calc(66px * var(--fs-scale)); letter-spacing: -0.01em; line-height: 1.12; margin: 0 0 6px; }
   .hook .l1, .hook .l2 { font-weight: 800; font-size: calc(66px * var(--fs-scale)); letter-spacing: -0.01em; }
   .hook .l3 { font-weight: 900; font-size: calc(88px * var(--fs-scale)); letter-spacing: -0.02em; line-height: 1.0; margin-top: 8px; }
-  .hook .sub { font-weight: 600; font-size: calc(27px * var(--fs-scale)); color: #3a6b70; margin-top: 14px; line-height: 1.25; }
-  /* Marker-Box (Teal, weiße Schrift) – Standard-Highlight */
+  .hook .sub { font-weight: 600; font-size: calc(27px * var(--fs-scale)); color: #281d67; margin-top: 14px; line-height: 1.25; }
+  /* Marker-Box (Türkis-Fläche, dunkelblaue Schrift) – Standard-Highlight */
   .hl { box-decoration-break: clone; -webkit-box-decoration-break: clone; }
-  .hl-box     { background: #4ebbc2; color: #fff; padding: 0 14px 4px; border-radius: 8px; }
-  .hl-boxdark { background: #281d67; color: #fff; padding: 0 14px 4px; border-radius: 8px; }
+  .hl-box     { background: #4ebbc2; color: #281d67; padding: 0 14px 4px; border-radius: 8px; }
+  .hl-boxdark { background: #4ebbc2; color: #281d67; padding: 0 14px 4px; border-radius: 8px; }
   .hl-farbe   { color: #4ebbc2; }
   .hl-underline { background: linear-gradient(#4ebbc2, #4ebbc2) left bottom / 100% 0.16em no-repeat; padding-bottom: 0.02em; }
   /* Footer */
@@ -67,9 +83,10 @@
 </head>
 <body>
   <div class="stage">
+    <div class="bg-teal"></div>
     <div class="photo-wrap">
       <img class="photo" src="{{PHOTO_SRC}}" alt="" />
-      <div class="photo-blend"></div>
+      <div class="photo-teal"></div>
     </div>
     <img class="logo" src="{{LOGO_SRC}}" alt="Palstek" />
     <div class="eyebrow">{{EYEBROW}}</div>
