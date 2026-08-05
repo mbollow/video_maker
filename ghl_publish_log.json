@@ -276,6 +276,54 @@
       "media_url": "https://assets.cdn.filesafe.space/3xZs9ttxAS2hmSZkZ2q7/media/731aaaf2-2044-4407-95ad-f8c7fa82ca12.mp4",
       "status": "scheduled",
       "schedule_date": "2026-08-07T07:55:00Z"
+    },
+    {
+      "sha256": "77958446bf71c9ca0045ee93da6708acfbc9451b389007b6ccb20e6cc0fb10e9",
+      "folder": "001_faktor-1-rahmenbedingungen",
+      "media_name": "01_start.png",
+      "source_path": "/Users/marc/Library/CloudStorage/OneDrive-PalstekGmbH–PalstekGmbH-Gäste-General/Social_Media_Prototyp/Freigabeprozess – Karussell/001_faktor-1-rahmenbedingungen/v12/01_start.png",
+      "size_bytes": 1392072,
+      "account_ids": [
+        "687bc0b6ee22f47f40e7a4d8_3xZs9ttxAS2hmSZkZ2q7_641859295681169_page"
+      ],
+      "published_at": "2026-08-05T09:38:37Z",
+      "post_id": "6a73049dd2a1a4419dcf011f",
+      "media_id": "6a7304986de4dfb60ff50d6a",
+      "media_url": "https://assets.cdn.filesafe.space/3xZs9ttxAS2hmSZkZ2q7/media/c4ee8223-c0b5-4ef3-a06c-12e0bb955554.png",
+      "status": "draft",
+      "schedule_date": "2026-08-05T11:55:00+02:00"
+    },
+    {
+      "sha256": "77958446bf71c9ca0045ee93da6708acfbc9451b389007b6ccb20e6cc0fb10e9",
+      "folder": "001_faktor-1-rahmenbedingungen",
+      "media_name": "01_start.png",
+      "source_path": "/Users/marc/Library/CloudStorage/OneDrive-PalstekGmbH–PalstekGmbH-Gäste-General/Social_Media_Prototyp/Freigabeprozess – Karussell/001_faktor-1-rahmenbedingungen/v12/01_start.png",
+      "size_bytes": 1392072,
+      "account_ids": [
+        "687bc08b974aed08257c09bb_3xZs9ttxAS2hmSZkZ2q7_17841452348406464"
+      ],
+      "published_at": "2026-08-05T09:38:38Z",
+      "post_id": "6a73049eb5cfb91dccaa9998",
+      "media_id": "6a7304986de4dfb60ff50d6a",
+      "media_url": "https://assets.cdn.filesafe.space/3xZs9ttxAS2hmSZkZ2q7/media/c4ee8223-c0b5-4ef3-a06c-12e0bb955554.png",
+      "status": "draft",
+      "schedule_date": "2026-08-05T11:55:00+02:00"
+    },
+    {
+      "sha256": "77958446bf71c9ca0045ee93da6708acfbc9451b389007b6ccb20e6cc0fb10e9",
+      "folder": "001_faktor-1-rahmenbedingungen",
+      "media_name": "01_start.png",
+      "source_path": "/Users/marc/Library/CloudStorage/OneDrive-PalstekGmbH–PalstekGmbH-Gäste-General/Social_Media_Prototyp/Freigabeprozess – Karussell/001_faktor-1-rahmenbedingungen/v12/01_start.png",
+      "size_bytes": 1392072,
+      "account_ids": [
+        "687bbf99974aed4f187c0940_3xZs9ttxAS2hmSZkZ2q7_zt5Zd16VV7_profile"
+      ],
+      "published_at": "2026-08-05T09:38:38Z",
+      "post_id": "6a73049e28901f724f40ff88",
+      "media_id": "6a7304986de4dfb60ff50d6a",
+      "media_url": "https://assets.cdn.filesafe.space/3xZs9ttxAS2hmSZkZ2q7/media/c4ee8223-c0b5-4ef3-a06c-12e0bb955554.png",
+      "status": "draft",
+      "schedule_date": "2026-08-05T11:55:00+02:00"
     }
   ]
 }

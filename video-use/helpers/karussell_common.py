@@ -34,6 +34,7 @@ HELPERS = bc.HELPERS
 TEMPLATES = HELPERS / "composition_templates"
 FONTS_DIR = TEMPLATES / "fonts"  # self-hosted variable fonts (deterministic render)
 TPL_START = TEMPLATES / "carousel-start.html"
+TPL_START_CUTOUT = TEMPLATES / "carousel-start-cutout.html"  # [start] mit foto_cutout: freigestellt auf Verlauf
 TPL_INNER = TEMPLATES / "carousel-inner.html"
 TPL_END = TEMPLATES / "carousel-end.html"
 TPL_OVERVIEW = TEMPLATES / "carousel-overview.html"  # layout: uebersicht (Serien-Teile)
@@ -57,6 +58,7 @@ FIELD_KEYS = {
     "foto_cutout",  # freigestelltes PNG für die Ende-Folie (lokaler Batch-Pfad)
     "foto_file",    # lokales Foto direkt nutzen (Start/Ende), umgeht Katalog/Stock
     "foto_spiegeln",  # Ende-Freisteller horizontal spiegeln (ja/nein)
+    "start_fill",   # Start-Cutout-Platzierung: 'full' (randlos) oder 'contain' (default)
 }
 _FIELD_START_RE = re.compile(r"^(" + "|".join(sorted(FIELD_KEYS)) + r")\s*:", re.IGNORECASE)
 _LIST_FIELDS = {"thema", "highlight"}
@@ -461,8 +463,9 @@ def render_slide(*, template: Path, out_png: Path, replacements: dict[str, str],
         if "{{FONTS_DIR}}" in filled and FONTS_DIR.exists():
             fdst = work / "fonts"
             fdst.mkdir(exist_ok=True)
-            for f in FONTS_DIR.glob("*.ttf"):
-                shutil.copy2(f, fdst / f.name)
+            for pat in ("*.ttf", "*.otf"):
+                for f in FONTS_DIR.glob(pat):
+                    shutil.copy2(f, fdst / f.name)
             filled = filled.replace("{{FONTS_DIR}}", "fonts")
         for ph, src in assets.items():
             local = f"asset_{_icon_slug(ph)}{src.suffix or '.png'}"
