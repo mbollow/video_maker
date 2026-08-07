@@ -31,6 +31,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -45,17 +46,20 @@ WHISPER_URL = "https://api.openai.com/v1/audio/transcriptions"
 WHISPER_MAX_BYTES = 25 * 1024 * 1024  # OpenAI hard limit
 
 
-def _load_env_key(key_name: str) -> str:
-    """Look up an API key in .env files (repo root + cwd) then environment.
+_ENV_FILES = [
+    Path(__file__).resolve().parent.parent / ".env",
+    Path(__file__).resolve().parent.parent.parent / ".env",
+    Path(".env"),
+]
+_ENV_VAR_RE = re.compile(r"\$\{([A-Za-z_][A-Za-z0-9_]*)\}")
 
-    Exits with a clear error message if missing.
+
+def _read_env_raw(key_name: str) -> str | None:
+    """Raw value for a key from .env files (repo root + cwd) then environment.
+
+    No ${VAR} expansion here — returns the literal value, or None if unset/empty.
     """
-    candidates = [
-        Path(__file__).resolve().parent.parent / ".env",
-        Path(__file__).resolve().parent.parent.parent / ".env",
-        Path(".env"),
-    ]
-    for candidate in candidates:
+    for candidate in _ENV_FILES:
         if not candidate.exists():
             continue
         for line in candidate.read_text().splitlines():
@@ -67,10 +71,41 @@ def _load_env_key(key_name: str) -> str:
                 v = v.strip().strip('"').strip("'")
                 if v:
                     return v
-    v = os.environ.get(key_name, "")
-    if v:
-        return v
-    sys.exit(f"{key_name} not found in .env or environment")
+    return os.environ.get(key_name) or None
+
+
+def _expand_env(value: str, _seen: frozenset = frozenset()) -> str:
+    """Expand ${VAR} references against .env/environment (recursive, cycle-safe).
+
+    Ermöglicht eine zentrale .env: z.B. einmal ONEDRIVE_SOCIAL_ROOT setzen und in
+    allen FREIGABE_*_DIR per ${ONEDRIVE_SOCIAL_ROOT}/... referenzieren. Bei einem
+    OneDrive-Neusync muss dann nur die eine Root-Zeile angepasst werden.
+    """
+    def repl(m: "re.Match") -> str:
+        name = m.group(1)
+        if name in _seen:
+            return ""  # Zyklus abbrechen
+        raw = _read_env_raw(name)
+        if raw is None:
+            return m.group(0)  # unbekannte Variable: literal stehen lassen
+        return _expand_env(raw, _seen | {name})
+    return _ENV_VAR_RE.sub(repl, value)
+
+
+def _load_env_key(key_name: str) -> str:
+    """Look up a value in .env files (repo root + cwd) then environment, expanding
+    ${VAR} references. Exits with a clear error message if missing.
+    """
+    raw = _read_env_raw(key_name)
+    if raw is None:
+        sys.exit(f"{key_name} not found in .env or environment")
+    return _expand_env(raw)
+
+
+def env_optional(key_name: str) -> str | None:
+    """Wie _load_env_key, aber None statt sys.exit, wenn der Key fehlt."""
+    raw = _read_env_raw(key_name)
+    return _expand_env(raw) if raw is not None else None
 
 
 def load_api_key() -> str:

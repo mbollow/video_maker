@@ -130,19 +130,10 @@ def no_dashes(s: str) -> str:
 
 def _optional_env(key: str) -> str | None:
     """Read a key from .env (root + video-use) or the environment; None if unset.
-    Unlike bild_common.env_value this never exits."""
-    for candidate in (REPO_ROOT / ".env", HELPERS.parent / ".env"):
-        if candidate.exists():
-            for line in candidate.read_text().splitlines():
-                line = line.strip()
-                if not line or line.startswith("#") or "=" not in line:
-                    continue
-                k, v = line.split("=", 1)
-                if k.strip() == key:
-                    v = v.strip().strip('"').strip("'")
-                    if v:
-                        return v
-    return os.environ.get(key)
+    Unlike bild_common.env_value this never exits. Expandiert ${VAR}-Referenzen
+    zentral über transcribe.env_optional."""
+    from transcribe import env_optional
+    return env_optional(key)
 
 
 def freigabe_dir() -> str:

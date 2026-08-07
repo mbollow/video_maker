@@ -27,20 +27,13 @@ import re
 import sys
 from pathlib import Path
 
-DEFAULT_FREIGABE_DIR = (
-    "/Users/marc/Library/CloudStorage/"
-    "OneDrive-FreigegebeneBibliotheken–PalstekGmbH/"
-    "Palstek GmbH - Gäste - General/Social_Media_Prototyp/Freigabeprozess – Video"
-)
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-# Testimonials liegen in einem eigenen Freigabe-Ordner (normaler Bindestrich " - ").
-# freigabe:check liest standardmaessig BEIDE Ordner, damit Rueckmeldungen zu Social-
-# Videos und Testimonials in einem Rutsch sichtbar sind.
-DEFAULT_TESTIMONIAL_FREIGABE_DIR = (
-    "/Users/marc/Library/CloudStorage/"
-    "OneDrive-FreigegebeneBibliotheken–PalstekGmbH/"
-    "Palstek GmbH - Gäste - General/Social_Media_Prototyp/Freigabeprozess - Testimonial"
+# Zentrale, env-aufgelöste Standard-Ordner (eine Quelle: freigabe_push).
+from freigabe_push import (  # noqa: E402
+    DEFAULT_FREIGABE_DIR, DEFAULT_TESTIMONIAL_FREIGABE_DIR,
 )
+from transcribe import env_optional  # noqa: E402
 
 KNOWN = {"OFFEN", "FREIGEGEBEN", "AENDERN"}
 # tolerate common reviewer spellings
@@ -125,9 +118,10 @@ def _default_bases() -> list[Path]:
     """Standard: Video- + Testimonial-Freigabe-Ordner (je per Env ueberschreibbar)."""
     bases: list[Path] = []
     seen: set[str] = set()
-    for env, default in (("FREIGABE_DIR", DEFAULT_FREIGABE_DIR),
-                         ("FREIGABE_TESTIMONIAL_DIR", DEFAULT_TESTIMONIAL_FREIGABE_DIR)):
-        p = Path(os.environ.get(env, default))
+    for keys, default in ((("FREIGABE_VIDEO_DIR", "FREIGABE_DIR"), DEFAULT_FREIGABE_DIR),
+                          (("FREIGABE_TESTIMONIAL_DIR",), DEFAULT_TESTIMONIAL_FREIGABE_DIR)):
+        val = next((env_optional(k) for k in keys if env_optional(k)), None)
+        p = Path(val or default)
         if str(p) not in seen:
             seen.add(str(p))
             bases.append(p)

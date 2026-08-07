@@ -45,21 +45,35 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 
-DEFAULT_FREIGABE_DIR = (
-    "/Users/marc/Library/CloudStorage/"
-    "OneDrive-FreigegebeneBibliotheken–PalstekGmbH/"
-    "Palstek GmbH - Gäste - General/Social_Media_Prototyp/Freigabeprozess – Video"
+from transcribe import env_optional  # noqa: E402  (zentraler .env-Reader mit ${VAR}-Expansion)
+
+# Der OneDrive-Mount wird bei einem Neusync umbenannt — deshalb NIE hartkodieren,
+# sondern zentral aus der .env auflösen (siehe ONEDRIVE_SOCIAL_ROOT). Reihenfolge:
+#   1. der spezifische FREIGABE_*_DIR-Eintrag,
+#   2. sonst aus ONEDRIVE_SOCIAL_ROOT + Unterordner abgeleitet,
+#   3. als allerletzter Notnagel der (evtl. veraltete) Alt-Pfad.
+_STALE_ROOT = (
+    "/Users/marc/Library/CloudStorage/OneDrive-FreigegebeneBibliotheken–PalstekGmbH/"
+    "Palstek GmbH - Gäste - General/Social_Media_Prototyp"
 )
+
+
+def _resolve_freigabe(key: str, subfolder: str) -> str:
+    val = env_optional(key)
+    if val:
+        return val
+    root = env_optional("ONEDRIVE_SOCIAL_ROOT")
+    return str(Path(root or _STALE_ROOT) / subfolder)
+
+
+DEFAULT_FREIGABE_DIR = _resolve_freigabe("FREIGABE_VIDEO_DIR", "Freigabeprozess – Video")
 
 # Testimonial-Videos sind ein voellig anderer Prozess (Langform, Website-Embed statt
 # Social-Post) und haben deshalb einen eigenen Freigabe-Ordner. Ueberschreibbar mit
 # der Umgebungsvariable FREIGABE_TESTIMONIAL_DIR. Achtung: normaler Bindestrich " - ",
 # NICHT der Halbgeviantstrich " – " der anderen Freigabe-Ordner.
-DEFAULT_TESTIMONIAL_FREIGABE_DIR = (
-    "/Users/marc/Library/CloudStorage/"
-    "OneDrive-FreigegebeneBibliotheken–PalstekGmbH/"
-    "Palstek GmbH - Gäste - General/Social_Media_Prototyp/Freigabeprozess - Testimonial"
-)
+DEFAULT_TESTIMONIAL_FREIGABE_DIR = _resolve_freigabe(
+    "FREIGABE_TESTIMONIAL_DIR", "Freigabeprozess - Testimonial")
 
 FREIGABE_TEMPLATE = """STATUS: OFFEN
 ============================================================
