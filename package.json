@@ -29,6 +29,7 @@
     "karussell:outline": "uv run --project ./video-use python ./video-use/helpers/karussell_outline.py",
     "karussell:build": "uv run --project ./video-use python ./video-use/helpers/karussell_build.py",
     "karussell:freigabe:push": "uv run --project ./video-use python ./video-use/helpers/karussell_freigabe_push.py",
+    "karussell:archive": "uv run --project ./video-use python ./video-use/helpers/freigabe_archive.py --area carousel",
   "testimonial:init": "uv run --project ./video-use python ./video-use/helpers/testimonial_init.py",
   "testimonial:build": "uv run --project ./video-use python ./video-use/helpers/testimonial_build.py",
   "testimonial:plan": "uv run --project ./video-use python ./video-use/helpers/testimonial_build.py --nur-plan",
