@@ -26,6 +26,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import testimonial_common as tc  # noqa: E402
+import testimonial_thumbnail as tt  # noqa: E402
 from freigabe_push import DEFAULT_TESTIMONIAL_FREIGABE_DIR, FREIGABE_TEMPLATE  # noqa: E402
 
 # Untertitel: dunkles Marken-Blau auf dem cremefarbenen Streifen unter dem Sprecher-Band.
@@ -209,8 +210,17 @@ def build(projekt: str, push: bool = True, zoom_experiment: bool = False) -> Pat
     info = tc.probe(out)
     print(f"\n  [ok] {out}  ({info['duration']:.1f}s, {info['codecs']})")
 
+    # Thumbnail gehoert zum Liefergegenstand: der Nutzer bettet das Video selbst
+    # auf der Website ein und sieht dort vor dem Klick NUR dieses Bild.
+    # Laeuft nach dem Video-Push, damit der Freigabe-Ordner schon existiert.
     if push:
         push_freigabe(projekt, cfg, out, version)
+    try:
+        bild = tt.build(projekt, video=out, version=version)
+        if bild and push:
+            tt.push(projekt, cfg, bild, freigabe_folder(cfg), slugify(projekt))
+    except Exception as e:  # ein kaputtes Logo darf den Video-Build nie kippen
+        print(f"  [thumb] uebersprungen: {e}")
     return out
 
 
