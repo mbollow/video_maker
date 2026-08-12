@@ -15,7 +15,9 @@ Channel checkboxes (in the FREIGABE header):
     [x] LinkedIn   -> LinkedIn account (Juliana's personal profile)
 
 Draft-first + dedup via the git-tracked ledger. DRY-RUN by default — it only
-prints the plan. Pass --execute to actually upload media and create the drafts.
+prints the plan. Pass --execute to actually upload media and create the posts.
+`--status scheduled` stellt sie direkt scharf (nur auf ausdrueckliche Ansage),
+`--only <text>` beschraenkt den Lauf auf einen bestimmten Freigabe-Ordner.
 
     npm run ghl:plan:auto                 # dry-run: show the plan
     npm run ghl:plan:auto -- --execute    # create the drafts (status=draft)
@@ -45,6 +47,7 @@ from ghl_ledger import (  # noqa: E402
 from ghl_push import resolve_caption  # noqa: E402
 from freigabe_push import DEFAULT_FREIGABE_DIR  # noqa: E402
 from ghl_sync_captions import newest_caption_file, sync_video_area  # noqa: E402
+from caption_check import check as check_caption  # noqa: E402
 
 SLOT_HOUR, SLOT_MIN = 9, 55
 
@@ -189,10 +192,18 @@ def post_type_for(content_type: str, platform: str) -> str:
 def main() -> None:
     ap = argparse.ArgumentParser(description="Plan + draft GHL posts from the Freigabe folders")
     ap.add_argument("--area", choices=["video", "carousel", "all"], default="all")
+    ap.add_argument("--only", help="Nur Freigabe-Ordner, deren Name diesen Text enthaelt "
+                                   "(z.B. '002_') — sonst laeuft es ueber alle FREIGEGEBEN-Ordner")
     ap.add_argument("--execute", action="store_true",
                     help="Actually upload media + create the drafts (default: dry-run plan)")
     ap.add_argument("--force", action="store_true",
                     help="Ignore the dedup ledger (re-post to accounts already done)")
+    ap.add_argument("--captions-ok", action="store_true",
+                    help="Bestaetigt, dass die Caption-Fundstellen mit dem Nutzer geklaert sind. "
+                         "Ohne das bricht --execute ab, sobald die Vorpruefung etwas findet.")
+    ap.add_argument("--status", choices=["draft", "scheduled"], default="draft",
+                    help="Lifecycle der angelegten Posts. Default 'draft' (draft-first). "
+                         "'scheduled' stellt sie direkt scharf — nur nach ausdruecklicher Ansage.")
     args = ap.parse_args()
 
     sel = {"video": ["Freigabeprozess – Video"], "carousel": ["Freigabeprozess – Karussell"]}
@@ -222,6 +233,9 @@ def main() -> None:
     items: list[dict] = []
     for sub, ctype in areas:
         items += collect_items(SM_BASE / sub, ctype)
+
+    if args.only:
+        items = [i for i in items if args.only.lower() in i["name"].lower()]
 
     if not items:
         print("Nichts zu planen — kein FREIGEGEBEN-Ordner mit angehaktem Kanal gefunden.")
@@ -262,9 +276,29 @@ def main() -> None:
             print(f"{tag:<8}{item['content_type']:<9}{plat:<10}"
                   f"{WEEKDAY_NAMES[slot.weekday()]+' '+slot.strftime('%Y-%m-%d %H:%M'):<20}{item['name']}")
 
-    print(f"\n{len(plan)} Draft-Post(s) geplant "
+    print(f"\n{len(plan)} {args.status}-Post(s) geplant "
           f"({'AUSFÜHREN' if args.execute else 'DRY-RUN — nichts gesendet, --execute zum Anlegen'}).")
+
+    # Caption-Vorpruefung: erst pruefen, Fundstellen mit dem Nutzer klaeren, dann
+    # hochladen. Ein einmal hochgeladener Tippfehler ist teuer — siehe Karussell 002.
+    befunde = {}
+    for item in {id(p["item"]): p["item"] for p in plan}.values():
+        f = check_caption(item["caption_raw"])
+        if f:
+            befunde[item["name"]] = f
+    if befunde:
+        print("\nCAPTION-VORPRUEFUNG — bitte erst klaeren:")
+        for name, f in befunde.items():
+            print(f"  {name}")
+            for x in f:
+                print(f"     • {x}")
+        print("  (Sinn- und Sachfehler sieht das nicht — zusaetzlich selbst gegenlesen.)")
+
     if not args.execute or not plan:
+        return
+    if befunde and not args.captions_ok:
+        print("\nABBRUCH: Es ist nichts hochgeladen worden. Fundstellen mit dem Nutzer "
+              "klaeren, Captions ggf. korrigieren, danach mit --captions-ok erneut starten.")
         return
 
     # --- execute: upload media once per item, then create a draft per target ---
@@ -291,14 +325,25 @@ def main() -> None:
             print(f"  ✗ {item['name']}: kein Medium hochgeladen — übersprungen")
             continue
         caption = resolve_caption(item["caption_raw"], p["platform"], None)
-        print(f"creating draft: {p['platform']} @ {p['slot']:%a %Y-%m-%d %H:%M} — {item['name']}")
+        # GHL-Falle (getestet 2026-08-10, alle drei Plattformen): wird ein Post
+        # direkt mit status="scheduled" angelegt ODER per PUT auf scheduled
+        # gesetzt, behaelt die API nur das ERSTE Medium — aus dem Karussell wird
+        # ein Einzelbild. Als Draft bleiben alle Folien erhalten. Also: mehrere
+        # Medien immer als Draft anlegen (Termin ist vorbelegt) und den letzten
+        # Klick auf "scheduled" im GHL-UI machen.
+        status = args.status
+        if status == "scheduled" and len(entries) > 1:
+            status = "draft"
+            print(f"  ! {len(entries)} Folien: GHL wuerde bei 'scheduled' nur die erste "
+                  f"behalten -> als Draft mit vorbelegtem Termin angelegt.")
+        print(f"creating {status}: {p['platform']} @ {p['slot']:%a %Y-%m-%d %H:%M} — {item['name']}")
         try:
             resp = client.create_post(
                 account_ids=[p["account_id"]],
                 summary=caption,
                 user_id=user_id,
                 media=entries,
-                status="draft",
+                status=status,
                 post_type=post_type_for(item["content_type"], p["platform"]),
                 schedule_date=p["slot"],
             )
@@ -318,10 +363,17 @@ def main() -> None:
             account_ids=[p["account_id"]],
             published_at=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
             post_id=post_id, media_id=(entries[0].get("id")),
+            media_url=entries[0].get("url"), status=status,
+            schedule_date=p["slot"].isoformat(),
         )
-        print(f"  ✓ draft angelegt (post_id={post_id})")
+        print(f"  ✓ {status} angelegt (post_id={post_id})")
 
-    print("\nFertig. Alle Posts sind DRAFTS im GHL Social Planner — nichts ist live.")
+    if args.status == "draft":
+        print("\nFertig. Alle Posts sind DRAFTS im GHL Social Planner — nichts ist live.")
+    else:
+        print("\nFertig. Einzelmedien stehen als SCHEDULED und gehen zum Termin automatisch "
+              "raus. Mehrbild-Posts (Karussells) liegen als DRAFT mit vorbelegtem Termin — "
+              "dort im GHL-UI einmal auf 'scheduled' stellen, sonst kappt die API die Folien.")
 
 
 if __name__ == "__main__":

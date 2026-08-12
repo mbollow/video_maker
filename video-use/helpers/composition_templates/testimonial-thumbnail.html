@@ -1,0 +1,81 @@
+<!doctype html>
+<!--
+  Testimonial-Thumbnail — 1920x1080 (16:9), Poster-Bild fuer den Website-Embed.
+  Gefuellt von testimonial_thumbnail.py. Platzhalter: {font} {logo_palstek}
+  {logo_kunde} {portrait} {eyebrow} {zitat} {name} {rolle} {label} {produkt}
+  {produkt_sub}
+
+  Layout ist nach Kundenfeedback festgezurrt (Freigabe 001, Variante 02_v2):
+  dunkelblaue Zitatkarte, das Zitat traegt das Bild, der Kopf ist nur Beleg.
+  Bewusst so, weil Standbilder aus Online-Aufzeichnungen nur ~960x540 nativ
+  haben — formatfuellend wuerden sie matschig.
+-->
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family:'Korbin'; src:url('{font}') format('opentype'); font-weight:500; }
+
+  /* Palstek-Tokens (brand-guidelines/<brand>/colors_and_type.css) */
+  :root { --cream:#f8f6f2; --dark:#281d67; --teal:#4ebbc2; }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { width:1920px; height:1080px; overflow:hidden; }
+  body {
+    font-family:'Korbin', system-ui, sans-serif;
+    background:var(--dark); color:#fff;
+    position:relative; -webkit-font-smoothing:antialiased;
+  }
+
+  /* Dezenter Teal-Schein oben rechts — nimmt der Flaeche das Plakative. */
+  .glow { position:absolute; inset:0;
+          background:radial-gradient(72% 92% at 84% 16%, rgba(78,187,194,.30), transparent 62%); }
+
+  /* Logo-Paar: Palstek oben links, Kunde oben rechts. */
+  .palstek { position:absolute; top:58px; left:96px; height:106px; }
+  .kunde   { position:absolute; top:64px; right:96px; height:94px; }
+
+  .pill { position:absolute; top:262px; left:96px; background:var(--teal); color:#fff;
+          font-size:26px; font-weight:600; letter-spacing:.18em; text-transform:uppercase;
+          padding:15px 34px; border-radius:999px; }
+
+  /* Das Zitat ist der Kern. .hl faerbt den Beleg-Teil teal. */
+  .zitat { position:absolute; left:96px; top:372px; width:1610px;
+           font-size:66px; line-height:1.30; font-weight:500; letter-spacing:-0.5px; }
+  .zitat .hl, .mark { color:var(--teal); }
+
+  /* Kopf im Kreis: mit Luft um den Kopf, Augen bei ~44 % Hoehe. */
+  .person { position:absolute; left:96px; bottom:104px; display:flex; align-items:center; gap:38px; }
+  .avatar { width:204px; height:204px; border-radius:50%; object-fit:cover;
+            border:5px solid var(--teal); }
+  .pname  { font-size:48px; font-weight:500; }
+  .prolle { font-size:30px; color:#c9d3e2; margin-top:10px; font-weight:500; }
+
+  /* Was der Kunde gebucht hat — Label heisst "Inhalt der Zusammenarbeit". */
+  .chip { position:absolute; right:96px; bottom:122px; text-align:right; }
+  .chip .plabel      { font-size:22px; font-weight:600; letter-spacing:.18em;
+                       text-transform:uppercase; color:var(--teal); }
+  .chip .produkt     { font-size:38px; font-weight:500; margin-top:10px; }
+  .chip .produkt-sub { font-size:24px; color:#c9d3e2; margin-top:8px; font-weight:500; }
+</style>
+</head>
+<body>
+  <div class="glow"></div>
+  <img class="palstek" src="{logo_palstek}">
+  <img class="kunde" src="{logo_kunde}">
+  <div class="pill">{eyebrow}</div>
+  <div class="zitat"><span class="mark">„</span>{zitat}<span class="mark">“</span></div>
+  <div class="person">
+    <img class="avatar" src="{portrait}">
+    <div>
+      <div class="pname">{name}</div>
+      <div class="prolle">{rolle}</div>
+    </div>
+  </div>
+  <div class="chip">
+    <div class="plabel">{label}</div>
+    <div class="produkt">{produkt}</div>
+    <div class="produkt-sub">{produkt_sub}</div>
+  </div>
+</body>
+</html>

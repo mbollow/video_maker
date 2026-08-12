@@ -31,6 +31,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import brand_text  # noqa: E402
 from transcribe import _load_env_key  # noqa: E402
 from ghl_client import GHLClient, GHLError  # noqa: E402
 from ghl_schedule import (  # noqa: E402
@@ -95,15 +96,20 @@ def _extract_caption_section(text: str, section: str | None) -> str | None:
 
 
 def resolve_caption(raw_text: str, platform: str, override_section: str | None) -> str:
-    """Pick the caption for a platform: explicit override, else by-platform block."""
+    """Pick the caption for a platform: explicit override, else by-platform block.
+
+    Letzte Station vor dem Upload — deshalb laufen hier die Marken-Textregeln
+    (u.a. #PalstekGmbH statt #Palstek) noch einmal drueber, egal aus welcher
+    Pipeline oder handgepflegten captions.txt der Text kommt.
+    """
     if override_section:
         block = _extract_caption_section(raw_text, override_section)
-        return block if block else raw_text.strip()
+        return brand_text.fix_hashtags(block if block else raw_text.strip())
     for sec in PLATFORM_SECTIONS.get(platform, ["LINKEDIN"]):
         block = _extract_caption_section(raw_text, sec)
         if block:
-            return block
-    return raw_text.strip()
+            return brand_text.fix_hashtags(block)
+    return brand_text.fix_hashtags(raw_text.strip())
 
 
 def main() -> None:

@@ -94,6 +94,12 @@ Return STRICTLY this JSON shape (no markdown wrapping, no commentary):
 - Hook in first 2 lines (before "mehr anzeigen" truncation)
 - **5 hashtags max** (Meta cap as of Dec 2025)
 - Mix a branded hashtag + niche/topic hashtags (from the brand's caption templates)
+- **Termin-CTA:** use the brand's standard wording. For Palstek that is
+  „Erstgespräch vereinbaren" (URL https://palstek-gmbh.de/termin) — never
+  „Beratungstermin", „Termin buchen", „Buch dir …", and never add „kostenlos",
+  „gratis" or „unverbindlich". See the brand's tone.md.
+- Use the branded hashtag EXACTLY as the brand template spells it. For Palstek that is
+  `#PalstekGmbH` — never the short `#Palstek`, which is not the company's channel.
 - Emoji per the brand
 - End with one question
 

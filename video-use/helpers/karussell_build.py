@@ -25,6 +25,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import brand_text as bt
 import karussell_common as kc  # noqa: E402
 import bild_common as bc  # noqa: E402
 import bild_stock  # noqa: E402
@@ -81,6 +82,15 @@ def build_prompt(*, carousel: dict, brand_voice: str, templates: dict[str, str],
 
     cap_block = ""
     cap_out = ""
+    # Das Experten-Poster gibt es nur in der Serie „6 Faktoren für erfolgreiche Teams",
+    # erkennbar an der Serien-Übersichtsfolie. Ohne sie darf die Caption es nicht
+    # anbieten — das wäre ein erfundenes Angebot.
+    is_series = any(bc.norm(s.get("layout", "")) in ("uebersicht", "übersicht", "overview", "serie")
+                    for s in carousel["slides"])
+    poster_hint = (
+        "Nenne das Poster konsequent „Experten-Poster\". Weise am Ende darauf hin, dass es das\n"
+        "komplette Experten-Poster mit allen 6 Faktoren zum Ausdrucken per DM gibt.\n"
+    ) if is_series else ""
     if with_captions:
         cap_block = f"""
 Erzeuge zusätzlich Captions für den GESAMTEN Karussell-Post:
@@ -92,9 +102,7 @@ WICHTIG - Perspektive: Der Post läuft auf Julianas PERSÖNLICHEM Profil. Schrei
 durchgehend in der ICH-Form aus ihrer Sicht. Sie spricht NIE in der dritten Person
 über sich selbst (also nicht „Juliana zeigt", „im Profil von Juliana", sondern
 „ich zeige", „hier in meinem Profil", „folge mir", „schreib mir").
-Nenne das Poster konsequent „Experten-Poster". Weise am Ende darauf hin, dass es das
-komplette Experten-Poster mit allen 6 Faktoren zum Ausdrucken per DM gibt.
-Erfinde KEINE Fakten, nur die Aussagen des Karussells + Marken-Proof-Points.
+{poster_hint}Erfinde KEINE Fakten, nur die Aussagen des Karussells + Marken-Proof-Points.
 Keine geraden Anführungszeichen (") in Caption-Texten; jede caption EINZEILIG.
 KEINE Gedankenstriche (— oder –); nutze stattdessen Kommas (wirkt sonst KI-generiert).
 
@@ -406,11 +414,13 @@ def main() -> None:
         li = data.get("linkedin") or {}
         ig = data.get("instagram") or {}
         if li.get("caption"):
-            manifest["posts"]["linkedin"] = {**empty_post(True), "caption": kc.no_dashes(li.get("caption")),
-                                             "hashtags": li.get("hashtags", [])}
+            manifest["posts"]["linkedin"] = bt.fix_post(
+                {**empty_post(True), "caption": kc.no_dashes(li.get("caption")),
+                 "hashtags": li.get("hashtags", [])})
         if ig.get("caption"):
-            manifest["posts"]["instagram"] = {**empty_post(True), "caption": kc.no_dashes(ig.get("caption")),
-                                              "hashtags": ig.get("hashtags", [])}
+            manifest["posts"]["instagram"] = bt.fix_post(
+                {**empty_post(True), "caption": kc.no_dashes(ig.get("caption")),
+                 "hashtags": ig.get("hashtags", [])})
     manifest["stages"] = {"built": now_iso(), "captioned": now_iso()}
     save_manifest(manifest_path, manifest)
 

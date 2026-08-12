@@ -53,7 +53,9 @@ Erst **danach** schreibst du die Caption.
 - **Kein Emoji.**
 
 ## Hashtag-Set
-- 1–2 Brand-Hashtags: `#Palstek`, `#FührungImKMU`
+- 1–2 Brand-Hashtags: `#PalstekGmbH`, `#FührungImKMU`
+- **Der Marken-Hashtag heißt immer `#PalstekGmbH`, nie `#Palstek`** — der kurze Tag
+  ist auf den Plattformen nicht der Kanal der Firma, Beiträge damit laufen ins Leere.
 - 2–3 Nische-Hashtags: `#Mitarbeiterführung`, `#Teamstabilität`, `#KMU`
 
 ## Qualitätskontrolle (vor der Ausgabe prüfen — sonst neu schreiben)
@@ -71,3 +73,8 @@ Erst **danach** schreibst du die Caption.
 - **Keine Proof-Points erfinden** — „neue Perspektive" heißt Reframe, nicht
   erfundene Zahlen/Daten/Testimonials. Belegbare Fakten nur aus SKILL.md/README.md
   oder Transkript.
+
+## Termin-CTA
+- Immer **„Erstgespräch vereinbaren"** (URL `https://palstek-gmbh.de/termin`).
+- **Nie** „Beratungstermin“, „Termin buchen“, „Buch dir …“ und **keine** Zusätze
+  wie „kostenlos“, „gratis“, „unverbindlich“. Begründung in `tone.md`.

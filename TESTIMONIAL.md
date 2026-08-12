@@ -79,6 +79,51 @@ Pfad überschreibbar via Env `FREIGABE_TESTIMONIAL_DIR`; eigene Nummerierung
 `NNN_<projekt>` ab 001. `npm run freigabe:check` liest Video- **und**
 Testimonial-Ordner zusammen (je ein Abschnitt).
 
+### Thumbnail (Pflicht, läuft automatisch mit)
+
+Der Nutzer bettet das fertige Testimonial selbst auf der Website ein. Ein Besucher sieht
+vor dem Klick **nur das Vorschaubild** — es muss also allein tragen, wer spricht, für
+welches Unternehmen und worum es ging. Deshalb baut `testimonial:build` am Ende
+automatisch ein Thumbnail und legt es neben das Video in den Freigabe-Ordner
+(`thumbnail_vN__<projekt>.png`). Einzeln nachbauen:
+
+```bash
+npm run testimonial:thumbnail -- --projekt testimonial-mustermann
+```
+
+**Format:** 1920 × 1080 (16:9) PNG — bewusst groß, nicht Daumennagel-Größe.
+
+**Pflichtinhalte, ohne Ausnahme:**
+Palstek-Logo · Kundenlogo · Name **und** Rolle des Gesprächspartners ·
+Inhalt der Zusammenarbeit (Titel + Untertitel).
+
+**Layout** (an der Kundenfreigabe von 001 festgezurrt, `composition_templates/testimonial-thumbnail.html`):
+dunkelblaue Zitatkarte auf `#281d67` mit dezentem Teal-Schein oben rechts, Palstek-Logo
+oben links (106 px hoch), Kundenlogo oben rechts, türkise Pille „Kundenstimme", darunter
+das Zitat groß (66 px) mit **einer** teal hervorgehobenen Belegstelle, unten links der Kopf
+im Kreis (204 px, Teal-Rand) mit Name/Rolle, unten rechts der Produktblock.
+
+**Warum ausgerechnet eine Zitatkarte:** Standbilder aus Online-Aufzeichnungen haben nativ
+oft nur ~960 × 540 (Teams-Kachel). Formatfüllend wirken sie matschig. Hier trägt das Zitat,
+das Foto ist nur Beleg — das funktioniert auch mit schwacher Bildquelle. Liegt ein
+Pressefoto vor, sind großformatige Layouts wieder eine Option.
+
+**Zitat:** ein Satz aus dem Interview, grammatikalisch geglättet (wie die Untertitel).
+Am besten der mit dem härtesten Beleg. `zitat_highlight` färbt genau diese Stelle teal —
+**eine** Hervorhebung, nicht zwei.
+
+**Kopf im Kreis:** braucht Luft. Eng am Scheitel wirkt beklemmt, zu weit aufgezogen holt
+den unruhigen Hintergrund der Aufzeichnung rein. Richtwert: Augen bei ~44 % der
+Ausschnitthöhe, Ausschnitt ca. 0,7 × Bildhöhe. Über `portrait_s` (Sekunde im **fertigen**
+Video) einen Moment mit offenem, freundlichem Gesichtsausdruck wählen — Kontaktbogen mit
+`ffmpeg fps=1/4 … tile=` durchsehen, statt zu raten.
+
+**Kundenlogo freistellen** (macht der Helper): weißen Hintergrund per **Flood-Fill vom
+Bildrand** entfernen, nie global alles Weiße — sonst verschwinden weiße Glanzlichter
+*innerhalb* der Grafik. Und nicht nur reines Weiß killen, sonst bleibt ein grauer Saum von
+den weichen Kanten; stattdessen die Deckung aus der Helligkeit ableiten und die Schrift in
+Zielfarbe (weiß fürs dunkle Layout) neu einfärben. Die farbige Bildmarke bleibt unberührt.
+
 ### Heranzoomen auf den Gast (optional, KEIN Automatismus)
 
 Es gibt einen Ken-Burns-Zoom, der bei längeren Antworten sanft auf den Gast
@@ -158,6 +203,7 @@ Kein Vorname in der Anrede — nur als Namensnennung auf der Intro-Folie.
 | `schreibweisen` | Eigennamen, die Scribe verhört: `{"vapa": "WAPA", "sowang": "Suhr"}` |
 | `textfixes` | Mehrwort-Korrekturen im Untertitel: `[{"suche": "a b c", "ersetze": "x y z"}]` |
 | `karten` | Standzeiten der Folien in Sekunden |
+| `thumbnail` | Vorschaubild für den Website-Embed: `kunde_logo` (Datei im Projekt oder URL), `zitat`, `zitat_highlight`, `produkt`, `produkt_sub`, `portrait_s`, optional `portrait_crop` |
 
 **Zu `ausnahmen`:** Wenn ein Schnitt als Sprung auffällt, ist fast immer eine Denkpause
 knapp über die Schwelle gerutscht. Dann **nicht** die globale Schwelle anheben (das ändert
@@ -176,7 +222,9 @@ und sollten deshalb kurz bleiben.
 | `video-use/helpers/testimonial_common.py` | Motor: Schnitt, Untertitel-Reinigung, Karten, ffmpeg |
 | `video-use/helpers/testimonial_init.py` | Phase 1 |
 | `video-use/helpers/testimonial_build.py` | Phase 2/3 + Freigabe-Push |
+| `video-use/helpers/testimonial_thumbnail.py` | Vorschaubild (läuft am Ende von `build` mit) |
 | `video-use/helpers/composition_templates/testimonial-card.html` | Folien-Template |
+| `video-use/helpers/composition_templates/testimonial-thumbnail.html` | Thumbnail-Template |
 | `projects/<projekt>/interview.txt` | **kuratiert vom Menschen** |
 | `projects/<projekt>/testimonial.json` | Technische Config |
 

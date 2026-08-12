@@ -194,6 +194,9 @@ rules. Typically a brand defines:
 - **Language & address & casing:** language, du/Sie, headline casing, whether headlines end with periods.
 - **Emphasis rule:** e.g. how many accent-colored words per headline.
 - **Shape language:** border-radius / pills vs. rectangles.
+- **Termin-CTA on the end card:** the brand's standard wording. For Palstek that is
+  „Erstgespräch vereinbaren" above the URL — NOT „Buch dir dein Erstgespräch",
+  „Termin buchen" or a „Kostenlos & unverbindlich" note. See the brand's tone.md.
 - **Emoji policy:** allowed or not.
 - **Logo usage:** which logo asset, how it may be used.
 
