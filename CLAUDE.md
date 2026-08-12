@@ -66,7 +66,9 @@ Helper `video-use/helpers/ghl_*.py`, `npm run ghl:discover|plan|push|push:draft`
 
 ## Brand-/Inhalts-Konventionen (Palstek / `default`)
 - **Du-Ansprache** konsequent (nie „Sie").
+- **Marken-Hashtag = `#PalstekGmbH`, nie `#Palstek`** — gilt für **alle** Formate (Video, Bild, Karussell) und alle Plattformen; der kurze Tag ist nicht der Kanal der Firma, Beiträge damit laufen ins Leere. Steht in den `caption-templates/`, wird zusätzlich per Code erzwungen (`helpers/brand_text.py`, greift in `caption_gen.py`, `bild_build.py`, `karussell_build.py` und zuletzt in `ghl_push.resolve_caption`).
 - **Buchungs-/CTA-URL:** `https://palstek-gmbh.de/termin` (End-Card + Captions).
+- **Termin-CTA heißt immer „Erstgespräch vereinbaren"** — in Captions, auf End-Cards, Karussell-Endfolien und Bild-Posts. **Nie** „Beratungstermin“/„Beratungsgespräch“, „Termin buchen“, „Buch dir …“, und **keine** Zusätze wie „kostenlos“, „gratis“, „unverbindlich“: das macht das Gespräch zum Angebot statt zum nächsten Schritt. Begründung + zulässige Formulierungen in `brand-guidelines/default/tone.md`; `caption:check` meldet Abweichungen vor dem Upload.
 - **Bestehende Projekte/Videos/Renders nie löschen oder überschreiben** — immer neuer Batch-/Versionsname.
 - **Kernaussagen on-screen** farblich einblenden (Anchors/List-Cards), nicht nur als Untertitel.
 - **Standard-Eyebrow/Kicker:** „Wirksamer Tipp für Führungskräfte" (nicht „Führung in KMU"). End-Card greift das Video-Thema als Frage über dem Buchungs-CTA auf.
@@ -91,6 +93,7 @@ Kunden-Interview (Zoom/Teams) → **~vollständiges 16:9-Video zum Einbetten**, 
 - **Quelle:** die saubere Cloud-/Meeting-Aufzeichnung schlägt den Bildschirm-Mitschnitt (Teams-UI). Bei mehreren Rohdateien Anfang **und** Ende beider kurz transkribieren — unterschiedliche Längen heißen nicht, dass eine unvollständig ist (Vorgespräch).
 - **Bild:** Galerie ist ~3,56:1 → nicht formatfüllend croppbar. Sprecher-Band freistellen, mittig auf Creme `#f8f6f2`, Logo oben rechts, Untertitel `#281d67` darunter. Folien + Antworten teilen den Rahmen → harte Schnitte wirken ruhig, keine Crossfades.
 - **Anrede:** Gast **siezen**, Publikum **duzen** (Outro-CTA). Kein Vorname in der Anrede — nur als Namensnennung auf der Intro-Folie.
+- **Thumbnail ist Pflicht und läuft automatisch mit:** `testimonial:build` baut am Ende ein **1920×1080-Vorschaubild** (`testimonial_thumbnail.py`, Template `composition_templates/testimonial-thumbnail.html`) und legt es als `thumbnail_vN__<projekt>.png` neben das Video in den Freigabe-Ordner. Der Nutzer bettet das Video selbst auf der Website ein und sieht vor dem Klick nur dieses Bild. **Pflichtinhalte:** Palstek-Logo, Kundenlogo, Name **und** Rolle, „Inhalt der Zusammenarbeit" (Titel + Untertitel — nie „Gebucht"). Gestaltung: dunkelblaue Zitatkarte `#281d67`, ein geglättetes Zitat aus dem Interview mit **einer** teal hervorgehobenen Belegstelle, Kopf im Kreis mit Luft drumherum (Augen ~44 % Ausschnitthöhe). Konfiguriert im `thumbnail`-Block der `testimonial.json`. Details: `TESTIMONIAL.md`.
 - **Freigabe:** `testimonial:build` pusht selbst als `final_vN+1` (`--no-push` = Notausgang). Versionen nie überschreiben. **Eigener Freigabe-Ordner `Freigabeprozess - Testimonial`** (bewusst getrennt von den Social-Video-Posts — anderer Prozess/Nutzung; Env `FREIGABE_TESTIMONIAL_DIR`, normaler Bindestrich). Eigene Nummerierung `NNN_<projekt>` (startet bei 001). `npm run freigabe:check` liest Video- **und** Testimonial-Ordner in einem Rutsch (Abschnitt je Ordner).
 
 ## Karussell-Posts (Multi-Slide, optisch eigenständig)

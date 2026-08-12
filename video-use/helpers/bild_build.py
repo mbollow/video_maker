@@ -25,7 +25,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-import bild_common as bc  # noqa: E402
+import bild_common as bc
+import brand_text as bt  # noqa: E402
 import bild_stock  # noqa: E402
 from bild_hooks import read_brand_voice  # noqa: E402
 from caption_gen import call_anthropic, extract_json  # noqa: E402
@@ -382,10 +383,10 @@ def main() -> None:
                 "font_scale": font_scale,
                 "render": str(out_png.relative_to(bc.REPO_ROOT)),
                 "posts": {
-                    "linkedin": {**empty_post(True), "caption": li.get("caption"),
-                                 "hashtags": li.get("hashtags", [])},
-                    "instagram": {**empty_post(True), "caption": ig.get("caption"),
-                                  "hashtags": ig.get("hashtags", [])},
+                    "linkedin": bt.fix_post({**empty_post(True), "caption": li.get("caption"),
+                                             "hashtags": li.get("hashtags", [])}),
+                    "instagram": bt.fix_post({**empty_post(True), "caption": ig.get("caption"),
+                                              "hashtags": ig.get("hashtags", [])}),
                 },
                 "stages": {"built": now_iso(), "captioned": now_iso()},
             }

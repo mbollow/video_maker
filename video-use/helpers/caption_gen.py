@@ -31,6 +31,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import brand_text as bt  # noqa: E402
 from transcribe import _load_env_key  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -261,6 +262,9 @@ def apply_to_manifest(video: dict, captions: dict) -> None:
         post["hashtags"] = rec.get("hashtags", [])
         if platform == "youtube":
             post["title"] = rec.get("title")
+        # Marken-Textregeln erzwingen (u.a. #PalstekGmbH statt #Palstek) —
+        # im Prompt allein haelt so etwas nicht.
+        bt.fix_post(post)
     video["stages"]["captioned"] = {"at": now_iso()}
     if video.get("status") in ("rendered", "captioned"):
         video["status"] = "captioned"

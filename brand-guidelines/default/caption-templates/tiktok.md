@@ -6,6 +6,7 @@
 - **80–100 Zeichen sichtbar** (TikTok kürzt aggressiv)
 - Punchy Fragment-Style
 - **4–6 Hashtags** (Mix trending + Nische)
+- **Marken-Hashtag immer `#PalstekGmbH`, nie `#Palstek`** — der kurze Tag ist nicht der Kanal der Firma.
 - Die ersten ~100 Zeichen sind der Hook
 
 ## Voice
@@ -25,3 +26,8 @@
 - Keine Backticks/Sonderzeichen, die TikTok mangled
 - Nicht länger als 2 Sätze
 - Keine erfundenen Proof-Points
+
+## Termin-CTA
+- Immer **„Erstgespräch vereinbaren"** (URL `https://palstek-gmbh.de/termin`).
+- **Nie** „Beratungstermin“, „Termin buchen“, „Buch dir …“ und **keine** Zusätze
+  wie „kostenlos“, „gratis“, „unverbindlich“. Begründung in `tone.md`.

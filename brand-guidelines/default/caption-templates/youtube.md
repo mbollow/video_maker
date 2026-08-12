@@ -17,8 +17,14 @@
 **Beschreibung:** 1–3 Sätze Kontext + Hashtags.
 
 ## Hashtag-Set
-- `#Shorts` `#Palstek` `#Führung` `#KMU`
+- `#Shorts` `#PalstekGmbH` `#Führung` `#KMU`
+- **Der Marken-Hashtag heißt immer `#PalstekGmbH`, nie `#Palstek`.**
 
 ## DO NOT
 - Kein Clickbait, der das Video nicht hält
 - Keine erfundenen Proof-Points
+
+## Termin-CTA
+- Immer **„Erstgespräch vereinbaren"** (URL `https://palstek-gmbh.de/termin`).
+- **Nie** „Beratungstermin“, „Termin buchen“, „Buch dir …“ und **keine** Zusätze
+  wie „kostenlos“, „gratis“, „unverbindlich“. Begründung in `tone.md`.

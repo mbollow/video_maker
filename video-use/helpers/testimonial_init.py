@@ -154,7 +154,7 @@ def write_interview(path: Path, pairs: list[dict], projekt: str) -> None:
         "eyebrow: Danke, Herr/Frau <Nachname>!",
         "text: Wie steht es um euer Team?",
         "highlight: euer Team",
-        "cta: Lernen wir uns kennen — unverbindlich und auf Augenhöhe.",
+        "cta: Lernen wir uns kennen. Erstgespraech vereinbaren:",
         "url: palstek-gmbh.de/termin",
         "",
     ]

@@ -18,8 +18,15 @@
 **CTA:** speichern / folgen / kommentieren — eine Aktion.
 
 ## Hashtag-Set
-- `#Palstek` `#Führungstipps` `#KMU` `#Teamkultur` `#Mitarbeiterbindung`
+- `#PalstekGmbH` `#Führungstipps` `#KMU` `#Teamkultur` `#Mitarbeiterbindung`
+- **Der Marken-Hashtag heißt immer `#PalstekGmbH`, nie `#Palstek`** — der kurze Tag
+  ist auf den Plattformen nicht der Kanal der Firma, Beiträge damit laufen ins Leere.
 
 ## DO NOT
 - Kein `#fyp #viral #explorepage` (Spam-Signal)
 - Keine erfundenen Proof-Points
+
+## Termin-CTA
+- Immer **„Erstgespräch vereinbaren"** (URL `https://palstek-gmbh.de/termin`).
+- **Nie** „Beratungstermin“, „Termin buchen“, „Buch dir …“ und **keine** Zusätze
+  wie „kostenlos“, „gratis“, „unverbindlich“. Begründung in `tone.md`.
