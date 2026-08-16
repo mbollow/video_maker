@@ -452,6 +452,38 @@
       "media_url": "https://assets.cdn.filesafe.space/3xZs9ttxAS2hmSZkZ2q7/media/0c7e9d5f-1e8d-49fb-9625-e0d6f31433bb.png",
       "status": "draft",
       "schedule_date": "2026-08-12T09:55:00+02:00"
+    },
+    {
+      "sha256": "e0756083ea6692268bafaf9cdb1adb18634999dafd2eb5ef78ae996e7c1bab51",
+      "folder": "009_probleme-im-team-kuendigen-sich-deutlich-an",
+      "media_name": "final_v8__probleme-im-team.mp4",
+      "source_path": "/Users/marc/Library/CloudStorage/OneDrive-FreigegebeneBibliotheken–PalstekGmbH 2/Palstek GmbH - Gäste - General/Social_Media_Prototyp/Freigabeprozess – Video/009_probleme-im-team-kuendigen-sich-deutlich-an/final_v8__probleme-im-team.mp4",
+      "size_bytes": 18767423,
+      "account_ids": [
+        "687bc0b6ee22f47f40e7a4d8_3xZs9ttxAS2hmSZkZ2q7_641859295681169_page"
+      ],
+      "published_at": "2026-08-16T21:30:37Z",
+      "post_id": "6a822bfd1429ec852400187c",
+      "media_id": "6a822bfccf50f900f22b1ea2",
+      "media_url": "https://assets.cdn.filesafe.space/3xZs9ttxAS2hmSZkZ2q7/media/d7f47ad1-83de-41ed-9d7d-ea3f743e17f5.mp4",
+      "status": "scheduled",
+      "schedule_date": "2026-08-17T09:55:00+02:00"
+    },
+    {
+      "sha256": "e0756083ea6692268bafaf9cdb1adb18634999dafd2eb5ef78ae996e7c1bab51",
+      "folder": "009_probleme-im-team-kuendigen-sich-deutlich-an",
+      "media_name": "final_v8__probleme-im-team.mp4",
+      "source_path": "/Users/marc/Library/CloudStorage/OneDrive-FreigegebeneBibliotheken–PalstekGmbH 2/Palstek GmbH - Gäste - General/Social_Media_Prototyp/Freigabeprozess – Video/009_probleme-im-team-kuendigen-sich-deutlich-an/final_v8__probleme-im-team.mp4",
+      "size_bytes": 18767423,
+      "account_ids": [
+        "687bc08b974aed08257c09bb_3xZs9ttxAS2hmSZkZ2q7_17841452348406464"
+      ],
+      "published_at": "2026-08-16T21:30:37Z",
+      "post_id": "6a822bfdaab54a1a452a8077",
+      "media_id": "6a822bfccf50f900f22b1ea2",
+      "media_url": "https://assets.cdn.filesafe.space/3xZs9ttxAS2hmSZkZ2q7/media/d7f47ad1-83de-41ed-9d7d-ea3f743e17f5.mp4",
+      "status": "scheduled",
+      "schedule_date": "2026-08-17T09:55:00+02:00"
     }
   ]
 }
