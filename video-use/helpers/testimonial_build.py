@@ -26,6 +26,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import testimonial_common as tc  # noqa: E402
+import testimonial_idbox as ti  # noqa: E402
 import testimonial_thumbnail as tt  # noqa: E402
 from freigabe_push import DEFAULT_TESTIMONIAL_FREIGABE_DIR, FREIGABE_TEMPLATE  # noqa: E402
 
@@ -162,7 +163,10 @@ def build(projekt: str, push: bool = True, zoom_experiment: bool = False) -> Pat
     cfg, planned = plan(projekt, zoom_experiment)
     proj = tc.project_dir(projekt)
     src = proj / cfg["quelle"]
-    logo = tc.REPO_ROOT / "brand-guidelines" / cfg["brand"] / "assets/logo-color.png"
+    # Antworten laufen ueber dem Video: dort das WEISSE Logo (das dunkle verschwindet
+    # im bunten Hintergrund des Gasts). Die weissen Folien behalten das farbige —
+    # gleiche Stelle, gleiche Groesse, es wechselt nur die Variante.
+    logo = tc.REPO_ROOT / "brand-guidelines" / cfg["brand"] / tc.LOGO_HELL
     band, bg = cfg["band"], cfg["hintergrund"]
     kd = cfg["karten"]
     # Vollbild-Modus: nur der Gast, formatfuellend (Juliana faellt weg). Ersetzt
@@ -210,18 +214,39 @@ def build(projekt: str, push: bool = True, zoom_experiment: bool = False) -> Pat
     info = tc.probe(out)
     print(f"\n  [ok] {out}  ({info['duration']:.1f}s, {info['codecs']})")
 
+    # Sprecher-ID-Box (Kundenlogo + Name + Rolle unten rechts, nur waehrend der
+    # Antworten). Sie war frueher ein Handgriff NACH dem Build — dabei ist sie bei
+    # jedem Rebuild still verloren gegangen. Deshalb laeuft sie hier mit, sobald die
+    # testimonial.json einen `idbox`-Block mit "enabled": true hat.
+    fertig = out
+    ib = cfg.get("idbox") or {}
+    if ib.get("enabled"):
+        intro = tt.intro_felder(projekt)
+        thumb = cfg.get("thumbnail") or {}
+        mit_box = out.with_name(f"{out.stem}_idbox.mp4")
+        fertig = ti.apply(
+            projekt, out, mit_box,
+            ib.get("name") or intro.get("name", ""),
+            ib.get("rolle") or thumb.get("rolle") or intro.get("rolle", ""),
+            # NICHT auf thumbnail.kunde_logo zurueckfallen: die Box ist eine WEISSE
+            # Karte, das Thumbnail eine dunkle — dort liegt oft die weisse Fassung
+            # des Kundenlogos, und die waere hier unsichtbar.
+            proj / (ib.get("logo") or "assets/kunde-logo.png"))
+
     # Thumbnail gehoert zum Liefergegenstand: der Nutzer bettet das Video selbst
     # auf der Website ein und sieht dort vor dem Klick NUR dieses Bild.
     # Laeuft nach dem Video-Push, damit der Freigabe-Ordner schon existiert.
     if push:
-        push_freigabe(projekt, cfg, out, version)
+        push_freigabe(projekt, cfg, fertig, version)
     try:
+        # Standbild aus der Fassung OHNE Box — sie sitzt unten rechts und haette
+        # sonst eine Chance, in den Portraet-Ausschnitt zu rutschen.
         bild = tt.build(projekt, video=out, version=version)
         if bild and push:
             tt.push(projekt, cfg, bild, freigabe_folder(cfg), slugify(projekt))
     except Exception as e:  # ein kaputtes Logo darf den Video-Build nie kippen
         print(f"  [thumb] uebersprungen: {e}")
-    return out
+    return fertig
 
 
 def freigabe_folder(cfg: dict) -> Path:

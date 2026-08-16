@@ -33,8 +33,10 @@
     position:relative; -webkit-font-smoothing:antialiased;
   }
 
-  /* Logo immer oben rechts — nie unten (kollidiert mit den Untertiteln). */
-  .logo { position:absolute; top:70px; right:70px; height:64px; }
+  /* Logo immer oben rechts — nie unten (kollidiert mit den Untertiteln).
+     Groesse/Position kommen aus testimonial_common (LOGO_H/MARGIN/TOP), damit das
+     Logo auf Folie und Video an derselben Stelle sitzt und beim Schnitt nicht springt. */
+  .logo { position:absolute; top:{{LOGO_TOP}}px; right:{{LOGO_MARGIN}}px; height:{{LOGO_H}}px; }
   /* Optionales Kunden-Logo (nur Intro-Folie), oben links — balanciert das
      Palstek-Logo oben rechts. Leer, wenn kein logo: im [intro]-Block steht. */
   .intro-logo { position:absolute; top:80px; left:140px; height:52px; }

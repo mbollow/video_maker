@@ -44,12 +44,27 @@ PROJECTS = REPO_ROOT / "projects"
 CANVAS_W, CANVAS_H = 1920, 1080
 FPS = 30
 
+# Palstek-Logo oben rechts. Folien und Antworten teilen denselben Rahmen, also MUSS
+# das Logo in beiden exakt gleich sitzen — sonst springt es bei jedem Schnitt.
+# Diese drei Werte sind die eine Wahrheit; die Folien-Vorlage (testimonial-card.html)
+# bekommt sie beim Fuellen eingesetzt, das Video ueber frame_filter().
+# Auf den Antworten wird die WEISSE Logo-Variante genommen: das dunkle Logo ist auf
+# einem bunten Video-Hintergrund nicht zu erkennen.
+LOGO_H, LOGO_MARGIN, LOGO_TOP = 90, 70, 70
+LOGO_HELL = "assets/logo-weiss.png"        # weiss, fuer das Video
+LOGO_DUNKEL = "assets/logo-color.png"      # farbig/dunkel, fuer die weissen Folien
+# Beide Dateien sind DASSELBE Artwork inkl. Claim, nur anders eingefaerbt — deshalb
+# sitzt die Wortmarke an derselben Stelle in derselben Groesse und der Wechsel faellt
+# beim Schnitt nicht auf. (`assets/logo-horizontal.png` ist die offizielle weisse
+# Fassung OHNE Claim: gleiche Box, aber groessere Wortmarke — die springt sichtbar.)
+
 # -------- Untertitel-Reinigung: generische Regeln ----------------------------
 # Diese Listen gelten fuer JEDES Interview. Video-spezifische Eingriffe gehoeren
 # als `textfixes` in die testimonial.json, nicht hierher.
 
 FILLER = {"ähm", "äh", "ah", "öh", "öhm", "hm", "mhm", "mm", "mmm", "eh", "hmm", "halt"}
-FILLER_PHRASES = [["ich", "sag", "mal"], ["sag", "ich", "jetzt", "mal"], ["in", "anführungsstrichen"]]
+FILLER_PHRASES = [["ich", "sag", "mal"], ["sag", "ich", "jetzt", "mal"], ["sag", "ich", "mal"],
+                  ["in", "anführungsstrichen"]]
 # Echte Betonung — nicht als Wiederholung zusammenziehen ("Vielen, vielen Dank").
 EMPHASIS = {"vielen", "ganz", "sehr"}
 # Woerter, die am Satzanfang nur Fuellsel sind.
@@ -67,6 +82,20 @@ N_BY_NEXT = {"bisschen": "ein", "kanzlei": "eine", "schlüsselstein": "ein",
 
 def norm(t: str) -> str:
     return re.sub(r"[^\wäöüß']", "", t.lower())
+
+
+def entdehnen(t: str) -> str:
+    """Gezogene Laute auf die richtige Schreibweise bringen.
+
+    Scribe schreibt mit, wie lange ein Laut klingt: „dannnnn", „sooo", „jaaa".
+    Im Untertitel steht aber die korrekte Schreibweise, nicht die Sprechdauer.
+    Vokale werden dabei auf EINEN reduziert (gedehntes „so" ist nie „soo"),
+    Konsonanten auf ZWEI (aus „dannnnn" wird „dann", nicht „dan").
+    Legitime Dreifach-Konsonanten an Wortfugen („Schifffahrt") sind in gesprochener
+    Sprache selten genug, um sie notfalls per `schreibweisen` zu retten.
+    """
+    t = re.sub(r"([aeiouäöü])\1{2,}", r"\1", t, flags=re.IGNORECASE)
+    return re.sub(r"([bcdfghjklmnpqrstvwxyzß])\1{2,}", r"\1\1", t, flags=re.IGNORECASE)
 
 
 def _sentence_end(t: str) -> bool:
@@ -101,6 +130,18 @@ def clean_tokens(words: list[dict], textfixes: list[dict] | None = None,
     fixes = [([norm(x) for x in f["suche"].split()], f["ersetze"].split())
              for f in (textfixes or [])]
     toks = [{"t": w["text"], "s": w["start"], "e": w["end"], "drop_after": False} for w in words]
+
+    # 0) Scribe markiert einen Satz-Neuansatz als "wort- -wort". Im Untertitel sind
+    #    das zwei sichtbare Bindestriche mitten im Satz. Nur dieses Paarmuster
+    #    aufloesen — ein einzelner Ergaenzungsstrich ("Ein- und Ausgang") bleibt.
+    #    Wo ein Komma hingehoert, setzt es der projekt-eigene `textfixes`-Block.
+    for tk in toks:
+        tk["t"] = entdehnen(tk["t"])
+
+    for i in range(len(toks) - 1):
+        if toks[i]["t"].rstrip().endswith("-") and toks[i + 1]["t"].lstrip().startswith("-"):
+            toks[i]["t"] = toks[i]["t"].rstrip()[:-1]
+            toks[i + 1]["t"] = toks[i + 1]["t"].lstrip()[1:]
 
     # 1) Fuellwoerter + Fuell-Phrasen streichen; merken, wo etwas wegfiel.
     res: list[dict] = []
@@ -382,8 +423,8 @@ def _zoom_curve(z: dict, dur: float) -> str:
             f"if(lt(t,{tout1}),1+({z1}-1)*{eout},1))))")
 
 
-def frame_filter(band: dict, bg: str, logo_h: int = 64, logo_margin: int = 60,
-                 logo_top: int = 96, zoom: dict | None = None,
+def frame_filter(band: dict, bg: str, logo_h: int = LOGO_H, logo_margin: int = LOGO_MARGIN,
+                 logo_top: int = LOGO_TOP, zoom: dict | None = None,
                  dur: float | None = None, vollbild: dict | None = None) -> str:
     """Speaker band -> centred on the brand backdrop, logo top-right.
 
@@ -519,7 +560,7 @@ def card_html(brand_dir: Path, kind: str, fields: dict) -> str:
     """Fill testimonial-card.html. kind: intro | frage | outro"""
     tpl = TPL_CARD.read_text()
     font = REPO_ROOT / "font_kobin_medium/Korbin-Medium.otf"
-    logo = brand_dir / "assets/logo-color.png"
+    logo = brand_dir / LOGO_DUNKEL
     body = {
         "intro": ("{intro_logo}<div class='stage'>"
                   "<div class='intro-eyebrow'>{eyebrow}</div>"
@@ -536,6 +577,9 @@ def card_html(brand_dir: Path, kind: str, fields: dict) -> str:
     }[kind].format(**fields)
     return (tpl.replace("{{FONT}}", f"file://{font}")
                .replace("{{LOGO}}", f"file://{logo}")
+               .replace("{{LOGO_H}}", str(LOGO_H))
+               .replace("{{LOGO_MARGIN}}", str(LOGO_MARGIN))
+               .replace("{{LOGO_TOP}}", str(LOGO_TOP))
                .replace("{{BODY}}", body))
 
 

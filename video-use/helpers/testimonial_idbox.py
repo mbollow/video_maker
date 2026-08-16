@@ -94,20 +94,10 @@ def render_box(png: Path, logo: Path, name: str, role: str) -> None:
                    check=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
 
 
-def main() -> None:
-    ap = argparse.ArgumentParser(description="Testimonial: Sprecher-ID-Box overlay")
-    ap.add_argument("--projekt", required=True)
-    ap.add_argument("--input", required=True, help="Eingangsvideo (relativ zum Projekt)")
-    ap.add_argument("--out", required=True, help="Ausgangsvideo (relativ zum Projekt)")
-    ap.add_argument("--name", required=True)
-    ap.add_argument("--rolle", required=True)
-    ap.add_argument("--logo", default="assets/kunde-logo.png")
-    args = ap.parse_args()
-
-    proj = tc.project_dir(args.projekt)
-    inp = proj / args.input
-    out = proj / args.out
-    logo = proj / args.logo
+def apply(projekt: str, inp: Path, out: Path, name: str, rolle: str,
+          logo: Path) -> Path:
+    """Box ins fertige Video brennen. Wird von testimonial_build mitgerufen."""
+    proj = tc.project_dir(projekt)
     for p in (inp, logo, proj / "renders" / "concat.txt"):
         if not p.exists():
             sys.exit(f"  [fehler] nicht gefunden: {p}")
@@ -120,7 +110,7 @@ def main() -> None:
           f"{wins[0][0]:.1f}s bis {wins[-1][1]:.1f}s")
 
     box_png = proj / "work" / "idbox.png"
-    render_box(box_png, logo, args.name, args.rolle)
+    render_box(box_png, logo, name, rolle)
     print(f"  [idbox] Box gerendert: {box_png}")
 
     graph = f"[0:v][1:v]overlay=0:0:enable='{enable}'[vo]"
@@ -133,6 +123,22 @@ def main() -> None:
 
     info = tc.probe(out)
     print(f"  [ok] {out}  ({info['duration']:.1f}s, {info['codecs']})")
+    return out
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser(description="Testimonial: Sprecher-ID-Box overlay")
+    ap.add_argument("--projekt", required=True)
+    ap.add_argument("--input", required=True, help="Eingangsvideo (relativ zum Projekt)")
+    ap.add_argument("--out", required=True, help="Ausgangsvideo (relativ zum Projekt)")
+    ap.add_argument("--name", required=True)
+    ap.add_argument("--rolle", required=True)
+    ap.add_argument("--logo", default="assets/kunde-logo.png")
+    args = ap.parse_args()
+
+    proj = tc.project_dir(args.projekt)
+    apply(args.projekt, proj / args.input, proj / args.out,
+          args.name, args.rolle, proj / args.logo)
 
 
 if __name__ == "__main__":

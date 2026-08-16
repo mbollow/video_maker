@@ -321,20 +321,68 @@ def _words_in_range(transcript: dict, t_start: float, t_end: float) -> list[dict
 
 
 def _fulltext_punct_map(transcript: dict) -> dict:
-    """Map word.start -> trailing punctuation, recovered positionally from Whisper's
-    punctuated `text` field. The per-word tokens are bare (no punctuation), but the
-    full `text` carries commas/periods/question marks and is the SAME word sequence,
-    so a positional zip re-attaches punctuation deterministically (no LLM needed).
-    Returns {} if the counts don't line up (then we fall back to no punctuation)."""
+    """Map word.start -> trailing punctuation, recovered from the punctuated `text`.
+
+    Die Wort-Tokens sind blank (ohne Satzzeichen), der Volltext traegt Komma, Punkt
+    und Fragezeichen. Beide beschreiben dieselbe Wortfolge, aber NICHT immer mit
+    derselben Tokengrenze: Whisper schreibt „Call-to-Action" im Volltext als EIN
+    Token und in `words` als drei. Ein simples zip() ueber gleiche Laengen scheitert
+    daran und lieferte dann gar keine Satzzeichen — genau das ist einer ganzen
+    Batch passiert.
+
+    Deshalb werden beide Seiten buchstabenweise synchron durchlaufen. Deckt ein
+    Volltext-Token mehrere Wort-Tokens ab (oder umgekehrt), landet das Satzzeichen
+    beim LETZTEN davon. Laufen die Folgen wirklich auseinander, wird abgebrochen
+    und gar nichts gesetzt — lieber keine Satzzeichen als falsch gesetzte.
+    """
     words = transcript.get("words") or []
     ft = re.findall(r"\S+", transcript.get("text") or "")
-    if not ft or len(ft) != len(words):
+    if not ft or not words:
         return {}
+
+    def _bare(s: str) -> str:
+        return re.sub(r"[^0-9a-zäöüß]", "", (s or "").lower())
+
+    # Schluessel ist (Startzeit, Wort) und NICHT die Startzeit allein: Whisper vergibt
+    # benachbarten Woertern gelegentlich denselben Timestamp („Sorge" und „dafuer" beide
+    # bei 10,440 s). Ueber die Zeit allein erbte dann das erste Wort das Komma des
+    # zweiten — „Sorge, dafuer, dass". Zusaetzlich eine Karte nur ueber die Zeit, aber
+    # ausschliesslich fuer eindeutige Zeitstempel; sie greift, wenn die Reinigung den
+    # Wortlaut veraendert hat (Schreibweisen, 'n -> ein).
     out: dict = {}
-    for w, tok in zip(words, ft):
+    je_zeit: dict = {}
+    mehrdeutig: set = set()
+    for w in words:
+        s = w.get("start")
+        if s is None:
+            continue
+        z = round(float(s), 3)
+        (mehrdeutig.add(z) if z in je_zeit else je_zeit.__setitem__(z, None))
+
+    wi, woff = 0, 0
+    for tok in ft:
+        rest, letztes = _bare(tok), None
+        while rest and wi < len(words):
+            wort = _bare(words[wi].get("text") or words[wi].get("word") or "")
+            offen = wort[woff:]
+            if not offen:
+                wi, woff = wi + 1, 0
+                continue
+            if rest.startswith(offen):          # Wort geht ganz im Token auf
+                rest, letztes = rest[len(offen):], words[wi]
+                wi, woff = wi + 1, 0
+            elif offen.startswith(rest):        # Token endet mitten im Wort
+                letztes, woff, rest = words[wi], woff + len(rest), ""
+            else:
+                return {}                       # echte Desynchronisation
         m = re.search(r"([.,!?;:]+)$", tok)
-        if m and w.get("start") is not None:
-            out[round(float(w["start"]), 3)] = m.group(1)
+        if m and letztes is not None and letztes.get("start") is not None:
+            z = round(float(letztes["start"]), 3)
+            wort = _bare(letztes.get("text") or letztes.get("word") or "")
+            out[(z, wort)] = m.group(1)
+            if z not in mehrdeutig:
+                je_zeit[z] = m.group(1)
+    out.update({("zeit", z): p for z, p in je_zeit.items() if p})
     return out
 
 
@@ -386,9 +434,23 @@ def build_master_srt(edl: dict, edit_dir: Path, out_path: Path, clean: bool = Tr
             punct = _fulltext_punct_map(transcript)
             if punct:
                 for w in toks:
-                    p = punct.get(round(float(w.get("s", -1)), 3), "")
-                    if p:
-                        w["t"] = (w.get("t") or "").rstrip() + p
+                    z = round(float(w.get("s", -1)), 3)
+                    bare = re.sub(r"[^0-9a-zäöüß]", "", (w.get("t") or "").lower())
+                    # Erst ueber (Zeit, Wort) — nur wenn die Reinigung den Wortlaut
+                    # geaendert hat, ueber die (eindeutige) Zeit allein.
+                    p = punct.get((z, bare)) or punct.get(("zeit", z), "")
+                    t = (w.get("t") or "").rstrip()
+                    # Manche Engines (Scribe) liefern die Satzzeichen schon am Wort mit.
+                    # Dann NICHT nochmal anhaengen — sonst steht da „Laden??".
+                    if not p or (t and t[-1] in ".,!?;:"):
+                        continue
+                    # Ein Komma, das nur das entfernte Fuellwort einrahmte, faellt mit
+                    # weg: aus „schon, aeh, sehr lange" wird „schon sehr lange", nicht
+                    # „schon, sehr lange". Punkt und Fragezeichen bleiben — die beenden
+                    # den Satz und nicht die Sprechpause.
+                    if p == "," and w.get("drop_after"):
+                        continue
+                    w["t"] = t + p
             chunks = []
             current = []
             for w in toks:

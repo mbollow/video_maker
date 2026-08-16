@@ -24,7 +24,8 @@ Konfiguration in `projects/<projekt>/testimonial.json`:
       "produkt": "Workshops fuer Mitarbeitende",
       "produkt_sub": "Selbstfuehrung im Arbeitsalltag, inklusive Workbook",
       "portrait_s": 135.2,                     // Sekunde im FERTIGEN Video
-      "portrait_crop": [722, 58, 1292, 628]    // optional, sonst automatisch
+      "portrait_crop": [722, 58, 1292, 628],   // optional, sonst automatisch
+      "rolle": "WP, StB & Partner"             // optional: kurze Rolle fuers Thumbnail
     }
 
 Name, Rolle und Eyebrow kommen aus dem `[intro]`-Block der `interview.txt` —
@@ -94,7 +95,33 @@ def freistellen(src: Path, out_hell: Path, out_dunkel: Path) -> None:
     from PIL import Image
     import numpy as np
 
-    im = Image.open(src).convert("RGB")
+    im = Image.open(src)
+    if im.mode in ("RGBA", "LA") or "transparency" in im.info:
+        # Sonderfall: das Logo ist SCHON freigestellt und hell (weisse Fassung vom
+        # Kunden). Dann waere jede Weiss-Erkennung toedlich — sie wuerde das Logo
+        # selbst wegradieren. Direkt uebernehmen, nur die dunkle Fassung einfaerben.
+        rgba = im.convert("RGBA")
+        arr = np.array(rgba)
+        deckend = arr[arr[..., 3] > 128][:, :3]
+        if len(deckend) and float(deckend.mean()) > 200:
+            # Zuschnitt auf SICHTBARE Deckung: getbbox() allein zaehlt auch Alpha 1
+            # mit, und solche Reste liegen in Export-PNGs oft im ganzen Rand — das
+            # Logo landet dann winzig in einer riesigen leeren Box.
+            bbox = rgba.getchannel("A").point(lambda v: 255 if v > 25 else 0).getbbox()
+            rgba.crop(bbox).save(out_dunkel)
+            dunkel = np.array(rgba.crop(bbox)).copy()
+            dunkel[..., :3] = (40, 29, 103)
+            Image.fromarray(dunkel).save(out_hell)
+            return
+        # Sonst: Transparenz ist da, das Logo aber dunkel (Website-Downloads oft).
+        # NICHT einfach convert("RGB") — dabei wird der transparente Rand SCHWARZ
+        # und gilt unten als volle Deckung; das Logo bekommt einen Kasten. Erst auf
+        # Weiss legen, dann greift die Flood-Fill-Logik wie bei einem weissen Original.
+        weiss = Image.new("RGB", rgba.size, (255, 255, 255))
+        weiss.paste(rgba, mask=rgba.getchannel("A"))
+        im = weiss
+    else:
+        im = im.convert("RGB")
     a = np.array(im).astype(np.float32)
     h, w, _ = a.shape
     lum = a.min(2)
@@ -221,7 +248,10 @@ def build(projekt: str, video: Path | None = None, version: int | None = None) -
         "eyebrow": t.get("eyebrow", EYEBROW),
         "zitat": tc.emphasise(t["zitat"], t.get("zitat_highlight")),
         "name": intro.get("name", projekt),
-        "rolle": intro.get("rolle", ""),
+        # Die Intro-Folie hat Platz fuer die volle Rolle, das Thumbnail nicht — dort
+        # steht rechts daneben der Produktblock. Zu lange Rollen laufen ineinander,
+        # deshalb hier eine kurze Fassung erlauben (Default: die aus dem Intro).
+        "rolle": t.get("rolle") or intro.get("rolle", ""),
         "label": t.get("label", LABEL),
         "produkt": t.get("produkt", ""),
         "produkt_sub": t.get("produkt_sub", ""),
