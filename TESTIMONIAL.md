@@ -112,17 +112,48 @@ Pressefoto vor, sind großformatige Layouts wieder eine Option.
 Am besten der mit dem härtesten Beleg. `zitat_highlight` färbt genau diese Stelle teal —
 **eine** Hervorhebung, nicht zwei.
 
+**Kundenlogo mit eigener Transparenz** (Website-Downloads haben die oft): wird vor dem
+Freistellen auf Weiß gelegt. Ohne das wird der transparente Rand beim `convert("RGB")`
+schwarz, gilt als volle Deckung und das Logo bekommt einen weißen Kasten.
+Liefert der Kunde eine **weiße Fassung**, wird sie direkt übernommen — jede
+Weiß-Erkennung würde das Logo selbst wegradieren. Zugeschnitten wird dann auf
+**sichtbare** Deckung (Alpha > 25): Export-PNGs haben oft Alpha-1-Reste im ganzen
+Rand, sonst landet das Logo winzig in einer riesigen leeren Box.
+
 **Kopf im Kreis:** braucht Luft. Eng am Scheitel wirkt beklemmt, zu weit aufgezogen holt
 den unruhigen Hintergrund der Aufzeichnung rein. Richtwert: Augen bei ~44 % der
 Ausschnitthöhe, Ausschnitt ca. 0,7 × Bildhöhe. Über `portrait_s` (Sekunde im **fertigen**
 Video) einen Moment mit offenem, freundlichem Gesichtsausdruck wählen — Kontaktbogen mit
-`ffmpeg fps=1/4 … tile=` durchsehen, statt zu raten.
+`ffmpeg fps=1/4 … tile=` durchsehen, statt zu raten. Die **Unterkante** von
+`portrait_crop` muss über dem Untertitel-Streifen bleiben (bei `sub_strip: 270` also
+≤ 810) — darunter schneidet der Helper das Bild ab und der Rest landet als schwarzer
+Rand im Kreis.
 
 **Kundenlogo freistellen** (macht der Helper): weißen Hintergrund per **Flood-Fill vom
 Bildrand** entfernen, nie global alles Weiße — sonst verschwinden weiße Glanzlichter
 *innerhalb* der Grafik. Und nicht nur reines Weiß killen, sonst bleibt ein grauer Saum von
 den weichen Kanten; stattdessen die Deckung aus der Helligkeit ableiten und die Schrift in
 Zielfarbe (weiß fürs dunkle Layout) neu einfärben. Die farbige Bildmarke bleibt unberührt.
+
+### Sprecher-ID-Box (Pflicht, läuft automatisch mit)
+
+Unten rechts neben den Untertiteln steht dauerhaft eine kleine weiße Karte mit
+**Kundenlogo · Name · Rolle** — sichtbar **nur während der Antworten**, auf
+Intro-/Fragen-/Outro-Folien aus (dort steht der Name ohnehin auf der Folie).
+Kundenwunsch: Der Gast stellt sich einmal am Anfang vor, nach fünf Minuten weiß
+niemand mehr, wer da spricht.
+
+Aktivieren über einen `idbox`-Block in der `testimonial.json`:
+```json
+"idbox": { "enabled": true, "rolle": "WP, StB & Partner" }
+```
+`name` fällt auf den `[intro]`-Block zurück, `rolle` auf `thumbnail.rolle` bzw.
+das Intro, `logo` auf `thumbnail.kunde_logo`. Die Box wird nach dem Zusammenbau
+ins Video gebrannt (`testimonial_idbox.py`), gepusht wird die Fassung **mit** Box.
+
+> Sie war früher ein Handgriff **nach** dem Build — und ging bei jedem Rebuild
+> still verloren. Deshalb hängt sie jetzt im Build. Prüfe nach einem Rebuild
+> trotzdem einen Talking-Head-Frame, bevor du eine Version verschickst.
 
 ### Heranzoomen auf den Gast (optional, KEIN Automatismus)
 
@@ -173,7 +204,13 @@ Eine Teams/Zoom-Galerie ist ~**3,56:1** (zwei Kacheln nebeneinander) und lässt 
 
 - Sprecher-Band freistellen (`band` in `testimonial.json`, von `init` erkannt) und mittig
   auf **Creme `#f8f6f2`** setzen — das ersetzt die schwarzen Balken.
-- **Logo oben rechts** (nie unten — kollidiert mit den Untertiteln).
+- **Logo oben rechts** (nie unten — kollidiert mit den Untertiteln), auf Folie und
+  Video an **exakt derselben Stelle und in derselben Größe** — sonst springt es bei
+  jedem Schnitt. Die Werte stehen einmal in `testimonial_common` (`LOGO_H`,
+  `LOGO_MARGIN`, `LOGO_TOP`); die Folien-Vorlage bekommt sie eingesetzt.
+  Es wechselt nur die **Variante**: farbig/dunkel auf den weißen Folien,
+  **weiß über dem Video** — vor dem Hintergrund des Gasts ist das dunkle Logo sonst
+  nicht zu erkennen.
 - Untertitel in **`#281d67`** im cremefarbenen Streifen darunter.
 - Folien und Antworten teilen denselben Rahmen und dasselbe Logo. Deshalb wirken **harte
   Schnitte** zwischen Folie und Video ruhig — es wechselt nur das Band in der Mitte.
@@ -203,7 +240,8 @@ Kein Vorname in der Anrede — nur als Namensnennung auf der Intro-Folie.
 | `schreibweisen` | Eigennamen, die Scribe verhört: `{"vapa": "WAPA", "sowang": "Suhr"}` |
 | `textfixes` | Mehrwort-Korrekturen im Untertitel: `[{"suche": "a b c", "ersetze": "x y z"}]` |
 | `karten` | Standzeiten der Folien in Sekunden |
-| `thumbnail` | Vorschaubild für den Website-Embed: `kunde_logo` (Datei im Projekt oder URL), `zitat`, `zitat_highlight`, `produkt`, `produkt_sub`, `portrait_s`, optional `portrait_crop` |
+| `idbox` | Sprecher-ID-Box: `enabled`, optional `name`, `rolle`, `logo` |
+| `thumbnail` | Vorschaubild für den Website-Embed: `kunde_logo` (Datei im Projekt oder URL), `zitat`, `zitat_highlight`, `produkt`, `produkt_sub`, `portrait_s`, optional `portrait_crop`, optional `rolle` (kurze Rolle — die volle aus dem Intro kollidiert mit dem Produktblock) |
 
 **Zu `ausnahmen`:** Wenn ein Schnitt als Sprung auffällt, ist fast immer eine Denkpause
 knapp über die Schwelle gerutscht. Dann **nicht** die globale Schwelle anheben (das ändert

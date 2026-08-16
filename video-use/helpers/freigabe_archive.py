@@ -351,16 +351,31 @@ def main() -> None:
         print("\nNichts zu archivieren (kein Post vollständig online)."); return
 
     print(f"\n{'AUSFÜHREN' if args.execute else 'DRY-RUN — mit --execute wirklich verschieben'}:")
+    fehler = 0
     for folder, s in online:
         area = s["area"]
-        res = archive_folder(area_base(area) / folder, area, s["shas"],
-                             s["pub_dt"], args.execute)
+        # Ein Ordner, der klemmt, darf die anderen NICHT mitreissen: der Lauf ist
+        # unbeaufsichtigt (LaunchAgent). Ein PermissionError auf einem Karussell
+        # hat hier schon drei Tage lang verhindert, dass ein laengst veroeffentlichtes
+        # Video wegarchiviert wurde.
+        try:
+            res = archive_folder(area_base(area) / folder, area, s["shas"],
+                                 s["pub_dt"], args.execute)
+        except Exception as e:
+            fehler += 1
+            print(f"  [{folder[:3]}/{area}] FEHLER, uebersprungen: {e}")
+            continue
         tag = "verschoben" if args.execute else "würde verschieben"
         print(f"  [{folder[:3]}/{area}] {tag} → veröffentlicht/{Path(res['moved_to']).name}")
         print(f"       behalten: {', '.join(res.get('kept', [])) or '(nichts)'}")
         print(f"       löschen : {', '.join(res.get('deleted', [])) or '(nichts)'}")
         if res.get("error"):
+            fehler += 1
             print(f"       FEHLER: {res['error']}")
+
+    if fehler:
+        print(f"\n{fehler} Ordner mit Fehlern — der Rest wurde verarbeitet.")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
