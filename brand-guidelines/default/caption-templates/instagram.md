@@ -30,3 +30,8 @@
 - Immer **„Erstgespräch vereinbaren"** (URL `https://palstek-gmbh.de/termin`).
 - **Nie** „Beratungstermin“, „Termin buchen“, „Buch dir …“ und **keine** Zusätze
   wie „kostenlos“, „gratis“, „unverbindlich“. Begründung in `tone.md`.
+- **Instagram-Besonderheit: der Weg zum Termin läuft immer über den Bio-Link**,
+  nicht über eine ausgeschriebene URL im Text — Instagram macht Links im
+  Caption-Text nicht klickbar. Also z. B. „Mehr Infos und Terminbuchung über den
+  Link in meiner Bio." statt der `palstek-gmbh.de/termin`-Adresse. Gilt für alle
+  Instagram-Formate (Reel, Bild, Karussell). Auf LinkedIn steht die URL im Text.

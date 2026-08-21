@@ -70,6 +70,10 @@
     text-wrap: pretty; /* verhindert Einzelwort-Zeilen (Hurenkinder) */
   }
   .body .para { margin: 0 0 34px; }
+  /* Absatz mit gewollten Umbrüchen (Formel-Block): Umbruch steht, Operator in
+     fester Breite, damit die Textspalte fluchtet. */
+  .body .para.keep { text-wrap: initial; }
+  .body .para.keep .op { display: inline-block; width: 1.05em; }
   .body .para:last-child { margin-bottom: 0; }
   /* Highlight-Formen */
   .hl { box-decoration-break: clone; -webkit-box-decoration-break: clone; }

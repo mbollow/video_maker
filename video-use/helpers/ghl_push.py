@@ -123,7 +123,9 @@ def main() -> None:
     ap.add_argument("--account-id", action="append", default=[], dest="account_ids",
                     help="GHL social account id (repeat for multiple)")
     ap.add_argument("--status", choices=["draft", "scheduled", "published"],
-                    default="draft", help="Post status (default: draft)")
+                    default="scheduled",
+                    help="Post status (default: scheduled — die inhaltliche Pruefung "
+                         "passiert vorab im Freigabe-Ordner; 'draft' fuer Entwuerfe)")
     ap.add_argument("--post-type", choices=["post", "story", "reel"],
                     default="post", help="Post kind (default: post)")
     ap.add_argument("--schedule-date",
@@ -314,7 +316,7 @@ def main() -> None:
     ok = [r for r in results_summary if r[1] == "ok"]
     print(f"\ndone. {len(ok)}/{len(targets)} post(s) created as {args.status} at {slot_label}.")
     print(f"ledger updated: {LEDGER_PATH.name} (+{len(ok)} entr{'y' if len(ok)==1 else 'ies'})")
-    print("Open the GHL Social Planner to review the drafts.")
+    print("Open the GHL Social Planner to review the posts.")
 
 
 if __name__ == "__main__":
