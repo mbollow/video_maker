@@ -391,12 +391,41 @@ def _wrap_words(escaped_line: str, words: list[str], style: str) -> str:
     return escaped_line
 
 
+OPERATORS = ("+", "=", "×", ">", "<")
+
+
+def _build_keep_para(para: list[str], words: list[str] | None, style: str) -> str:
+    """Absatz mit harten Umbruechen ("|"-Zeilen aus dem outline.txt).
+
+    Beginnen Zeilen mit einem Operator (+ = × …), wandert er in ein <span class="op">
+    fester Breite — dann stehen die Operatoren untereinander und die Textspalte
+    fluchtet, auch auf der Zeile ohne Operator.
+    """
+    stripped = [l[1:].strip() for l in para]
+    has_ops = any(l[:1] in OPERATORS and l[1:2] == " " for l in stripped)
+    rows: list[str] = []
+    for line in stripped:
+        op = ""
+        if has_ops and line[:1] in OPERATORS and line[1:2] == " ":
+            op, line = line[0], line[2:]
+        inner = _wrap_words(html.escape(no_dashes(line)), words, style)
+        prefix = f'<span class="op">{html.escape(op)}</span>' if has_ops else ""
+        rows.append(prefix + inner)
+    return '<p class="para keep">' + "<br>".join(rows) + "</p>"
+
+
 def build_body_html(text_lines: list[str], words: list[str] | None, style: str) -> str:
     """Body paragraphs; each source line becomes a <br>-joined line, chosen words
     wrapped in the emphasis style."""
     words = [w for w in (words or []) if w and w.strip()]
     out: list[str] = []
     for para in paragraphs_from_lines(text_lines):
+        # Absatz mit gewollten Umbrüchen: JEDE Zeile beginnt im outline.txt mit "|".
+        # Dann bleibt der Umbruch stehen (z.B. Formel-Bloecke), statt zu Fließtext
+        # zusammengezogen zu werden.
+        if all(l.startswith("|") for l in para):
+            out.append(_build_keep_para(para, words, style))
+            continue
         # Zeilen eines Absatzes zu Fließtext verbinden (mit Leerzeichen), nicht mit
         # hartem <br>: der Browser bricht per Breite um, `text-wrap: pretty` (CSS)
         # verhindert Einzelwort-Zeilen. Manuelle Umbrüche = nur Autoren-Bequemlichkeit.

@@ -30,10 +30,10 @@
     "karussell:build": "uv run --project ./video-use python ./video-use/helpers/karussell_build.py",
     "karussell:freigabe:push": "uv run --project ./video-use python ./video-use/helpers/karussell_freigabe_push.py",
     "karussell:archive": "uv run --project ./video-use python ./video-use/helpers/freigabe_archive.py --area carousel",
-  "testimonial:init": "uv run --project ./video-use python ./video-use/helpers/testimonial_init.py",
-  "testimonial:build": "uv run --project ./video-use python ./video-use/helpers/testimonial_build.py",
-  "testimonial:thumbnail": "uv run --project ./video-use python ./video-use/helpers/testimonial_thumbnail.py",
-  "testimonial:plan": "uv run --project ./video-use python ./video-use/helpers/testimonial_build.py --nur-plan",
+    "testimonial:init": "uv run --project ./video-use python ./video-use/helpers/testimonial_init.py",
+    "testimonial:build": "uv run --project ./video-use python ./video-use/helpers/testimonial_build.py",
+    "testimonial:thumbnail": "uv run --project ./video-use python ./video-use/helpers/testimonial_thumbnail.py",
+    "testimonial:plan": "uv run --project ./video-use python ./video-use/helpers/testimonial_build.py --nur-plan",
     "ki:generate": "uv run --project ./video-use python ./video-use/helpers/ki_generate.py",
     "recraft:icon": "uv run --project ./video-use python ./video-use/helpers/recraft_icons.py",
     "denoise:setup": "uv venv video-use/.denoise-venv --python 3.11 && uv pip install --python video-use/.denoise-venv/bin/python deepfilternet torch==2.1.2 torchaudio==2.1.2 soundfile",
@@ -58,7 +58,8 @@
     "ghl:auto": "uv run --project ./video-use python ./video-use/helpers/ghl_plan.py",
     "ghl:auto:push": "uv run --project ./video-use python ./video-use/helpers/ghl_plan.py --execute",
     "ghl:sync-captions": "uv run --project ./video-use python ./video-use/helpers/ghl_sync_captions.py",
-    "caption:check": "uv run --project ./video-use python ./video-use/helpers/caption_check.py"
+    "caption:check": "uv run --project ./video-use python ./video-use/helpers/caption_check.py",
+    "ghl:check-media": "uv run --project ./video-use python ./video-use/helpers/ghl_check_media.py"
   },
   "dependencies": {
     "hyperframes": "^0.5.5",
@@ -66,5 +67,7 @@
     "@hyperframes/shader-transitions": "^0.5.5",
     "puppeteer-core": "^23.0.0"
   },
-  "engines": { "node": ">=22" }
+  "engines": {
+    "node": ">=22"
+  }
 }

@@ -36,6 +36,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import karussell_common as kc  # noqa: E402
 import bild_common as bc  # noqa: E402
+from ghl_sync_captions import (  # noqa: E402
+    newest_caption_file, split_caption_hashtags,
+)
+from ghl_push import _extract_caption_section  # noqa: E402
 from freigabe_push import (  # noqa: E402
     slugify_hook, next_global_number, src_signature,
 )
@@ -93,6 +97,27 @@ def build_captions_text(manifest: dict) -> str:
     return ("\n".join(parts).rstrip() + "\n") if parts else ""
 
 
+def sync_captions_into_manifest(manifest: dict, caption_file: Path) -> list[str]:
+    """Mirror the hand-edited folder captions back into the manifest.
+
+    Returns the platforms whose manifest entry actually changed.
+    """
+    text = caption_file.read_text(encoding="utf-8")
+    changed: list[str] = []
+    for platform in ("linkedin", "instagram"):
+        block = _extract_caption_section(text, platform)
+        if not block:
+            continue
+        caption, hashtags = split_caption_hashtags(block)
+        rec = manifest.setdefault("posts", {}).setdefault(platform, {})
+        if rec.get("caption") == caption and (rec.get("hashtags") or []) == hashtags:
+            continue
+        rec["caption"] = caption
+        rec["hashtags"] = hashtags
+        changed.append(platform)
+    return changed
+
+
 def push(manifest: dict, base: Path, batch: str, dry_run: bool, allocator: list[int],
          label: str | None = None) -> dict:
     thema = manifest.get("thema") or batch
@@ -140,19 +165,22 @@ def push(manifest: dict, base: Path, batch: str, dry_run: bool, allocator: list[
                          "at": datetime.now(timezone.utc).isoformat()})
         actions.append(f"{vdir.name}/ ({len(slides)} Slides)")
 
-    # --- captions (write once; new version on change) ---
-    captions_text = build_captions_text(manifest)
-    if captions_text:
-        existing = sorted(folder.glob("captions*.txt")) if folder.exists() else []
-        if not existing:
+    # --- captions (seed once, then hands off) ---
+    # Der handgepflegte Text im Freigabe-Ordner ist die Wahrheit. Bei einem Rebuild
+    # NIE eine neue captions-Version schreiben — das hat Julianas Korrekturen sonst
+    # still ueberschrieben. Stattdessen den Ordner-Text zurueck ins Manifest spiegeln.
+    existing = newest_caption_file(folder) if folder.exists() else None
+    if existing is None:
+        captions_text = build_captions_text(manifest)
+        if captions_text:
             dst = folder / f"captions__{title}.txt"
             if not dry_run:
                 dst.write_text(captions_text, encoding="utf-8")
             actions.append(dst.name)
-        elif not dry_run and existing[-1].read_text(encoding="utf-8").strip() != captions_text.strip():
-            dst = folder / f"captions_v{len(existing) + 1}__{title}.txt"
-            dst.write_text(captions_text, encoding="utf-8")
-            actions.append(dst.name)
+    else:
+        synced = sync_captions_into_manifest(manifest, existing)
+        if synced:
+            actions.append(f"Captions aus {existing.name} ins Manifest gespiegelt ({', '.join(synced)})")
 
     # --- FREIGABE (write once, NEVER overwrite) ---
     if not (folder.exists() and any(folder.glob("FREIGABE*.txt"))):

@@ -2,7 +2,7 @@
 
 Scans the Video + Karussell Freigabe areas, reads each FREIGABE…txt
 (STATUS + channel checkboxes), and for every FREIGEGEBEN folder creates
-DRAFT posts on the *checked* channels, each on that content type's weekday
+SCHEDULED posts on the *checked* channels, each on that content type's weekday
 slot at 09:55 Europe/Berlin — next free day per channel.
 
 Content → weekday matrix (09:55 Europe/Berlin):
@@ -14,13 +14,19 @@ Channel checkboxes (in the FREIGABE header):
     [x] Instagram  -> Instagram + Facebook accounts (both Meta, same caption)
     [x] LinkedIn   -> LinkedIn account (Juliana's personal profile)
 
-Draft-first + dedup via the git-tracked ledger. DRY-RUN by default — it only
-prints the plan. Pass --execute to actually upload media and create the posts.
-`--status scheduled` stellt sie direkt scharf (nur auf ausdrueckliche Ansage),
+Posts gehen direkt scharf raus (status=scheduled): die inhaltliche Pruefung
+passiert vorher im Freigabe-Ordner, der Draft-Umweg hat nur Klicks im GHL-UI
+gekostet. `--status draft` legt sie stattdessen als Entwurf an. AUSNAHME, die
+Das gilt auch fuer Karussells: Die API meldet dort nach dem Terminieren zwar
+nur ein Medium, das ist aber ein Lesefehler — veroeffentlicht wird mit allen
+Folien (belegt am 19.08.2026, Instagram + LinkedIn).
+
+Dedup via den git-getrackten Ledger. DRY-RUN by default — it only prints the
+plan. Pass --execute to actually upload media and create the posts.
 `--only <text>` beschraenkt den Lauf auf einen bestimmten Freigabe-Ordner.
 
     npm run ghl:plan:auto                 # dry-run: show the plan
-    npm run ghl:plan:auto -- --execute    # create the drafts (status=draft)
+    npm run ghl:plan:auto -- --execute    # create the posts (status=scheduled)
 
 Env (.env): GHL_PRIVATE_INTEGRATION_TOKEN, GHL_LOCATION_ID, GHL_USER_ID
 """
@@ -201,9 +207,10 @@ def main() -> None:
     ap.add_argument("--captions-ok", action="store_true",
                     help="Bestaetigt, dass die Caption-Fundstellen mit dem Nutzer geklaert sind. "
                          "Ohne das bricht --execute ab, sobald die Vorpruefung etwas findet.")
-    ap.add_argument("--status", choices=["draft", "scheduled"], default="draft",
-                    help="Lifecycle der angelegten Posts. Default 'draft' (draft-first). "
-                         "'scheduled' stellt sie direkt scharf — nur nach ausdruecklicher Ansage.")
+    ap.add_argument("--status", choices=["draft", "scheduled"], default="scheduled",
+                    help="Lifecycle der angelegten Posts. Default 'scheduled' — die Pruefung "
+                         "passiert vorab im Freigabe-Ordner. 'draft' legt Entwuerfe an. "
+                         "Karussells gehen technisch bedingt immer als Draft raus.")
     args = ap.parse_args()
 
     sel = {"video": ["Freigabeprozess – Video"], "carousel": ["Freigabeprozess – Karussell"]}
@@ -273,8 +280,10 @@ def main() -> None:
             slot = slot[0]
             plan.append({**t, "item": item, "slot": slot})
             tag = "PLAN" if args.execute else "DRY"
+            hint = ""
             print(f"{tag:<8}{item['content_type']:<9}{plat:<10}"
-                  f"{WEEKDAY_NAMES[slot.weekday()]+' '+slot.strftime('%Y-%m-%d %H:%M'):<20}{item['name']}")
+                  f"{WEEKDAY_NAMES[slot.weekday()]+' '+slot.strftime('%Y-%m-%d %H:%M'):<20}"
+                  f"{item['name']}{hint}")
 
     print(f"\n{len(plan)} {args.status}-Post(s) geplant "
           f"({'AUSFÜHREN' if args.execute else 'DRY-RUN — nichts gesendet, --execute zum Anlegen'}).")
@@ -325,17 +334,13 @@ def main() -> None:
             print(f"  ✗ {item['name']}: kein Medium hochgeladen — übersprungen")
             continue
         caption = resolve_caption(item["caption_raw"], p["platform"], None)
-        # GHL-Falle (getestet 2026-08-10, alle drei Plattformen): wird ein Post
-        # direkt mit status="scheduled" angelegt ODER per PUT auf scheduled
-        # gesetzt, behaelt die API nur das ERSTE Medium — aus dem Karussell wird
-        # ein Einzelbild. Als Draft bleiben alle Folien erhalten. Also: mehrere
-        # Medien immer als Draft anlegen (Termin ist vorbelegt) und den letzten
-        # Klick auf "scheduled" im GHL-UI machen.
+        # Frueher gingen Mehrbild-Posts hier zwangsweise als Draft raus, weil die
+        # API nach dem Terminieren nur noch ein Medium meldet. Am 19.08.2026 hat
+        # sich das als reiner LESEFEHLER der API erwiesen: Das Karussell wurde
+        # auf Instagram und LinkedIn mit allen Folien in richtiger Reihenfolge
+        # veroeffentlicht. Der Zwang ist damit weg — Karussells laufen wie alles
+        # andere. Details: docs/ghl-karussell-mehrbild.md
         status = args.status
-        if status == "scheduled" and len(entries) > 1:
-            status = "draft"
-            print(f"  ! {len(entries)} Folien: GHL wuerde bei 'scheduled' nur die erste "
-                  f"behalten -> als Draft mit vorbelegtem Termin angelegt.")
         print(f"creating {status}: {p['platform']} @ {p['slot']:%a %Y-%m-%d %H:%M} — {item['name']}")
         try:
             resp = client.create_post(
@@ -371,9 +376,7 @@ def main() -> None:
     if args.status == "draft":
         print("\nFertig. Alle Posts sind DRAFTS im GHL Social Planner — nichts ist live.")
     else:
-        print("\nFertig. Einzelmedien stehen als SCHEDULED und gehen zum Termin automatisch "
-              "raus. Mehrbild-Posts (Karussells) liegen als DRAFT mit vorbelegtem Termin — "
-              "dort im GHL-UI einmal auf 'scheduled' stellen, sonst kappt die API die Folien.")
+        print("\nFertig. Alle Posts stehen als SCHEDULED und gehen zum Termin automatisch raus.")
 
 
 if __name__ == "__main__":
