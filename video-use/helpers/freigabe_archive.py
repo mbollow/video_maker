@@ -192,6 +192,7 @@ def folder_states(ledger: dict, idx: dict[tuple[str, str], datetime]) -> dict:
             "n_live": len(live),
             "n_total": len(pairs),
             "shas": {e.get("sha256") for e in ents if e.get("sha256")},
+            "sizes": {e.get("size_bytes") for e in ents if e.get("size_bytes")},
             "pub_dt": pub_dt,
         }
     return out
@@ -201,9 +202,35 @@ def folder_states(ledger: dict, idx: dict[tuple[str, str], datetime]) -> dict:
 # Prune pro Bereich
 # --------------------------------------------------------------------------- #
 
-def prune_video(folder: Path, published_shas: set[str], execute: bool) -> dict:
+def _matches_published(f: Path, published_shas: set[str],
+                       published_sizes: set[int]) -> bool:
+    """Ist `f` die Fassung, die online gegangen ist?
+
+    Zuerst ueber die Dateigroesse (aus dem Ledger) vorfiltern — die Freigabe-
+    Ordner liegen in OneDrive, und das Lesen einer nur-in-der-Cloud liegenden
+    Datei laeuft in einen Timeout. Frueher hat genau das den ganzen Archiv-Lauf
+    abgebrochen. Nur wenn die Groesse passt, wird der Hash gebildet; ist die
+    Datei dann nicht lesbar, zaehlt die Groessen-Uebereinstimmung.
+    """
+    try:
+        size = f.stat().st_size
+    except OSError:
+        return False
+    if published_sizes and size not in published_sizes:
+        return False
+    if not published_shas:
+        return bool(published_sizes)
+    try:
+        return sha256_file(f) in published_shas
+    except OSError:
+        return bool(published_sizes)
+
+
+def prune_video(folder: Path, published_shas: set[str], published_sizes: set[int],
+                execute: bool) -> dict:
     finals = sorted(folder.glob("final_v*.mp4"))
-    keep_finals = {f for f in finals if sha256_file(f) in published_shas}
+    keep_finals = {f for f in finals
+                   if _matches_published(f, published_shas, published_sizes)}
     if not keep_finals and finals:
         keep_finals = {max(finals, key=_final_num)}
     covers = sorted(folder.glob("cover*.png"))
@@ -220,7 +247,8 @@ def prune_video(folder: Path, published_shas: set[str], execute: bool) -> dict:
     }
 
 
-def prune_carousel(folder: Path, published_shas: set[str], execute: bool) -> dict:
+def prune_carousel(folder: Path, published_shas: set[str], published_sizes: set[int],
+                   execute: bool) -> dict:
     """Nur den neuesten Versions-Ordner vN/ behalten, ältere Versionen löschen."""
     vdirs = sorted(
         [d for d in folder.iterdir() if d.is_dir() and re.fullmatch(r"v\d+", d.name)],
@@ -241,8 +269,9 @@ PRUNE = {"video": prune_video, "carousel": prune_carousel}
 
 
 def archive_folder(folder: Path, area: str, published_shas: set[str],
-                   pub_dt: datetime | None, execute: bool) -> dict:
-    res = PRUNE[area](folder, published_shas, execute)
+                   published_sizes: set[int], pub_dt: datetime | None,
+                   execute: bool) -> dict:
+    res = PRUNE[area](folder, published_shas, published_sizes, execute)
     date_tag = _berlin_date(pub_dt) if pub_dt else _today_berlin()
     archive = area_base(area) / "veröffentlicht"
     dst = archive / f"{folder.name}_{date_tag}"
@@ -301,8 +330,10 @@ def main() -> None:
     # --- Force-Modus: einen Ordner ohne Online-Check archivieren ---
     if args.folder:
         folder, area = _find_folder_area(args.folder, want_area)
-        shas = {e.get("sha256") for e in ledger.get("entries", [])
-                if e.get("folder") == folder.name}
+        f_ents = [e for e in ledger.get("entries", [])
+                  if e.get("folder") == folder.name]
+        shas = {e.get("sha256") for e in f_ents if e.get("sha256")}
+        sizes = {e.get("size_bytes") for e in f_ents if e.get("size_bytes")}
         # Echtes Live-Datum best-effort aus GHL holen (sonst heute).
         pub_dt = None
         try:
@@ -311,7 +342,7 @@ def main() -> None:
             pub_dt = st["pub_dt"] if st else None
         except (GHLError, Exception):
             pub_dt = None
-        res = archive_folder(folder, area, shas, pub_dt, args.execute)
+        res = archive_folder(folder, area, shas, sizes, pub_dt, args.execute)
         tag = "VERSCHOBEN" if args.execute else "DRY-RUN"
         print(f"[{args.folder}/{area}] {tag} → {area}/veröffentlicht/{Path(res['moved_to']).name}")
         print(f"    behalten: {', '.join(res.get('kept', [])) or '(nichts)'}")
@@ -360,7 +391,7 @@ def main() -> None:
         # Video wegarchiviert wurde.
         try:
             res = archive_folder(area_base(area) / folder, area, s["shas"],
-                                 s["pub_dt"], args.execute)
+                                 s["sizes"], s["pub_dt"], args.execute)
         except Exception as e:
             fehler += 1
             print(f"  [{folder[:3]}/{area}] FEHLER, uebersprungen: {e}")
