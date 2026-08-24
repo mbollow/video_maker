@@ -21,6 +21,13 @@ Das gilt auch fuer Karussells: Die API meldet dort nach dem Terminieren zwar
 nur ein Medium, das ist aber ein Lesefehler — veroeffentlicht wird mit allen
 Folien (belegt am 19.08.2026, Instagram + LinkedIn).
 
+Nach dem Terminieren wandert jeder erfolgreich eingeplante Freigabe-Ordner
+direkt nach `<Bereich>/veroeffentlicht/NNN_slug_<termin>/` — mit dem GEPLANTEN
+Termin im Ordnernamen. Grund: der taegliche Archiv-Cron haengt am GHL-Feld
+`publishedAt`, das fuer Karussells nie gesetzt wird; deren Ordner blieben
+dadurch dauerhaft liegen. `--no-archive` ist der Notausgang, der Cron laeuft
+als Netz fuer alles weiter, was hier nicht mitgenommen wurde.
+
 Dedup via den git-getrackten Ledger. DRY-RUN by default — it only prints the
 plan. Pass --execute to actually upload media and create the posts.
 `--only <text>` beschraenkt den Lauf auf einen bestimmten Freigabe-Ordner.
@@ -54,6 +61,7 @@ from ghl_push import resolve_caption  # noqa: E402
 from freigabe_push import DEFAULT_FREIGABE_DIR  # noqa: E402
 from ghl_sync_captions import newest_caption_file, sync_video_area  # noqa: E402
 from caption_check import check as check_caption  # noqa: E402
+from freigabe_archive import archive_folder  # noqa: E402
 
 SLOT_HOUR, SLOT_MIN = 9, 55
 
@@ -66,6 +74,9 @@ WEEKDAYS = {
     ("carousel", "facebook"): (2,),
     ("carousel", "linkedin"): (2,),
 }
+
+# content type -> Bereich in freigabe_archive (dort heisst 'reel' -> 'video')
+ARCHIVE_AREA = {"reel": "video", "carousel": "carousel"}
 
 # checkbox label -> platforms it enables (Instagram checkbox drives both Meta nets)
 CHECKBOX_PLATFORMS = {
@@ -193,6 +204,67 @@ def post_type_for(content_type: str, platform: str) -> str:
     return "post"
 
 
+# ------------------------------------------------------------- archivieren ---
+
+def archive_done(outcome: dict, args) -> None:
+    """Terminierte Ordner direkt nach veroeffentlicht/ verschieben.
+
+    Warum sofort und nicht erst wenn der Post wirklich live ist: der taegliche
+    Archiv-Cron prueft `publishedAt` — das meldet GHL fuer Karussells NIE
+    (derselbe API-Lesefehler wie bei den Mehrbild-Folien), ihre Ordner blieben
+    deshalb dauerhaft liegen. Ab hier wandert jeder Ordner mit, sobald seine
+    Posts stehen; der Ordnername traegt den GEPLANTEN Termin.
+
+    Uebersprungen wird ein Ordner, wenn ein Kanal fehlgeschlagen ist (er bleibt
+    liegen, damit der Rest nachgezogen werden kann) oder bei --status draft
+    (Drafts gehen nicht automatisch live).
+    """
+    if args.no_archive or not outcome:
+        return
+    if args.status != "scheduled":
+        print("\n[archiv] uebersprungen — Drafts gehen nicht automatisch live.")
+        return
+
+    todo = [o for o in outcome.values() if o["ok"] and not o["fail"]]
+    haenger = [o for o in outcome.values() if o["fail"]]
+    if not todo and not haenger:
+        return
+
+    print("\nArchivieren → veröffentlicht/ (Ordnername = geplanter Termin):")
+    for o in haenger:
+        print(f"  [skip] {o['item']['name']}: nicht alle Kanäle durch — Ordner "
+              f"bleibt liegen")
+    for o in todo:
+        item = o["item"]
+        area = ARCHIVE_AREA.get(item["content_type"])
+        if not area:
+            continue
+        # Ein klemmender Ordner darf die anderen nicht mitreissen — die Posts
+        # stehen zu diesem Zeitpunkt bereits, das Archivieren ist Kosmetik.
+        try:
+            res = archive_folder(
+                item["folder"], area,
+                # Gleiche Form wie der Ledger-Eintrag unten: ueber (Dateiname,
+                # Groesse) findet prune_video die Endfassung, ohne ein Byte zu
+                # lesen — bei OneDrive-Platzhaltern liefe das in einen Timeout.
+                published={
+                    "shas": {item["sha"]},
+                    "files": {(item["media"][0].name,
+                               sum(m.stat().st_size for m in item["media"]))},
+                },
+                pub_dt=o["slot"], execute=True,
+            )
+        except Exception as e:
+            print(f"  [fehler] {item['name']}: {e}")
+            continue
+        if res.get("error"):
+            print(f"  [fehler] {item['name']}: {res['error']}")
+            continue
+        print(f"  ✓ {item['name']} → veröffentlicht/{Path(res['moved_to']).name}")
+        print(f"      behalten: {', '.join(res.get('kept', [])) or '(nichts)'}"
+              f"   gelöscht: {', '.join(res.get('deleted', [])) or '(nichts)'}")
+
+
 # ---------------------------------------------------------------- run --------
 
 def main() -> None:
@@ -210,7 +282,11 @@ def main() -> None:
     ap.add_argument("--status", choices=["draft", "scheduled"], default="scheduled",
                     help="Lifecycle der angelegten Posts. Default 'scheduled' — die Pruefung "
                          "passiert vorab im Freigabe-Ordner. 'draft' legt Entwuerfe an. "
-                         "Karussells gehen technisch bedingt immer als Draft raus.")
+                         "Gilt auch fuer Karussells (der alte Draft-Zwang ist seit "
+                         "19.08.2026 weg — die API las nur falsch).")
+    ap.add_argument("--no-archive", action="store_true",
+                    help="Freigabe-Ordner NICHT nach veroeffentlicht/ verschieben "
+                         "(Notausgang; normal wandert jeder terminierte Ordner mit)")
     args = ap.parse_args()
 
     sel = {"video": ["Freigabeprozess – Video"], "carousel": ["Freigabeprozess – Karussell"]}
@@ -313,6 +389,9 @@ def main() -> None:
     # --- execute: upload media once per item, then create a draft per target ---
     user_id = _load_env_key("GHL_USER_ID")
     media_cache: dict = {}  # item sha -> list[media_entry]
+    # Pro Ordner mitschreiben, was geklappt hat — daraus entscheidet sich unten,
+    # ob er nach veroeffentlicht/ wandert und mit welchem Datum.
+    outcome: dict = {}
     for p in plan:
         item = p["item"]
         if item["sha"] not in media_cache:
@@ -329,9 +408,12 @@ def main() -> None:
                     e["id"] = up["id"]
                 entries.append(e)
             media_cache[item["sha"]] = entries
+        oc = outcome.setdefault(item["sha"], {"item": item, "ok": 0, "fail": 0,
+                                              "slot": None})
         entries = media_cache[item["sha"]]
         if not entries:
             print(f"  ✗ {item['name']}: kein Medium hochgeladen — übersprungen")
+            oc["fail"] += 1
             continue
         caption = resolve_caption(item["caption_raw"], p["platform"], None)
         # Frueher gingen Mehrbild-Posts hier zwangsweise als Draft raus, weil die
@@ -354,6 +436,7 @@ def main() -> None:
             )
         except GHLError as e:
             print(f"  ✗ failed: {e}")
+            oc["fail"] += 1
             continue
         post_id = None
         if isinstance(resp, dict):
@@ -372,6 +455,12 @@ def main() -> None:
             schedule_date=p["slot"].isoformat(),
         )
         print(f"  ✓ {status} angelegt (post_id={post_id})")
+        oc["ok"] += 1
+        # Frühester Termin des Ordners = sein Veröffentlichungsdatum im Archiv.
+        if oc["slot"] is None or p["slot"] < oc["slot"]:
+            oc["slot"] = p["slot"]
+
+    archive_done(outcome, args)
 
     if args.status == "draft":
         print("\nFertig. Alle Posts sind DRAFTS im GHL Social Planner — nichts ist live.")
