@@ -244,8 +244,14 @@ def archive_done(outcome: dict, args) -> None:
         try:
             res = archive_folder(
                 item["folder"], area,
-                published_shas={item["sha"]},
-                published_sizes={sum(m.stat().st_size for m in item["media"])},
+                # Gleiche Form wie der Ledger-Eintrag unten: ueber (Dateiname,
+                # Groesse) findet prune_video die Endfassung, ohne ein Byte zu
+                # lesen — bei OneDrive-Platzhaltern liefe das in einen Timeout.
+                published={
+                    "shas": {item["sha"]},
+                    "files": {(item["media"][0].name,
+                               sum(m.stat().st_size for m in item["media"]))},
+                },
                 pub_dt=o["slot"], execute=True,
             )
         except Exception as e:
