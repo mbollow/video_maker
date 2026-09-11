@@ -42,6 +42,16 @@ def now_iso() -> str:
     return datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds")
 
 
+def _pinned_lines(val: str | None) -> list[str]:
+    """`hook_lines:` / `statement_lines:` aus dem outline.txt — "|" trennt die Zeilen.
+
+    Gesetzt, gewinnen sie gegen den vom Modell erzeugten Umbruch. Noetig, sobald
+    eine `highlight`-Phrase als Ganzes markiert werden soll: der Marker wird pro
+    Zeile gesetzt, eine ueber zwei Zeilen verteilte Phrase faellt sonst weg.
+    """
+    return [p.strip() for p in (val or "").split("|") if p.strip()]
+
+
 def _emph_b(text: str, words) -> str:
     """Escape `text` and wrap each highlight word in <b> (teal via template CSS)."""
     out = _html.escape(kc.no_dashes(text or ""))
@@ -286,7 +296,7 @@ def main() -> None:
             rec = {"seq": seq, "kind": sl["kind"], "render": None}
 
             if sl["kind"] == "start":
-                lines = start_lines or [sl.get("hook", "")]
+                lines = _pinned_lines(sl.get("hook_lines")) or start_lines or [sl.get("hook", "")]
                 hook_html = kc.build_lines_html(lines, words, style)
                 if sl.get("sub"):
                     import html as _h
@@ -331,7 +341,8 @@ def main() -> None:
                     rec.update({"lines": lines, "photo": pmeta, "highlight": words, "style": style})
 
             elif sl["kind"] == "end":
-                lines = end_lines or [sl.get("statement", "")]
+                lines = (_pinned_lines(sl.get("statement_lines")) or end_lines
+                         or [sl.get("statement", "")])
                 stmt_html = kc.build_lines_html(lines, words, style)
                 # Ende-Folie zeigt eine FREIGESTELLTE Person auf Teal-Welle.
                 # Bevorzugt ein vorbereitetes Cutout-PNG (foto_cutout), sonst

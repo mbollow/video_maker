@@ -59,6 +59,10 @@ FIELD_KEYS = {
     "foto_file",    # lokales Foto direkt nutzen (Start/Ende), umgeht Katalog/Stock
     "foto_spiegeln",  # Ende-Freisteller horizontal spiegeln (ja/nein)
     "start_fill",   # Start-Cutout-Platzierung: 'full' (randlos) oder 'contain' (default)
+    # Zeilenumbruch von Hook/Statement fest vorgeben ("|" trennt die Zeilen).
+    # Ohne sie teilt das Modell den Text bei jedem Build neu auf — dann kann eine
+    # `highlight`-Phrase ueber zwei Zeilen rutschen und der Marker faellt STILL weg.
+    "hook_lines", "statement_lines",
 }
 _FIELD_START_RE = re.compile(r"^(" + "|".join(sorted(FIELD_KEYS)) + r")\s*:", re.IGNORECASE)
 _LIST_FIELDS = {"thema", "highlight"}
