@@ -72,14 +72,32 @@ Return STRICTLY this JSON shape (no markdown wrapping, no commentary):
   What new perspective can I offer? Which single sentence would trigger a real
   "I've never thought about it that way" in the audience? Write only after that.
 - **Structure (5 beats):**
-  1. Strong opening — a surprising observation or a counter-question, NOT clickbait.
-  2. Explain the psychological mechanism — don't just assert, give the *why*.
-  3. Max **3** concrete thoughts or recommendations.
+  1. Your OWN opening — a surprising observation or a scene that opens the topic
+     from a different angle. **Never the reel's hook**, not even paraphrased.
+  2. Frame the mechanism rather than explaining it again — give the *why*.
+  3. One **extending, deliberately uncomfortable thought** that does not appear in
+     the reel. Usually a reframe: the obvious problem is not the problem.
+     **Never retell the reel's steps, never a numbered list of them.**
   4. One sentence that nails the core message.
-  5. An open question that sparks real discussion.
+  5. An open question that sparks real discussion — this is the closing thought,
+     not the booking link.
 - **Delete any sentence that reads like a repeat of the reel's spoken text.**
-- 200-320 words (let the argument breathe; brand language), line breaks every 1-2 sentences.
-- **3-5 hashtags** (more = lower reach). Emoji + tone per the brand.
+- **The four hard bans (Juliana's review, 2026-08-27)** — she rejected a finished
+  caption because it read "like the transcript of the video". The audience just
+  watched the reel; they will not read the same thing again:
+  1. Never reuse the opening. The reel's hook in line 1 (even reworded) makes her
+     stop reading immediately. Own hook, mandatory.
+  2. Explain less, frame more. The caption deepens the video's thesis.
+  3. Do not enumerate the reel's steps. Copying the three points into the caption
+     strips the reel of its value. The video's payoff stays in the video.
+  4. The CTA belongs to the discussion, not to selling. The body ends on the open
+     question; the booking line sits below it and does not pitch.
+- 180-300 words (let the argument breathe; brand language), line breaks every 1-2 sentences.
+- **3-5 hashtags** (more = lower reach). Emoji sparingly — single markers before a
+  question are fine, no emoji carpet.
+- **Booking CTA: last line, after the open question**, one plain line
+  („Erstgespräch vereinbaren: https://palstek-gmbh.de/termin"). Never inside the
+  body, never a sales sentence leading into it.
 - **Banned** (no motivational/buzzword language): "Gamechanger", "Mindset",
   "Erfolgsgeheimnis", "Must-have", "Hack" — and their obvious cousins.
 - "New perspective" ≠ invented facts. The Hard Rule on claims/stats still holds:
