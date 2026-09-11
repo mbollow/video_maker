@@ -13,6 +13,23 @@ Palstek spricht direkt, sachlich und vertrauenswürdig. Kurze, prägnante Sätze
 - Next-level
 - intensiviert
 
+## Eigennamen: „Juliana Wiechert" und „Palstek GmbH"
+
+Die Geschäftsführerin heißt **Juliana Wiechert** — mit *ie*, nicht „Wichert",
+„Wichardt" oder „Wichard". Die Firma heißt **Palstek GmbH**, nicht „Palsteck".
+
+**Warum das eine eigene Regel ist:** Beide Namen sprechen die
+Transkriptions-Dienste falsch mit, und sie kommen in fast jedem Video vor —
+Kunden reden Juliana im O-Ton mit Namen an. Bei Video 016 stand „Frau Wichert"
+eingebrannt im Untertitel, und ein falsch geschriebener Nachname fällt genau
+den Leuten auf, die sie kennen. Bemerkt wird es erst, wenn das Video fertig ist.
+
+**Wo es automatisch greift:** `video-use/helpers/brand_text.py` (`NAMEN`) wird
+von `render.build_master_srt` und `testimonial_build.py` in die Untertitel
+gezogen und von `fix_hashtags`/`fix_post` in die Captions. Neue Verhörer dort
+ergänzen — nicht pro Projekt in die `edl.json`. Projekt-eigene
+`schreibweisen` überschreiben die zentrale Tabelle weiterhin (für Kundennamen).
+
 ## CTA-Standard: „Erstgespräch vereinbaren"
 
 Der Handlungsaufruf zum Termin heißt **„Erstgespräch vereinbaren"** — auf der

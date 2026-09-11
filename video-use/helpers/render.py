@@ -392,7 +392,8 @@ def build_master_srt(edl: dict, edit_dir: Path, out_path: Path, clean: bool = Tr
     clean=True (DEFAULT): Untertitel werden grammatikalisch bereinigt — Fuellwoerter
     raus, Versprecher-Wiederholungen zusammengezogen, 'n/'ne ausgeschrieben,
     Schreibweisen/Textfixes angewandt (via testimonial_common.clean_tokens, dieselbe
-    Logik wie beim Testimonial). Ergebnis: durchgehende, saubere Untertitel, die bewusst
+    Logik wie beim Testimonial). Eigennamen kommen aus `brand_text.NAMEN` — zentral,
+    damit "Frau Wiechert" nicht in jedem Projekt neu gepflegt werden muss. Ergebnis: durchgehende, saubere Untertitel, die bewusst
     leicht vom gesprochenen Ton abweichen — damit man das Video am Handy OHNE Ton lesen
     kann. `--no-clean-subs` -> verbatim (Opt-out). Optionale Projekt-Korrekturen ueber
     edl['textfixes'] / edl['schreibweisen'] (gleiches Format wie testimonial.json).
@@ -405,7 +406,10 @@ def build_master_srt(edl: dict, edit_dir: Path, out_path: Path, clean: bool = Tr
     transcripts_dir = edit_dir / "transcripts"
     sources = edl["sources"]
     textfixes = edl.get("textfixes")
-    spellings = {k.lower(): v for k, v in (edl.get("schreibweisen") or {}).items()} or None
+    # Zentrale Marken-Schreibweisen (Juliana Wiechert, Palstek GmbH) + die
+    # projekt-eigenen aus der EDL; das Projekt gewinnt bei gleichem Schluessel.
+    import brand_text
+    spellings = brand_text.spellings(edl.get("schreibweisen"))
     if clean:
         import testimonial_common as tc
 

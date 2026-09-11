@@ -57,7 +57,9 @@ def plan(projekt: str, zoom_experiment: bool = False) -> tuple[dict, list[dict]]
     default_gap = cfg["schnitt"]["max_pause_s"]
     exceptions = cfg["schnitt"].get("ausnahmen", {})
     fixes = cfg.get("textfixes", [])
-    spellings = {k.lower(): v for k, v in cfg.get("schreibweisen", {}).items()}
+    # Zentrale Marken-Schreibweisen + die interview-eigenen (Interview gewinnt).
+    import brand_text
+    spellings = brand_text.spellings(cfg.get("schreibweisen"))
     zoomcfg = cfg.get("zoom") or {}
     # Der Ken-Burns-Push auf den Gast ist bewusst KEIN Automatismus: er greift nur,
     # wenn dieser Build explizit mit --zoom als Experiment laeuft ODER die
