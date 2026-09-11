@@ -284,6 +284,12 @@ def main() -> None:
                          "passiert vorab im Freigabe-Ordner. 'draft' legt Entwuerfe an. "
                          "Gilt auch fuer Karussells (der alte Draft-Zwang ist seit "
                          "19.08.2026 weg — die API las nur falsch).")
+    ap.add_argument("--zeit", metavar="HH:MM",
+                    help="Uhrzeit des Slots abweichend vom Standard 09:55 Europe/Berlin "
+                         "(z.B. --zeit 11:30, wenn der Standard-Slot heute schon durch ist)")
+    ap.add_argument("--jeder-wochentag", action="store_true",
+                    help="Wochentags-Matrix ignorieren und den naechsten freien Slot an "
+                         "JEDEM Tag nehmen — fuer Posts, die kurzfristig raus sollen")
     ap.add_argument("--no-archive", action="store_true",
                     help="Freigabe-Ordner NICHT nach veroeffentlicht/ verschieben "
                          "(Notausgang; normal wandert jeder terminierte Ordner mit)")
@@ -324,6 +330,19 @@ def main() -> None:
         print("Nichts zu planen — kein FREIGEGEBEN-Ordner mit angehaktem Kanal gefunden.")
         return
 
+    slot_hour, slot_min = SLOT_HOUR, SLOT_MIN
+    if args.zeit:
+        m = re.fullmatch(r"(\d{1,2}):(\d{2})", args.zeit.strip())
+        if not m:
+            sys.exit(f"  [fehler] --zeit erwartet HH:MM, bekommen: {args.zeit!r}")
+        slot_hour, slot_min = int(m.group(1)), int(m.group(2))
+        if not (0 <= slot_hour < 24 and 0 <= slot_min < 60):
+            sys.exit(f"  [fehler] --zeit ausserhalb 00:00-23:59: {args.zeit!r}")
+        print(f"  Slot-Uhrzeit abweichend vom Standard: {slot_hour:02d}:{slot_min:02d} "
+              f"(statt {SLOT_HOUR:02d}:{SLOT_MIN:02d}) Europe/Berlin")
+    if args.jeder_wochentag:
+        print("  Wochentags-Matrix ausgeschaltet — naechster freier Slot an jedem Tag")
+
     # Live occupancy (per account, per slot) — so we only put posts on free days.
     now = datetime.now(BERLIN)
     occ = get_account_occupancy(client, from_date=now, to_date=now + timedelta(days=400))
@@ -347,8 +366,10 @@ def main() -> None:
             wds = WEEKDAYS.get((item["content_type"], plat))
             if not wds:
                 continue
+            if args.jeder_wochentag:
+                wds = (0, 1, 2, 3, 4, 5, 6)
             slot = compute_slots(1, [t["account_id"]], weekdays=wds,
-                                 hour=SLOT_HOUR, minute=SLOT_MIN, now=now,
+                                 hour=slot_hour, minute=slot_min, now=now,
                                  occupancy=occ, extra_taken=taken)
             if not slot:
                 print(f"  [warn] {item['name']}/{plat}: kein freier Slot gefunden")
