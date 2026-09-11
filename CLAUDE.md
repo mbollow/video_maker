@@ -79,6 +79,10 @@ Helper `video-use/helpers/ghl_*.py`, `npm run ghl:discover|plan|push|push:draft`
 - **Standard-Eyebrow/Kicker:** „Wirksamer Tipp für Führungskräfte" (nicht „Führung in KMU"). End-Card greift das Video-Thema als Frage über dem Buchungs-CTA auf.
 - **Render `-q standard`** (mobile-first Publikum), nicht `-q high`.
 - **Denoise via DeepFilterNet** (`helpers/denoise.py`), nicht `afftdn`; isolierte venv.
+- **Nach dem Denoise IMMER `helpers/denoise_repair.py` und danach loudnorm.** DeepFilterNet haelt bei leise gesprochenen Stellen einzelne Woerter fuer Rauschen und drueckt sie weg (Video 013: 19 von 142 Woertern, „Strukturprobleme sind" um 20 dB, „muerbe und muede macht" um 10 dB; Median ueber alle Woerter nur 1,3 dB). Der Rest bleibt normal, deshalb faellt genau dort die Stimme ab. Im Rohmaterial reproduzierbar — Modellfehler, nicht Render-Fehler.
+  - **Immer mit `--words <scribe.json>` aufrufen** (Transkript des ENTRAUSCHTEN Videos via `helpers/transcribe.py <video> --engine scribe`). Dann misst der Helfer die Absenkung an den echten Wortgrenzen und flickt nur die betroffenen Woerter — bei 013 waren das 12 % des Videos, der Rest blieb Bit fuer Bit das entrauschte Signal. Ohne `--words` greift eine grobe gleitende Erkennung, die 70-80 % des Videos anfasst.
+  - **`--mode global` NICHT auf fertige Videos.** Genau das war v7 von Video 013: die Problemwoerter waren repariert, aber der Raumteppich stieg von -84 auf -46 dBFS — der Nutzer hoerte sofort, dass das Rauschen lauter ist. Richtig ist `targeted` (Standard) mit `--cap 3..5`.
+  - **Danach erneut auf -14 LUFS normalisieren** (`highpass=f=80` davor). `render.py` normalisiert VOR dem Entrauschen, das Denoise kostet ~5 dB — sonst landet das fertige Reel bei ~-19 LUFS, deutlich zu leise fuer Social.
 
 ## Bild-Posts (Single-Image, neben den Video-Reels)
 Eigene Pipeline für statische Ein-Bild-Posts (echtes Juliana-Foto + Hook/Spruch-Overlay). Spiegelt den Batch-Workflow.
