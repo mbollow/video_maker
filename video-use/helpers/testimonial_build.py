@@ -133,7 +133,10 @@ def render_cards(projekt: str, cfg: dict, planned: list[dict]) -> None:
             if logo_rel:
                 lp = (proj / logo_rel).resolve()
                 if lp.exists():
-                    intro_logo = f"<img class='intro-logo' src='file://{lp}'>"
+                    # `logo_h:` im [intro]-Block ueberschreibt die 52 px der Vorlage —
+                    # die passen fuer breite Wortmarken, kompakte Logos werden winzig.
+                    style = f" style='height:{int(b['logo_h'])}px'" if b.get("logo_h", "").strip() else ""
+                    intro_logo = f"<img class='intro-logo' src='file://{lp}'{style}>"
                 else:
                     print(f"  [warn] Kunden-Logo nicht gefunden: {lp}")
             html = tc.card_html(brand, "intro", {
@@ -168,7 +171,10 @@ def build(projekt: str, push: bool = True, zoom_experiment: bool = False) -> Pat
     # Antworten laufen ueber dem Video: dort das WEISSE Logo (das dunkle verschwindet
     # im bunten Hintergrund des Gasts). Die weissen Folien behalten das farbige —
     # gleiche Stelle, gleiche Groesse, es wechselt nur die Variante.
-    logo = tc.REPO_ROOT / "brand-guidelines" / cfg["brand"] / tc.LOGO_HELL
+    # Ausnahme per `"logo_video": "dunkel"` in der testimonial.json: sitzt der Gast
+    # vor einer weissen Wand (Basedow), ist das weisse Logo unsichtbar.
+    logo_variant = tc.LOGO_DUNKEL if cfg.get("logo_video") == "dunkel" else tc.LOGO_HELL
+    logo = tc.REPO_ROOT / "brand-guidelines" / cfg["brand"] / logo_variant
     band, bg = cfg["band"], cfg["hintergrund"]
     kd = cfg["karten"]
     # Vollbild-Modus: nur der Gast, formatfuellend (Juliana faellt weg). Ersetzt

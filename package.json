@@ -59,7 +59,9 @@
     "ghl:auto:push": "uv run --project ./video-use python ./video-use/helpers/ghl_plan.py --execute",
     "ghl:sync-captions": "uv run --project ./video-use python ./video-use/helpers/ghl_sync_captions.py",
     "caption:check": "uv run --project ./video-use python ./video-use/helpers/caption_check.py",
-    "ghl:check-media": "uv run --project ./video-use python ./video-use/helpers/ghl_check_media.py"
+    "ghl:check-media": "uv run --project ./video-use python ./video-use/helpers/ghl_check_media.py",
+    "testimonial:zitate": "uv run --project ./video-use python ./video-use/helpers/testimonial_zitate.py",
+    "testimonial:praxisbericht": "uv run --project ./video-use python ./video-use/helpers/testimonial_praxisbericht.py"
   },
   "dependencies": {
     "hyperframes": "^0.5.5",

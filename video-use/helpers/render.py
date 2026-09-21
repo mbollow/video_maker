@@ -526,6 +526,29 @@ LOUDNORM_I = -14.0
 LOUDNORM_TP = -1.0
 LOUDNORM_LRA = 11.0
 
+# Sprache immer als Dual-Mono ausspielen. iPhone-Aufnahmen mit externem Mikro
+# (Drehtag 18.09.2026) hatten die Stimme nur auf EINEM Kanal, der andere lag bei
+# -119 dB — ohne Downmix sitzt die Stimme im fertigen Reel hart links/rechts.
+# Der Mittelwert beider Kanaele ist fuer normales Stereo neutral; den Pegel
+# setzt loudnorm danach ohnehin.
+DUAL_MONO = "pan=stereo|c0=0.5*c0+0.5*c1|c1=0.5*c0+0.5*c1"
+
+
+def _dead_channel(video_path: Path) -> str | None:
+    """Meldet 'links'/'rechts', wenn ein Stereo-Kanal praktisch stumm ist (nur Log)."""
+    cmd = ["ffmpeg", "-hide_banner", "-nostats", "-i", str(video_path),
+           "-af", "astats=metadata=1:reset=0", "-vn", "-f", "null", "-"]
+    proc = subprocess.run(cmd, capture_output=True, text=True)
+    levels = re.findall(r"RMS level dB: (-?[\d.]+|-inf)", proc.stderr)
+    if len(levels) < 3:  # Kanal 1, Kanal 2, Overall
+        return None
+    l, r = (float(x) if x != "-inf" else -999.0 for x in levels[:2])
+    if l < -90 and r > -70:
+        return "links"
+    if r < -90 and l > -70:
+        return "rechts"
+    return None
+
 
 def measure_loudness(video_path: Path) -> dict[str, str] | None:
     """Run ffmpeg loudnorm first pass and parse the JSON measurement.
@@ -534,6 +557,7 @@ def measure_loudness(video_path: Path) -> dict[str, str] | None:
     target_offset, or None if measurement failed.
     """
     filter_str = (
+        f"{DUAL_MONO},"
         f"loudnorm=I={LOUDNORM_I}:TP={LOUDNORM_TP}:LRA={LOUDNORM_LRA}:print_format=json"
     )
     cmd = [
@@ -574,9 +598,13 @@ def apply_loudnorm_two_pass(
     In preview mode, skips the measurement pass and uses a one-pass approximation
     for speed. Final mode always does the proper two-pass.
     """
+    dead = _dead_channel(input_path)
+    if dead:
+        print(f"  Hinweis: Kanal {dead} ist stumm — Stimme wird als Dual-Mono ausgespielt")
+
     if preview:
         # One-pass approximation — faster, slightly less accurate.
-        filter_str = f"loudnorm=I={LOUDNORM_I}:TP={LOUDNORM_TP}:LRA={LOUDNORM_LRA}"
+        filter_str = f"{DUAL_MONO},loudnorm=I={LOUDNORM_I}:TP={LOUDNORM_TP}:LRA={LOUDNORM_LRA}"
         cmd = [
             "ffmpeg", "-y", "-hide_banner", "-nostats",
             "-i", str(input_path),
@@ -601,6 +629,7 @@ def apply_loudnorm_two_pass(
           f"TP={measurement['input_tp']}  LRA={measurement['input_lra']}")
 
     filter_str = (
+        f"{DUAL_MONO},"
         f"loudnorm=I={LOUDNORM_I}:TP={LOUDNORM_TP}:LRA={LOUDNORM_LRA}"
         f":measured_I={measurement['input_i']}"
         f":measured_TP={measurement['input_tp']}"

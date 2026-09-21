@@ -115,6 +115,23 @@ def short_title(video: dict, max_len: int = 24) -> str:
     return slugify_hook(caption_hook(video), max_len=max_len)
 
 
+def existing_title(folder: Path) -> str | None:
+    """Suffix der bereits im Ordner liegenden Dateien (``final_v1__<title>.mp4``).
+
+    Der Titel wird sonst aus der LinkedIn-Caption abgeleitet — und die wird nach
+    Reviews umgeschrieben (und per ghl:sync-captions ins Manifest gespiegelt).
+    Ein Re-Push bekaeme dann einen anderen Suffix als final_v1…v6 daneben.
+    Ein Ordner behaelt deshalb den Suffix, mit dem er angelegt wurde.
+    """
+    if not folder.exists():
+        return None
+    for pat in ("final_v*__*.mp4", "FREIGABE__*.txt", "captions__*.txt"):
+        for f in sorted(folder.glob(pat)):
+            if (m := re.search(r"__(.+)\.(?:mp4|txt)$", f.name)):
+                return m.group(1)
+    return None
+
+
 def next_global_number(base: Path) -> int:
     """Highest NNN_ folder prefix across the whole review dir, plus one.
 
@@ -134,6 +151,17 @@ def next_global_number(base: Path) -> int:
             if child.is_dir() and m:
                 highest = max(highest, int(m.group(1)))
     return highest + 1
+
+
+def existing_folder_with_number(base: Path, number: int) -> Path | None:
+    """Ordner (aktiv oder unter veröffentlicht/) mit genau diesem NNN-Praefix, sonst None."""
+    for d in (base, base / "veröffentlicht"):
+        if not d.exists():
+            continue
+        for child in d.iterdir():
+            if child.is_dir() and re.match(rf"^{number:03d}_", child.name):
+                return child
+    return None
 
 
 def caption_hook(video: dict) -> str:
@@ -190,8 +218,19 @@ def push_video(video: dict, base: Path, dry_run: bool, allocator: list[int]) -> 
         folder = base / folder_name
         created = False
     else:
-        number = allocator[0]
-        allocator[0] += 1
+        # Feste Nummer (manifest video.freigabe.number bzw. --numbers) schlaegt den
+        # globalen Zaehler — z. B. wenn die Drehreihenfolge die Posting-Reihenfolge
+        # vorgibt und die Videos nicht in dieser Reihenfolge fertig werden.
+        fixed = fr.get("number")
+        if fixed:
+            number = int(fixed)
+            clash = existing_folder_with_number(base, number)
+            if clash is not None:
+                raise SystemExit(
+                    f"[{seq}] Nummer {number:03d} ist bereits belegt: {clash.name}")
+        else:
+            number = allocator[0]
+            allocator[0] += 1
         slug = slugify_hook(caption_hook(video))
         folder_name = f"{number:03d}_{slug}"
         folder = base / folder_name
@@ -212,7 +251,7 @@ def push_video(video: dict, base: Path, dry_run: bool, allocator: list[int]) -> 
     # carries a stale `versions` list from an earlier push to a different dir.
     versions = [] if created else list(fr.get("versions", []))
     cur_sig = src_signature(final_src)
-    title = short_title(video)  # kebab suffix appended to non-original file names
+    title = existing_title(folder) or short_title(video)  # kebab suffix appended to non-original file names
 
     if not dry_run:
         folder.mkdir(parents=True, exist_ok=True)
@@ -313,7 +352,18 @@ def main() -> None:
                     help="Target review directory (default: Palstek SharePoint / FREIGABE_DIR)")
     ap.add_argument("--dry-run", action="store_true", help="Show what would happen, write nothing")
     ap.add_argument("--seq", help="Nur diese seq(s) pushen, kommagetrennt (z.B. 01 oder 01,03). Default: alle")
+    ap.add_argument("--numbers",
+                    help="Feste Ordnernummern je seq, z.B. 01=025,02=032 (wird ins Manifest unter "
+                         "video.freigabe.number geschrieben und schlaegt den globalen Zaehler)")
     args = ap.parse_args()
+
+    fixed_numbers: dict[str, int] = {}
+    if args.numbers:
+        for pair in args.numbers.split(","):
+            k, _, v = pair.partition("=")
+            if not v.strip().isdigit():
+                sys.exit(f"--numbers: ungueltiges Paar '{pair}' (erwartet seq=NNN)")
+            fixed_numbers[k.strip()] = int(v)
 
     only_seqs = {s.strip() for s in args.seq.split(",")} if args.seq else None
 
@@ -337,6 +387,8 @@ def main() -> None:
     for video in manifest["videos"]:
         if only_seqs is not None and str(video.get("seq")) not in only_seqs:
             continue
+        if str(video.get("seq")) in fixed_numbers:
+            video.setdefault("freigabe", {})["number"] = fixed_numbers[str(video.get("seq"))]
         video["_batch"] = args.batch
         res = push_video(video, base, args.dry_run, allocator)
         video.pop("_batch", None)

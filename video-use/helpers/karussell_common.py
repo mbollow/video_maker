@@ -39,6 +39,7 @@ TPL_INNER = TEMPLATES / "carousel-inner.html"
 TPL_END = TEMPLATES / "carousel-end.html"
 TPL_OVERVIEW = TEMPLATES / "carousel-overview.html"  # layout: uebersicht (Serien-Teile)
 TPL_POSTER = TEMPLATES / "carousel-poster.html"      # layout: poster (Poster-Ausschnitt)
+TPL_KONTRAST = TEMPLATES / "carousel-kontrast.html"  # layout: kontrast (Gegensatz-Zeilen + Folgerung)
 RENDERER = bc.RENDERER
 CANVAS_W, CANVAS_H = bc.CANVAS_W, bc.CANVAS_H
 
@@ -63,6 +64,9 @@ FIELD_KEYS = {
     # Ohne sie teilt das Modell den Text bei jedem Build neu auf — dann kann eine
     # `highlight`-Phrase ueber zwei Zeilen rutschen und der Marker faellt STILL weg.
     "hook_lines", "statement_lines",
+    # layout: kontrast — beschriftete Zeilen "Label | Satz" (Label optional), in
+    # Outline-Reihenfolge: kontra (schwach), pro (Teal + Marker), neutral (Navy).
+    "kontra", "pro", "neutral",
 }
 _FIELD_START_RE = re.compile(r"^(" + "|".join(sorted(FIELD_KEYS)) + r")\s*:", re.IGNORECASE)
 _LIST_FIELDS = {"thema", "highlight"}

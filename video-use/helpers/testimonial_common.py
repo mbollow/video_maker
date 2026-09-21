@@ -186,9 +186,18 @@ def clean_tokens(words: list[dict], textfixes: list[dict] | None = None,
                     for j, r in enumerate(rep):
                         res.append({"t": r, "s": toks[i + j]["s"], "e": toks[i + j]["e"], "drop_after": False})
                 else:
-                    s0, e0 = toks[i]["s"], toks[i + n - 1]["e"]
-                    for r in rep:
-                        res.append({"t": r, "s": s0, "e": e0, "drop_after": False})
+                    # Andere Wortzahl: die Spanne nach Zeichenlaenge auf die Ersatz-
+                    # woerter verteilen. Frueher bekamen alle dieselbe Start-/Endzeit —
+                    # dann ueberlappten sich benachbarte Cues und wurden im Bild
+                    # uebereinander gestapelt (Basedow 02:35, 06:19).
+                    # Jedes Ersatzwort erbt die Zeit des Originalworts an derselben
+                    # relativen Position — so bleiben Sprechpausen innerhalb der
+                    # Spanne erhalten (ein linearer Verlauf zieht den Text sonst ueber
+                    # eine Pause hinweg und laeuft dem Ton voraus).
+                    m = len(rep)
+                    for k, r in enumerate(rep):
+                        j = min(n - 1, int((k + 0.5) * n / m))
+                        res.append({"t": r, "s": toks[i + j]["s"], "e": toks[i + j]["e"], "drop_after": False})
                 i += n
                 hit = True
                 break
@@ -359,10 +368,15 @@ def build_srt(ranges: list[list[float]], tokens: list[dict], max_words: int = 5)
     if chunk:
         cues.append(chunk)
     lines = []
+    prev_e = 0.0
     for i, c in enumerate(cues, 1):
         s, e = out_t(c[0]["s"]), out_t(c[-1]["e"])
+        # Nie in den Vorgaenger hineinragen — ueberlappende Cues zeigt ffmpeg
+        # gestapelt uebereinander an (zwei Untertitel gleichzeitig im Bild).
+        s = max(s, prev_e)
         if e <= s:
             e = s + 0.4
+        prev_e = e
         text = _wrap_cue([w["t"] for w in c])
         lines.append(f"{i}\n{_srt_time(s)} --> {_srt_time(e)}\n{text}\n")
     return "\n".join(lines)
