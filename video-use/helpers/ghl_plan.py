@@ -92,6 +92,8 @@ AREAS = [
 ]
 
 
+from freigabe_check import ALIASES as fc_aliases  # noqa: E402
+
 # ---------------------------------------------------------------- parsing ----
 
 def parse_freigabe(path: Path) -> tuple[str, set[str]]:
@@ -102,7 +104,11 @@ def parse_freigabe(path: Path) -> tuple[str, set[str]]:
         s = line.strip()
         m = re.match(r"STATUS\s*:\s*([A-Za-zÄÖÜäöü]+)", s)
         if m:
-            status = m.group(1).upper()
+            # Dieselben Schreibweisen akzeptieren wie freigabe_check — die Zeile
+            # tippen Menschen von Hand, und "Freigabe"/"OK"/"Passt" hier still als
+            # "nicht freigegeben" zu lesen, laesst den Ordner unbemerkt liegen.
+            roh = m.group(1).upper()
+            status = fc_aliases.get(roh, roh)
             continue
         cm = re.match(r"\[([ xX])\]\s*(Instagram|LinkedIn)\b", s, re.I)
         if cm and cm.group(1).lower() == "x":
