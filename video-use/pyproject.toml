@@ -12,6 +12,7 @@ dependencies = [
     "numpy",
     "anthropic>=0.104.1",
     "json-repair>=0.61.1",
+    "python-docx>=1.2.0",
 ]
 
 [project.optional-dependencies]

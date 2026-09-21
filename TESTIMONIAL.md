@@ -58,6 +58,7 @@ unterschiedlich lang sein, ohne dass eine unvollständig ist (Vorgespräch!).
 - `antwort:` = Sekunden aus der Quelle; mehrere Bereiche mit Komma trennen (die Lücke
   dazwischen fliegt raus — so entfernt man Zwischenrufe).
 - `status: nein` lässt einen Block weg. Blöcke dürfen umsortiert werden.
+- `[intro]`: `logo:` = Kundenlogo (am besten freigestellt, sonst weißer Kasten auf Creme), `logo_h:` = Höhe in px (Vorlage 52 — passt für breite Wortmarken, kompakte Logos brauchen ~100).
 
 ### Phase 3 — Bauen
 ```bash
@@ -134,6 +135,54 @@ Bildrand** entfernen, nie global alles Weiße — sonst verschwinden weiße Glan
 *innerhalb* der Grafik. Und nicht nur reines Weiß killen, sonst bleibt ein grauer Saum von
 den weichen Kanten; stattdessen die Deckung aus der Helligkeit ableiten und die Schrift in
 Zielfarbe (weiß fürs dunkle Layout) neu einfärben. Die farbige Bildmarke bleibt unberührt.
+
+### Zitat-Tabelle (Word, gehört zu jedem Testimonial)
+
+Der Nutzer will nach jedem Gespräch eine kuratierte Liste knackiger Zitate — als
+Grundlage für das Vorschaubild, für Website/Social Media **und für die Freigabe durch den
+Gesprächspartner**. Format ist die Abnahme-Vorlage aus dem Donnevert-Projekt
+(`Zitate_Christoph_Donnevert.docx` im Testimonial-Freigabe-Ordner): **A4 quer, Tabelle
+Nr. | Kurzform | Langfassung**, darüber Titel + Name/Firma/Stand, darunter die Adresszeile.
+Kurzform = Zuschnitt für Motiv/Thumbnail, Langfassung = der Kontext, den der Gast freigibt.
+
+Kuratiert wird in `projects/<projekt>/zitate.txt` (Blockformat wie `interview.txt`: `[kopf]`
+mit `titel/name/rolle/firma/datum/stand/thema`, dann `[01]`, `[02]` … mit `kurz:`, `lang:`,
+`stelle:` = Sekunde in der Roh-Aufzeichnung, optional `vorzeile:` und `verwendet:`).
+10–14 Stück, die härtesten Belege zuerst (Zeit/Nutzen, Arbeitgebersicht, messbare Effekte).
+
+**Redaktionsregel (Nutzer-Feedback 16.09.2026): Jedes Zitat muss allein stehen können.**
+Vollständige Sätze, und der Bezug wird ausgeschrieben — „die Zusammenarbeit mit Palstek",
+„das Programm" statt „hier", „das ganze Thema", „das". Wer nur das Zitat liest, muss
+verstehen, worum es geht. Sinn bleibt unverändert; es ist Glättung, keine Umdeutung.
+Nennt der Gast einen Grund, gehört er ins Zitat („…, weil …").
+
+```bash
+npm run testimonial:zitate -- --projekt testimonial-mustermann   # Word bauen + in den Freigabe-Ordner
+```
+Ergebnis: `Zitate__<projekt>.docx` (python-docx, `testimonial_zitate.py`) neben dem Video.
+Bewusst Word statt PDF, damit der Nutzer kleine Änderungen selbst macht. Arbeitsdokument,
+wird bei erneutem Lauf ersetzt — keine Versionsnummer.
+
+### Praxisbericht-Textbausteine (Word, nach dem Video)
+
+Zu jedem Testimonial entsteht am Ende ein einseitiger **Praxisbericht** („Aus der Praxis …",
+Beispiele `Praxisbericht_WAPA.pdf` / `Praxisbericht_Revision_Nord.pdf` im Freigabe-Ordner).
+Gesetzt wird er von einer Mitarbeiterin in Canva — wir liefern **nur die Textbausteine**,
+geordnet nach den Layout-Blöcken: Kopfzeile (Reihe, Firma, Kennzeile Standorte | Mitarbeitende
+| Branche) · **Davor** (3 Punkte, je fetter Titel + 1–2 Sätze) · Box „Bewusst Psychologie, nicht
+Coaching" · **Während** (Einleitung + Bullets: Auftakt, Workshops/Module, Einzelcoachings,
+Begleitmaterial, Abstimmung auf den Kanzleialltag) · **In Zahlen** (5 Kennzahlen mit Unterzeile)
+· Zitat + Name/Rolle · **Danach / Die Geschäftsführung beobachtet** (4–5 Punkte) · „Das Programm
+passt zu Unternehmen, …" (3 Halbsätze) · offene Punkte.
+
+Quelle: `projects/<projekt>/praxisbericht.txt`. **Nichts erfinden:** Zahlen und Fakten, die im
+Gespräch nicht fallen (Standorte, Mitarbeitende, Termine, Stunden), als `[ERGÄNZEN: …]`
+markieren — sie werden rot gesetzt und am Ende als Liste für Juliana gesammelt.
+
+```bash
+npm run testimonial:praxisbericht -- --projekt testimonial-mustermann
+```
+Ergebnis: `Praxisbericht_Textbausteine__<projekt>.docx` im Freigabe-Ordner.
 
 ### Sprecher-ID-Box (Pflicht, läuft automatisch mit)
 
@@ -241,6 +290,7 @@ Kein Vorname in der Anrede — nur als Namensnennung auf der Intro-Folie.
 | `textfixes` | Mehrwort-Korrekturen im Untertitel: `[{"suche": "a b c", "ersetze": "x y z"}]` |
 | `karten` | Standzeiten der Folien in Sekunden |
 | `idbox` | Sprecher-ID-Box: `enabled`, optional `name`, `rolle`, `logo` |
+| `logo_video` | `"dunkel"` nimmt auch über dem Video das farbige Palstek-Logo — nötig, wenn der Gast vor einer weißen Wand sitzt (Basedow); Standard ist die weiße Variante |
 | `thumbnail` | Vorschaubild für den Website-Embed: `kunde_logo` (Datei im Projekt oder URL), `zitat`, `zitat_highlight`, `produkt`, `produkt_sub`, `portrait_s`, optional `portrait_crop`, optional `rolle` (kurze Rolle — die volle aus dem Intro kollidiert mit dem Produktblock) |
 
 **Zu `ausnahmen`:** Wenn ein Schnitt als Sprung auffällt, ist fast immer eine Denkpause
@@ -261,6 +311,8 @@ und sollten deshalb kurz bleiben.
 | `video-use/helpers/testimonial_init.py` | Phase 1 |
 | `video-use/helpers/testimonial_build.py` | Phase 2/3 + Freigabe-Push |
 | `video-use/helpers/testimonial_thumbnail.py` | Vorschaubild (läuft am Ende von `build` mit) |
+| `video-use/helpers/testimonial_zitate.py` | Zitat-Tabelle Kurz-/Langfassung als Word (`zitate.txt` → Freigabe-Ordner) |
+| `video-use/helpers/testimonial_praxisbericht.py` | Praxisbericht-Textbausteine als Word (`praxisbericht.txt` → Freigabe-Ordner) |
 | `video-use/helpers/composition_templates/testimonial-card.html` | Folien-Template |
 | `video-use/helpers/composition_templates/testimonial-thumbnail.html` | Thumbnail-Template |
 | `projects/<projekt>/interview.txt` | **kuratiert vom Menschen** |

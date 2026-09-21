@@ -193,6 +193,8 @@ npm run agency:onboard -- --brand <slug> --label "Name"          # neue Marke an
 npm run testimonial:init  -- --projekt <name> --quelle <datei>   # Scaffold + Transkript + interview.txt
 npm run testimonial:plan  -- --projekt <name>                    # Schnitt + Untertitel pruefen
 npm run testimonial:build -- --projekt <name>                    # rendern + Freigabe-Push
+npm run testimonial:zitate -- --projekt <name>                   # Zitat-Tabelle (Kurz/Lang) als Word in den Freigabe-Ordner
+npm run testimonial:praxisbericht -- --projekt <name>            # Praxisbericht-Textbausteine als Word (Canva-Vorlage)
 ```
 
 ### Beim Resume einer Batch (frische Session)

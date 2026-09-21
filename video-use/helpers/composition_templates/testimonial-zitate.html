@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;800&display=swap" rel="stylesheet">
+<style>
+  /* Zitat-Liste zu einem Testimonial — A4, Marken-Look (Creme, Navy, Teal). */
+  @page { size: A4; }
+  :root { --navy:#281d67; --teal:#4ebbc2; --creme:#f8f6f2; --grau:#6b6b7a; }
+  html, body { margin:0; padding:0; background:#fff; color:var(--navy);
+               font-family:'Montserrat', 'Helvetica Neue', Arial, sans-serif; }
+  .kopf { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:22px; }
+  .kopf img { height:52px; }
+  .eyebrow { font-size:10px; letter-spacing:.22em; text-transform:uppercase; color:var(--teal); font-weight:600; }
+  h1 { font-size:24px; font-weight:800; margin:6px 0 4px; line-height:1.2; }
+  .meta { font-size:12px; color:var(--grau); line-height:1.5; }
+  .meta b { color:var(--navy); font-weight:600; }
+  .hinweis { background:var(--creme); border-radius:8px; padding:10px 14px; font-size:10.5px;
+             color:var(--grau); line-height:1.5; margin:18px 0 22px; }
+  .zitat { display:grid; grid-template-columns:34px 1fr; gap:0 12px; margin:0 0 16px;
+           page-break-inside:avoid; }
+  .nr { font-size:11px; font-weight:800; color:var(--teal); padding-top:5px; }
+  .text { font-size:14.5px; font-weight:500; line-height:1.45; }
+  .text::before { content:"\201E"; } .text::after { content:"\201C"; }
+  .quelle { font-size:10px; color:var(--grau); margin-top:4px; }
+  .tag { display:inline-block; background:var(--teal); color:#fff; font-size:9px; font-weight:600;
+         letter-spacing:.08em; text-transform:uppercase; border-radius:99px; padding:2px 8px; margin-left:8px;
+         vertical-align:1px; }
+  .fuss { margin-top:26px; padding-top:10px; border-top:1px solid #e4e1da; font-size:9.5px; color:var(--grau); }
+</style>
+</head>
+<body>
+  <div class="kopf">
+    <div>
+      <div class="eyebrow">Kundenstimme</div>
+      <h1>{{TITEL}}</h1>
+      <div class="meta"><b>{{NAME}}</b> · {{ROLLE}} · {{FIRMA}}<br>{{THEMA}}<br>Gespräch vom {{DATUM}}</div>
+    </div>
+    <img src="{{LOGO}}" alt="Palstek">
+  </div>
+  <div class="hinweis">{{HINWEIS}}</div>
+  {{ZITATE}}
+  <div class="fuss">Palstek GmbH · Veränderung mit Kopf · palstek-gmbh.de</div>
+</body>
+</html>
