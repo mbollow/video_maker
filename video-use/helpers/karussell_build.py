@@ -400,6 +400,33 @@ def main() -> None:
                                                   "{{FONT_SCALE}}": f"{fs:g}"},
                                     assets={"{{LOGO_SRC}}": logo_white, "{{EMBED_SRC}}": embed_path})
                     rec.update({"layout": "poster", "embed_file": embed_rel})
+                elif layout in ("kontrast", "gegenueber", "gegenüber", "vs"):
+                    # Beschriftete Zeilen `kontra|pro|neutral: Label | Satz` in der Reihenfolge
+                    # aus dem outline.txt (kontra schwach, pro Teal-Label + Marker, neutral Navy),
+                    # darunter optional die Folgerung aus text:.
+                    rows = []
+                    for key, val in sl.items():
+                        if key not in ("kontra", "pro", "neutral") or not str(val).strip():
+                            continue
+                        val = kc.no_dashes(str(val).strip())
+                        lbl, txt = (val.split("|", 1) if "|" in val else ("", val))
+                        txt_html = _h.escape(txt.strip())
+                        if key == "pro":
+                            txt_html = kc._wrap_words(txt_html, words, style)
+                        lbl_html = f'<div class="label">{_h.escape(lbl.strip())}</div>' if lbl.strip() else ""
+                        rows.append(f'<div class="row {key}">{lbl_html}<div class="line">{txt_html}</div></div>')
+                    body_html = kc.build_body_html(sl.get("text_lines", []), words, style)
+                    body_block = f'<div class="body">\n        {body_html}\n      </div>' if body_html.strip() else ""
+                    icon_svg = kc.resolve_icon_svg(sl.get("icon"), sl.get("thema"), sl.get("titel"))
+                    kc.render_slide(template=kc.TPL_KONTRAST, out_png=out_png,
+                                    replacements={"{{EYEBROW}}": eyebrow, "{{NUMBER}}": seq,
+                                                  "{{ICON_SVG}}": icon_svg,
+                                                  "{{TITLE_HTML}}": _h.escape(sl.get("titel", "")),
+                                                  "{{ROWS_HTML}}": "\n      ".join(rows),
+                                                  "{{BODY_BLOCK}}": body_block, "{{FONT_SCALE}}": f"{fs:g}"},
+                                    assets={"{{LOGO_SRC}}": logo_white})
+                    rec.update({"layout": "kontrast", "titel": sl.get("titel", ""),
+                                "icon": sl.get("icon", ""), "highlight": words, "style": style})
                 else:
                     icon_svg = kc.resolve_icon_svg(sl.get("icon"), sl.get("thema"), sl.get("titel"))
                     title_html = _h.escape(sl.get("titel", ""))
