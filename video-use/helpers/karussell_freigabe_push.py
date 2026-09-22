@@ -78,8 +78,11 @@ def ordered_slides(manifest: dict) -> list[dict]:
 
 
 def slide_filename(ordinal: int, slide: dict) -> str:
-    seq = slide.get("seq")
-    label = "start" if slide.get("kind") == "start" else ("ende" if slide.get("kind") == "end" else seq)
+    # Label = das, was auch auf der Folie steht: „start" / „ende" bzw. die angezeigte
+    # Innen-Slide-Nummer (die zählt ab 01 und ist nicht die outline-Blocknummer).
+    label = ("start" if slide.get("kind") == "start"
+             else "ende" if slide.get("kind") == "end"
+             else (slide.get("nummer") or slide.get("seq")))
     return f"{ordinal:02d}_{label}.png"
 
 

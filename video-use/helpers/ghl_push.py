@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -64,34 +65,61 @@ PLATFORM_SECTIONS = {
 }
 
 
+KNOWN_PLATFORM_WORDS = {
+    "LINKEDIN", "INSTAGRAM", "FACEBOOK", "GOOGLE", "TIKTOK", "YOUTUBE",
+    "THREADS", "X", "TWITTER", "META", "GMB",
+}
+
+
+def _section_header(line: str) -> set[str] | None:
+    """Erkennt eine Plattform-Ueberschrift und gibt ihre Plattform-Woerter zurueck.
+
+    Toleriert alle Schreibweisen, die in den handgepflegten captions.txt vorkommen:
+    „LINKEDIN" allein (so setzt es freigabe_push zwischen ===-Zeilen) genauso wie
+    „== LINKEDIN ==" oder „-- INSTAGRAM / FACEBOOK --" (so sehen die Captions-
+    Entwuerfe aus den Vorschau-Ordnern aus, die von Hand herueberkopiert werden).
+    Trennlinien und normaler Fliesstext sind KEINE Ueberschrift — deshalb muss
+    jedes Wort der Zeile ein bekannter Plattformname sein.
+    """
+    raw = line.strip()
+    if not raw or set(raw) <= set("=-"):
+        return None
+    core = raw.strip("=-# ").strip().upper()
+    if not core or len(core) > 40:
+        return None
+    words = {w for w in re.split(r"[/&+,]|\s+|\bUND\b", core) if w}
+    if not words or not words <= KNOWN_PLATFORM_WORDS:
+        return None
+    return words
+
+
 def _extract_caption_section(text: str, section: str | None) -> str | None:
     """Pull one platform block out of a captions file.
 
-    Blocks are delimited by a line of '=' followed by an uppercase platform name
-    (e.g. LINKEDIN, INSTAGRAM). Returns the whole stripped text when `section` is
+    Blocks are introduced by a platform name on its own line (optionally wrapped
+    in = or - characters). Returns the whole stripped text when `section` is
     None; returns None when the requested section is not present.
     """
     if not section:
         return text.strip()
-    lines = text.splitlines()
     target = section.strip().upper()
     collected: list[str] = []
     capturing = False
-    for i, line in enumerate(lines):
-        header = line.strip().upper()
-        is_sep = set(line.strip()) == {"="} and line.strip() != ""
-        if header == target and not is_sep:
-            capturing = True
+    for line in text.splitlines():
+        words = _section_header(line)
+        if words is not None:
+            if target in words:
+                capturing = True
+                collected = []
+                continue
+            if capturing:
+                break  # naechste Plattform -> Block zu Ende
             continue
         if capturing:
-            # stop at the next platform header (separated by '=' lines)
-            nxt = lines[i + 1].strip() if i + 1 < len(lines) else ""
-            if set(line.strip()) == {"="} and nxt and nxt.upper() != target and nxt.isupper():
-                break
             collected.append(line)
     if not capturing:
         return None
-    block = "\n".join(collected).strip("=").strip()
+    block = "\n".join(collected).strip("=-").strip()
     return block or None
 
 
