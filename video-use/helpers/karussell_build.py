@@ -279,6 +279,13 @@ def main() -> None:
     start_lines = data.get("start_lines") or []
     end_lines = data.get("end_lines") or []
 
+    # Türkise Slide-Nummer = laufende Nummer NUR der Innen-Slides, beginnend bei 01.
+    # Cover und Schluss-/CTA-Folie zählen nicht mit (Nutzer, 22.09.2026). Der Index
+    # kommt aus ALLEN Slides, nicht aus der --only-Auswahl, sonst verschiebt sich die
+    # Nummerierung, sobald nur einzelne Slides neu gebaut werden.
+    inner_number = {sl["seq"]: f"{i:02d}" for i, sl in
+                    enumerate([s for s in slides if s["kind"] == "inner"], start=1)}
+
     used_photos: set = set()
     errors = 0
     for sl in slides:
@@ -294,6 +301,10 @@ def main() -> None:
                 fs = 1.0
             out_png = batch_dir / "renders" / f"{seq}.png"
             rec = {"seq": seq, "kind": sl["kind"], "render": None}
+            # angezeigte Slide-Nummer (Innen-Slides ab 01) — der Freigabe-Push
+            # benennt die Dateien danach, damit Dateiname und Folie übereinstimmen
+            if sl["kind"] == "inner":
+                rec["nummer"] = inner_number.get(seq, seq)
 
             if sl["kind"] == "start":
                 lines = _pinned_lines(sl.get("hook_lines")) or start_lines or [sl.get("hook", "")]
@@ -419,7 +430,7 @@ def main() -> None:
                     body_block = f'<div class="body">\n        {body_html}\n      </div>' if body_html.strip() else ""
                     icon_svg = kc.resolve_icon_svg(sl.get("icon"), sl.get("thema"), sl.get("titel"))
                     kc.render_slide(template=kc.TPL_KONTRAST, out_png=out_png,
-                                    replacements={"{{EYEBROW}}": eyebrow, "{{NUMBER}}": seq,
+                                    replacements={"{{EYEBROW}}": eyebrow, "{{NUMBER}}": inner_number.get(seq, seq),
                                                   "{{ICON_SVG}}": icon_svg,
                                                   "{{TITLE_HTML}}": _h.escape(sl.get("titel", "")),
                                                   "{{ROWS_HTML}}": "\n      ".join(rows),
@@ -432,7 +443,7 @@ def main() -> None:
                     title_html = _h.escape(sl.get("titel", ""))
                     body_html = kc.build_body_html(sl.get("text_lines", []), words, style)
                     kc.render_slide(template=kc.TPL_INNER, out_png=out_png,
-                                    replacements={"{{EYEBROW}}": eyebrow, "{{NUMBER}}": seq,
+                                    replacements={"{{EYEBROW}}": eyebrow, "{{NUMBER}}": inner_number.get(seq, seq),
                                                   "{{ICON_SVG}}": icon_svg, "{{TITLE_HTML}}": title_html,
                                                   "{{BODY_HTML}}": body_html, "{{FONT_SCALE}}": f"{fs:g}"},
                                     assets={"{{LOGO_SRC}}": logo_white})
