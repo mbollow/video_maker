@@ -14,6 +14,10 @@ Langfassung) und schreibt `Zitate__<projekt>.docx` neben das Video im Freigabe-O
 macht (16.09.2026). Bei erneutem Lauf wird die Datei ersetzt — Arbeitsdokument,
 keine Version.
 
+`stelle:` und `verwendet:` sind interne Notizen und landen bewusst NICHT im Dokument:
+die Datei geht zur Freigabe an den Gespraechspartner, der die Roh-Aufzeichnung nie
+bekommt (Nutzer, 19.10.2026).
+
 Redaktionsregel fuer zitate.txt: Jedes Zitat muss ALLEIN stehen koennen —
 vollstaendige Saetze, der Bezug (Palstek, das Programm, die Zusammenarbeit)
 ausgeschrieben statt "hier" / "das Thema". Sinn unveraendert.
@@ -43,15 +47,7 @@ NAVY, TEAL, GRAU = RGBColor(0x28, 0x1D, 0x67), RGBColor(0x4E, 0xBB, 0xC2), RGBCo
 FONT = "Montserrat"   # faellt in Word auf die Ersatzschrift zurueck, wenn nicht installiert
 ADRESSE = "Palstek GmbH  |  Vorm Dickenbusch 18, 25497 Prisdorf  |  info@palstek-gmbh.de  |  palstek-gmbh.de"
 HINWEIS = ("Kurzform = Zuschnitt für Motiv/Vorschaubild, Langfassung = Kontext für die Freigabe. "
-           "Sprachlich geglättet, inhaltlich unverändert; „Stelle“ = Position in der Roh-Aufzeichnung.")
-
-
-def _mmss(sec: str) -> str:
-    try:
-        s = int(float(sec))
-    except ValueError:
-        return sec
-    return f"{s // 60:02d}:{s % 60:02d}"
+           "Sprachlich geglättet, inhaltlich unverändert.")
 
 
 def _run(par, text: str, *, size: float, bold=False, color=NAVY, italic=False):
@@ -129,13 +125,6 @@ def build(projekt: str) -> Path:
         _run(pk, f"„{kurz}“", size=10, bold=True)
         pl = cells[2].paragraphs[0]
         _run(pl, f"„{b['lang']}“" if b.get("lang") else "", size=10)
-        meta = []
-        if b.get("stelle"):
-            meta.append(f"Stelle {_mmss(b['stelle'])}")
-        if b.get("verwendet"):
-            meta.append(f"verwendet: {b['verwendet']}")
-        if meta:
-            pm = cells[2].add_paragraph(); _run(pm, "  ·  ".join(meta), size=7.5, color=GRAU)
         for c in cells:
             for par in c.paragraphs:
                 par.paragraph_format.space_after = Pt(2)

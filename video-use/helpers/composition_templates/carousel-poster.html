@@ -45,7 +45,7 @@
   .caption b { color: #4ebbc2; font-weight: 800; }
   /* eingebetteter Ausschnitt, zentriert, wie ein herausgetrenntes Stück Poster */
   .embed-wrap {
-    position: absolute; top: 296px; left: 0; right: 0; bottom: 190px;
+    position: absolute; top: 296px; left: 0; right: 0; bottom: 240px;
     display: flex; align-items: center; justify-content: center;
   }
   .embed {
@@ -53,12 +53,14 @@
     border-radius: 20px;
     box-shadow: 0 26px 64px rgba(40,29,103,0.30), 0 4px 12px rgba(40,29,103,0.18);
   }
-  /* kleine Notiz unten — klarer Abstand zur Grafik */
+  /* Notiz unten (40px, Nutzerwahl 24.10.2026: 27px ging unter) — klarer Abstand zur Grafik */
   .note {
-    position: absolute; bottom: 74px; left: 110px; right: 110px; text-align: center;
-    color: #281d67; font-weight: 600; font-size: calc(27px * var(--fs-scale));
-    line-height: 1.3;
+    position: absolute; bottom: 64px; left: 110px; right: 110px; text-align: center;
+    color: #281d67; font-weight: 600; font-size: calc(40px * var(--fs-scale));
+    line-height: 1.28;
   }
+  .note strong { color: #4ebbc2; font-weight: 800; }
+  .note mark { background: #4ebbc2; color: #281d67; font-weight: 800; padding: 0 10px 3px; border-radius: 6px; }
 </style>
 </head>
 <body>

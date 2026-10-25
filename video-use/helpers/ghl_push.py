@@ -130,14 +130,18 @@ def resolve_caption(raw_text: str, platform: str, override_section: str | None) 
     (u.a. #PalstekGmbH statt #Palstek) noch einmal drueber, egal aus welcher
     Pipeline oder handgepflegten captions.txt der Text kommt.
     """
+    def finish(text: str) -> str:
+        text = brand_text.fix_hashtags(text)
+        return text if platform == "instagram" else brand_text.link_in_bio_to_url(text)
+
     if override_section:
         block = _extract_caption_section(raw_text, override_section)
-        return brand_text.fix_hashtags(block if block else raw_text.strip())
+        return finish(block if block else raw_text.strip())
     for sec in PLATFORM_SECTIONS.get(platform, ["LINKEDIN"]):
         block = _extract_caption_section(raw_text, sec)
         if block:
-            return brand_text.fix_hashtags(block)
-    return brand_text.fix_hashtags(raw_text.strip())
+            return finish(block)
+    return finish(raw_text.strip())
 
 
 def main() -> None:

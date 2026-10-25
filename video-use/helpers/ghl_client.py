@@ -320,6 +320,13 @@ class GHLClient:
         `payload` should carry the full post fields (type is required); resend
         the existing values plus whatever you want to change so GHL does not drop
         fields. Datetimes in `scheduleDate` must already be ISO strings.
+
+        Measured 25.10.2026: PUT is a full replace, not a patch. accountIds,
+        userId and media are required (422 otherwise), and omitted summary/media
+        count as empty. A pure date change therefore still has to resend the
+        complete media list. For scheduled carousels take it from the media
+        library (`<folder>__NN_*.png`), never from get_post (which reports only
+        the first slide).
         """
         return self._request(
             "PUT", f"/social-media-posting/{self.location_id}/posts/{post_id}",

@@ -29,6 +29,11 @@ import re
 _BRAND_TAG = re.compile(r"#palstek(?![0-9A-Za-zÄÖÜäöüß_])", re.IGNORECASE)
 BRAND_TAG = "#PalstekGmbH"
 
+# „Link in meiner Bio" gibt es nur auf Instagram. Facebook bekommt denselben
+# Text, kann Links aber direkt anklicken — dort steht stattdessen die URL.
+BOOKING_URL = "https://palstek-gmbh.de/termin"
+_LINK_IN_BIO = re.compile(r"\s*[:,]?\s*\bLink in (?:meiner|der) Bio\b\.?", re.IGNORECASE)
+
 # ---------------------------------------------------------------------------
 # Eigennamen — zentrale Schreibweisen-Tabelle
 # ---------------------------------------------------------------------------
@@ -48,6 +53,9 @@ NAMEN: dict[str, str] = {
     "palsteck": "Palstek",
     "pahlstek": "Palstek",
     "pahlsteck": "Palstek",
+    "pazie": "Palstek",   # Video 046 (Scribe, schnell gesprochen)
+    "palc": "Palstek",
+    "passtie": "Palstek",
 }
 
 # Mehrwort-Schreibweisen fuer Fliesstext (Captions, Folien). Der Untertitel-Weg
@@ -92,6 +100,13 @@ def fix_hashtags(text: str) -> str:
     if not text:
         return text
     return fix_names(_BRAND_TAG.sub(BRAND_TAG, text))
+
+
+def link_in_bio_to_url(text: str) -> str:
+    """„Erstgespräch vereinbaren, Link in meiner Bio." -> „…: <URL>" (nicht für Instagram)."""
+    if not text:
+        return text
+    return _LINK_IN_BIO.sub(f": {BOOKING_URL}", text)
 
 
 def fix_hashtag_list(tags: list | None) -> list:

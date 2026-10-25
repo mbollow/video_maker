@@ -64,6 +64,14 @@ def _emph_b(text: str, words) -> str:
     return out
 
 
+def _markup(text: str) -> str:
+    """Escape `text`; `**wort**` -> <strong> (Teal, fett), `==wort==` -> <mark> (Marker-Box).
+    Fuer Notiz-/CTA-Zeilen, die einzelne Woerter hervorheben (z. B. „Kommentiere „Poster““)."""
+    out = _html.escape(kc.no_dashes(text or ""), quote=False)
+    out = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", out)
+    return re.sub(r"==(.+?)==", r"<mark>\1</mark>", out)
+
+
 def generate_json(prompt: str, *, model: str, api_key: str) -> dict:
     """Anthropic call → JSON with one repair retry (mirrors bild_build)."""
     try:
@@ -88,19 +96,30 @@ def build_prompt(*, carousel: dict, brand_voice: str, templates: dict[str, str],
         body = s.get("text") or " ".join(l.strip() for l in s.get("text_lines", []))
         ctx.append(f"[{s['seq']}] {s.get('titel','')}: {body}".strip())
     ctx.append(f"SCHLUSS: {end.get('statement','')}")
+    if end.get("cta"):
+        ctx.append(f"SCHLUSS-CTA: {end['cta']}")
     ctx_str = "\n".join(ctx)
 
     cap_block = ""
     cap_out = ""
-    # Das Experten-Poster gibt es nur in der Serie „6 Faktoren für erfolgreiche Teams",
+    # Das Experten-Poster gibt es nur in Poster-Serien (Teams-Faktoren, Abgrenzung …),
     # erkennbar an der Serien-Übersichtsfolie. Ohne sie darf die Caption es nicht
-    # anbieten — das wäre ein erfundenes Angebot.
-    is_series = any(bc.norm(s.get("layout", "")) in ("uebersicht", "übersicht", "overview", "serie")
-                    for s in carousel["slides"])
-    poster_hint = (
-        "Nenne das Poster konsequent „Experten-Poster\". Weise am Ende darauf hin, dass es das\n"
-        "komplette Experten-Poster mit allen 6 Faktoren zum Ausdrucken per DM gibt.\n"
-    ) if is_series else ""
+    # anbieten — das wäre ein erfundenes Angebot. Anzahl und Titel kommen aus den
+    # Folien selbst, sonst schreibt das Modell die Wörter der ersten Serie ab.
+    overview = next((s for s in carousel["slides"]
+                     if bc.norm(s.get("layout", "")) in ("uebersicht", "übersicht", "overview", "serie")), None)
+    poster_hint = ""
+    if overview:
+        teile = [l for l in overview.get("text_lines", []) if l.strip()]
+        poster = next((s for s in carousel["slides"] if bc.norm(s.get("layout", "")) == "poster"), {})
+        titel = re.search(r"[»„\"](.+?)[«“\"]", poster.get("caption", ""))
+        poster_hint = (
+            "Nenne das Poster konsequent „Experten-Poster\"" + (f" (Titel: „{titel.group(1)}\")" if titel else "")
+            + ". Weise am Ende darauf hin, dass es das\n"
+            f"komplette Experten-Poster mit allen {len(teile) or 'Teilen der Serie'} Teilen zum Ausdrucken per DM gibt.\n"
+            "Übernimm die Bezeichnung der Serienteile NICHT aus anderen Serien (kein „Faktoren\", wenn die\n"
+            "Folien es nicht so nennen). Nennt der SCHLUSS-CTA einen Termin für den nächsten Teil, greif ihn auf.\n"
+        )
     if with_captions:
         cap_block = f"""
 Erzeuge zusätzlich Captions für den GESAMTEN Karussell-Post:
@@ -312,6 +331,11 @@ def main() -> None:
                 if sl.get("sub"):
                     import html as _h
                     hook_html += f'\n      <div class="sub">{_h.escape(sl["sub"])}</div>'
+                # Serien-Plakette ueber dem Hook ("Teil 1 von 6") — der kleine sub-Text
+                # geht als Serienhinweis auf dem Handy unter.
+                if sl.get("serie"):
+                    import html as _h
+                    hook_html = f'<div class="serie">{_h.escape(sl["serie"])}</div>\n      ' + hook_html
                 # Freigestellte Variante (foto_cutout) hat Vorrang: Motiv steht frei auf
                 # einem Verlauf (unten hellblau -> oben weiß), Headline normal (nicht fett).
                 cutout_rel = (sl.get("foto_cutout") or "").strip()
@@ -372,7 +396,7 @@ def main() -> None:
                 kc.render_slide(template=kc.TPL_END, out_png=out_png,
                                 replacements={"{{EYEBROW}}": eyebrow, "{{STATEMENT_HTML}}": stmt_html,
                                               "{{FONT_SCALE}}": f"{fs:g}", "{{CUTOUT_TRANSFORM}}": mirror,
-                                              "{{CTA_TEXT}}": kc.no_dashes(sl.get("cta", DEFAULT_CTA))},
+                                              "{{CTA_TEXT}}": _markup(sl.get("cta", DEFAULT_CTA))},
                                 assets={"{{LOGO_SRC}}": logo_white, "{{PHOTO_SRC}}": photo_src})
                 rec.update({"lines": lines, "photo": pmeta, "cta": sl.get("cta", DEFAULT_CTA),
                             "highlight": words, "style": style})
@@ -407,7 +431,7 @@ def main() -> None:
                     kc.render_slide(template=kc.TPL_POSTER, out_png=out_png,
                                     replacements={"{{EYEBROW}}": eyebrow,
                                                   "{{CAPTION_HTML}}": _emph_b(sl.get("caption", ""), words),
-                                                  "{{NOTE}}": _h.escape(sl.get("note", "")),
+                                                  "{{NOTE}}": _markup(sl.get("note", "")),
                                                   "{{FONT_SCALE}}": f"{fs:g}"},
                                     assets={"{{LOGO_SRC}}": logo_white, "{{EMBED_SRC}}": embed_path})
                     rec.update({"layout": "poster", "embed_file": embed_rel})
