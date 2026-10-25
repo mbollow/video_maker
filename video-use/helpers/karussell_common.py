@@ -64,6 +64,7 @@ FIELD_KEYS = {
     # Ohne sie teilt das Modell den Text bei jedem Build neu auf — dann kann eine
     # `highlight`-Phrase ueber zwei Zeilen rutschen und der Marker faellt STILL weg.
     "hook_lines", "statement_lines",
+    "serie",  # Start-Folie: Serien-Plakette über dem Hook, z. B. "Teil 1 von 6"
     # layout: kontrast — beschriftete Zeilen "Label | Satz" (Label optional), in
     # Outline-Reihenfolge: kontra (schwach), pro (Teal + Marker), neutral (Navy).
     "kontra", "pro", "neutral",
